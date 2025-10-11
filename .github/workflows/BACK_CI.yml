@@ -1,0 +1,67 @@
+name: Backend CI
+
+on:
+  push:
+    branches: ["main", "master", "dev", "feat/**"]
+  pull_request:
+    branches: ["main", "master", "dev"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Python -> Install -> Lint -> Typecheck -> Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Upgrade pip
+        working-directory: backend
+        run: python -m pip install --upgrade pip
+
+      - name: Install dependencies (pip)
+        working-directory: backend
+        run: |
+          python -m pip install -r requirements.txt
+          if [ -f requirements-dev.txt ]; then python -m pip install -r requirements-dev.txt; fi
+
+      - name: Lint (ruff/flake8 if available)
+        working-directory: backend
+        run: |
+          if python -m ruff --version >/dev/null 2>&1; then python -m ruff check .; fi
+          if python -m flake8 --version >/dev/null 2>&1; then python -m flake8 .; fi
+
+      - name: Type check
+        working-directory: backend
+        run: |
+          if python -m mypy --version >/dev/null 2>&1; then python -m mypy .; fi
+
+      - name: Test (pytest)
+        env:
+          CI: true
+        working-directory: backend
+        run: |
+          if python -m pytest --version >/dev/null 2>&1; then
+            python -m pytest -q || ec=$?; if [ "${ec:-0}" -eq 5 ]; then echo "No tests collected"; exit 0; else exit "${ec:-0}"; fi
+          fi
+
+      - name: Build Docker image
+        if: |
+          hashFiles('backend/Dockerfile') != '' || hashFiles('Dockerfile') != ''
+        working-directory: backend
+        run: docker build -t backend-ci .
+

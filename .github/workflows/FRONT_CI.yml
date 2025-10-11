@@ -1,0 +1,130 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: ["main", "master", "dev", "feat/**"]
+  pull_request:
+    branches: ["main", "master", "dev"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Install -> Lint -> Test -> Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node (pnpm cache)
+        if: hashFiles('pnpm-lock.yaml') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup Node (yarn cache)
+        if: hashFiles('yarn.lock') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Setup Node (npm cache)
+        if: hashFiles('package-lock.json') != '' || hashFiles('npm-shrinkwrap.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Node (no cache)
+        if: hashFiles('pnpm-lock.yaml') == '' && hashFiles('yarn.lock') == '' && hashFiles('package-lock.json') == '' && hashFiles('npm-shrinkwrap.json') == ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        if: hashFiles('pnpm-lock.yaml') != ''
+        uses: pnpm/action-setup@v4
+        with:
+          version: 'latest'
+
+      - name: Setup Bun
+        if: hashFiles('bun.lockb') != ''
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 'latest'
+
+      - name: Install dependencies
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+          elif [ -f yarn.lock ]; then
+            yarn install --immutable || yarn install --frozen-lockfile
+          elif [ -f bun.lockb ]; then
+            bun install
+          elif [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found. Skipping install." && exit 0
+          fi
+
+      - name: Lint
+        env:
+          CI: true
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm run lint --if-present
+          elif [ -f yarn.lock ]; then
+            yarn run lint --if-present
+          elif [ -f bun.lockb ]; then
+            if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts && require('./package.json').scripts['lint'] ? 0 : 1)"; then
+              bun run lint
+            fi
+          else
+            npm run lint --if-present
+          fi
+
+      - name: Test
+        env:
+          CI: true
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm test --if-present -- --watch=false
+          elif [ -f yarn.lock ]; then
+            yarn test --if-present --watch=false
+          elif [ -f bun.lockb ]; then
+            if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts && require('./package.json').scripts['test'] ? 0 : 1)"; then
+              bun run test
+            fi
+          else
+            npm test --if-present -- --watch=false
+          fi
+
+      - name: Build
+        env:
+          CI: true
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm run build --if-present
+          elif [ -f yarn.lock ]; then
+            yarn run build --if-present
+          elif [ -f bun.lockb ]; then
+            if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts && require('./package.json').scripts['build'] ? 0 : 1)"; then
+              bun run build
+            fi
+          else
+            npm run build --if-present
+          fi
+
