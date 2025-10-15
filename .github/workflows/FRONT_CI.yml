@@ -14,10 +14,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Code Style (Prettier + ESLint + Stylelint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found. Skipping install." && exit 1
+          fi
+
+      - name: Prettier – check formatting
+        run: |
+          npx --no-install prettier --check .
+
+      - name: ESLint – lint sources
+        run: |
+          # adjust globs if needed
+          npx --no-install eslint . --max-warnings=0
+
+      - name: Stylelint – lint styles
+        run: |
+          # change globs to your styles location
+          npx --no-install stylelint "**/*.{css,scss,sass,less,pcss}" --ignore-path .gitignore --max-warnings 0
+
   ci:
     name: Frontend CI
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    needs: lint
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,8 +64,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: |
@@ -38,20 +77,12 @@ jobs:
             echo "No package.json found. Skipping install." && exit 0
           fi
 
-      - name: Lint
-        env:
-          CI: true
-        run: |
-          npm run lint --if-present
-
       - name: Unit tests (coverage >= 80%)
         env:
           CI: true
           COVERAGE_MIN: 80
         run: |
           npx --no-install vitest run --coverage.enabled true --coverage.reporter json-summary
-
-          # Enforce coverage threshold (lines)
           node -e "const fs=require('fs'); const p='coverage/coverage-summary.json'; if(!fs.existsSync(p)){console.error('coverage-summary.json not found'); process.exit(1);} const s=JSON.parse(fs.readFileSync(p,'utf8')); const pct=(s.total && s.total.lines && s.total.lines.pct)||0; const min=Number(process.env.COVERAGE_MIN||80); if(pct<min){console.error(`Line coverage ${pct}% < ${min}%`); process.exit(1);} console.log(`Line coverage OK: ${pct}% >= ${min}%`);"
 
       - name: Build
@@ -60,20 +91,19 @@ jobs:
         run: |
           npm run build --if-present
 
-
   e2e:
     name: E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: ci
+    needs: [lint, ci]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: |
