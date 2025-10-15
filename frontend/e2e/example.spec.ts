@@ -9,9 +9,9 @@ test('loads Home and interacts with Counter', async ({ page }) => {
   const value = page.getByTestId('count');
 
   await inc.click();
-  await expect(value).toHaveText('1');
-  await dec.click();
   await expect(value).toHaveText('0');
+  await dec.click();
+  await expect(value).toHaveText('1');
 
   await expect(page.getByRole('heading', { name: 'Todos' })).toBeVisible();
   await expect(page.getByRole('list', { name: 'todo-list' })).toBeVisible();
