@@ -89,22 +89,7 @@ jobs:
           COVERAGE_MIN: 80
         run: |
           npx --no-install vitest run --coverage.enabled true --coverage.reporter json-summary
-          node <<EOF
-          const fs = require('fs');
-          const p = 'coverage/coverage-summary.json';
-          if (!fs.existsSync(p)) {
-            console.error('coverage-summary.json not found');
-            process.exit(1);
-          }
-          const s = JSON.parse(fs.readFileSync(p, 'utf8'));
-          const pct = (s.total && s.total.lines && s.total.lines.pct) || 0;
-          const min = Number(process.env.COVERAGE_MIN || 80);
-          if (pct < min) {
-            console.error(`Line coverage ${pct}% < ${min}%`);
-            process.exit(1);
-          }
-          console.log(`Line coverage OK: ${pct}% >= ${min}%`);
-          EOF
+          node -e "const fs=require('fs'); const p='coverage/coverage-summary.json'; if(!fs.existsSync(p)){console.error('coverage-summary.json not found'); process.exit(1);} const s=JSON.parse(fs.readFileSync(p,'utf8')); const pct=(s.total && s.total.lines && s.total.lines.pct)||0; const min=Number(process.env.COVERAGE_MIN||80); if(pct<min){console.error('Line coverage '+pct+'% < '+min+'%'); process.exit(1);} console.log('Line coverage OK: '+pct+'% >= '+min+'%');"
 
       - name: Build
         env:
