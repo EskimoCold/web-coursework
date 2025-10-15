@@ -12,6 +12,6 @@ describe('Home', () => {
       expect(screen.getByLabelText('todo-list')).toBeInTheDocument();
     });
     expect(screen.getByText('Buy coffee beans')).toBeInTheDocument();
-    expect(screen.getByText('Write unit tests')).toBeInTheDocument();
+    expect(screen.getByText('WRONG UNIT TEST!')).toBeInTheDocument();
   });
 });
