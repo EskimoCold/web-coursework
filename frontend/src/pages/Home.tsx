@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Counter } from "../components/Counter";
-import { api } from "../api/client";
+import { useEffect, useState } from 'react';
+import { Counter } from '../components/Counter';
+import { api } from '../api/client';
 
 type Todo = { id: number; title: string };
 
@@ -9,7 +9,7 @@ export function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get<Todo[]>("/todos").then((res) => {
+    api.get<Todo[]>('/todos').then((res) => {
       setTodos(res);
       setLoading(false);
     });
@@ -21,9 +21,13 @@ export function Home() {
       <hr />
       <section>
         <h2>Todos</h2>
-        {loading ? <p aria-busy="true">Loading…</p> : (
+        {loading ? (
+          <p aria-busy="true">Loading…</p>
+        ) : (
           <ul aria-label="todo-list">
-            {todos.map((t) => <li key={t.id}>{t.title}</li>)}
+            {todos.map((t) => (
+              <li key={t.id}>{t.title}</li>
+            ))}
           </ul>
         )}
       </section>

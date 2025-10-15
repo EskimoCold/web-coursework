@@ -1,9 +1,9 @@
 module.exports = {
-  extends: ["stylelint-config-standard", "stylelint-config-prettier"],
-  plugins: ["stylelint-order"],
+  extends: ['stylelint-config-standard', 'stylelint-config-prettier'],
+  plugins: ['stylelint-order'],
   rules: {
-    "color-hex-length": "short",
-    "order/properties-order": []
+    'color-hex-length': 'short',
+    'order/properties-order': [],
   },
-  ignoreFiles: ["**/dist/**", "**/build/**", "**/coverage/**", "**/node_modules/**"]
+  ignoreFiles: ['**/dist/**', '**/build/**', '**/coverage/**', '**/node_modules/**'],
 };
