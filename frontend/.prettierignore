@@ -1,3 +1,5 @@
+test-results
+**/*.snap
 node_modules
 dist
 build
