@@ -1,0 +1,6 @@
+venv
+.venv
+migrations
+**/__pycache__
+build
+dist

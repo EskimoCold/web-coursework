@@ -1,0 +1,77 @@
+.DS_Store
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.pyre/
+.tox/
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+
+# Coverage
+.coverage
+.coverage.*
+coverage/
+coverage.xml
+htmlcov/
+lcov.info
+test-results/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Node/Frontend (if present) ---
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.turbo/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+dist/
+build/
+.next/
+
+# --- IDEs/Editors ---
+.idea/
+.vscode/
+*.code-workspace
+
+# --- Env & local config ---
+.env
+.env.*
+!.env.example
+docker-compose.override.yml
+backend/.env
+frontend/.env
+
+# --- Misc ---
+.cache/
+*.db
+*.sqlite
+*.sqlite3

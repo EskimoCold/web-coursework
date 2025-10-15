@@ -1,0 +1,11 @@
+test-results
+**/*.snap
+node_modules
+public/mockServiceWorker.js
+dist
+build
+coverage
+.playwright
+playwright-report
+.next
+out
