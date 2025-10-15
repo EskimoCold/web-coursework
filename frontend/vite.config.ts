@@ -10,5 +10,11 @@ export default defineConfig({
     css: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules/**', 'dist/**', 'e2e/**'],
+    coverage: {
+      reporter: ['json-summary', 'text'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/app/main.tsx'],
+      clean: true,
+    },
   },
 });
