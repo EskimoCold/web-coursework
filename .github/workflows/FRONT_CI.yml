@@ -122,12 +122,31 @@ jobs:
             echo "No package.json found. Skipping install." && exit 1
           fi
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package.json').devDependencies['@playwright/test'])")" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: |
           npx --no-install playwright install --with-deps
+
+      - name: Install Playwright system dependencies (if cached)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: |
+          npx --no-install playwright install-deps
 
       - name: Run Playwright tests
         env:
           CI: true
         run: |
-          npx --no-install playwright test --reporter=line
+          npx --no-install playwright test --reporter=line --config=e2e/playwright.config.ts
