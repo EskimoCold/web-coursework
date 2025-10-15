@@ -15,64 +15,22 @@ concurrency:
 
 jobs:
   ci:
-    name: Install -> Lint -> Test -> Build
+    name: Frontend CI
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node (pnpm cache)
-        if: hashFiles('pnpm-lock.yaml') != ''
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Setup Node (yarn cache)
-        if: hashFiles('yarn.lock') != ''
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Setup Node (npm cache)
-        if: hashFiles('package-lock.json') != '' || hashFiles('npm-shrinkwrap.json') != ''
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup Node (no cache)
-        if: hashFiles('pnpm-lock.yaml') == '' && hashFiles('yarn.lock') == '' && hashFiles('package-lock.json') == '' && hashFiles('npm-shrinkwrap.json') == ''
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Setup pnpm
-        if: hashFiles('pnpm-lock.yaml') != ''
-        uses: pnpm/action-setup@v4
-        with:
-          version: 'latest'
-
-      - name: Setup Bun
-        if: hashFiles('bun.lockb') != ''
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 'latest'
-
       - name: Install dependencies
         run: |
-          if [ -f pnpm-lock.yaml ]; then
-            pnpm install --frozen-lockfile
-          elif [ -f yarn.lock ]; then
-            yarn install --immutable || yarn install --frozen-lockfile
-          elif [ -f bun.lockb ]; then
-            bun install
-          elif [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
             npm ci
           elif [ -f package.json ]; then
             npm install
@@ -84,47 +42,55 @@ jobs:
         env:
           CI: true
         run: |
-          if [ -f pnpm-lock.yaml ]; then
-            pnpm run lint --if-present
-          elif [ -f yarn.lock ]; then
-            yarn run lint --if-present
-          elif [ -f bun.lockb ]; then
-            if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts && require('./package.json').scripts['lint'] ? 0 : 1)"; then
-              bun run lint
-            fi
-          else
-            npm run lint --if-present
-          fi
+          npm run lint --if-present
 
-      - name: Test
+      - name: Unit tests (coverage >= 80%)
         env:
           CI: true
+          COVERAGE_MIN: 80
         run: |
-          if [ -f pnpm-lock.yaml ]; then
-            pnpm test --if-present -- --watch=false
-          elif [ -f yarn.lock ]; then
-            yarn test --if-present --watch=false
-          elif [ -f bun.lockb ]; then
-            if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts && require('./package.json').scripts['test'] ? 0 : 1)"; then
-              bun run test
-            fi
-          else
-            npm test --if-present -- --watch=false
-          fi
+          npx --no-install vitest run --coverage.enabled true --coverage.reporter json-summary
+
+          # Enforce coverage threshold (lines)
+          node -e "const fs=require('fs'); const p='coverage/coverage-summary.json'; if(!fs.existsSync(p)){console.error('coverage-summary.json not found'); process.exit(1);} const s=JSON.parse(fs.readFileSync(p,'utf8')); const pct=(s.total && s.total.lines && s.total.lines.pct)||0; const min=Number(process.env.COVERAGE_MIN||80); if(pct<min){console.error(`Line coverage ${pct}% < ${min}%`); process.exit(1);} console.log(`Line coverage OK: ${pct}% >= ${min}%`);"
 
       - name: Build
         env:
           CI: true
         run: |
-          if [ -f pnpm-lock.yaml ]; then
-            pnpm run build --if-present
-          elif [ -f yarn.lock ]; then
-            yarn run build --if-present
-          elif [ -f bun.lockb ]; then
-            if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts && require('./package.json').scripts['build'] ? 0 : 1)"; then
-              bun run build
-            fi
+          npm run build --if-present
+
+
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: ci
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install
           else
-            npm run build --if-present
+            echo "No package.json found. Skipping install." && exit 1
           fi
 
+      - name: Install Playwright browsers
+        run: |
+          npx --no-install playwright install --with-deps
+
+      - name: Run Playwright tests
+        env:
+          CI: true
+        run: |
+          npx --no-install playwright test --reporter=line

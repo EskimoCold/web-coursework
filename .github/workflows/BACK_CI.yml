@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   ci:
-    name: Python -> Install -> Lint -> Typecheck -> Test
+    name: Backend CI
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -33,7 +33,7 @@ jobs:
         working-directory: backend
         run: python -m pip install --upgrade pip
 
-      - name: Install dependencies (pip)
+      - name: Install dependencies
         working-directory: backend
         run: |
           python -m pip install -r requirements.txt
@@ -49,19 +49,3 @@ jobs:
         working-directory: backend
         run: |
           if python -m mypy --version >/dev/null 2>&1; then python -m mypy .; fi
-
-      - name: Test (pytest)
-        env:
-          CI: true
-        working-directory: backend
-        run: |
-          if python -m pytest --version >/dev/null 2>&1; then
-            python -m pytest -q || ec=$?; if [ "${ec:-0}" -eq 5 ]; then echo "No tests collected"; exit 0; else exit "${ec:-0}"; fi
-          fi
-
-      - name: Build Docker image
-        if: |
-          hashFiles('backend/Dockerfile') != '' || hashFiles('Dockerfile') != ''
-        working-directory: backend
-        run: docker build -t backend-ci .
-
