@@ -16,7 +16,7 @@ describe('api.client', () => {
       '/api/todos',
       expect.objectContaining({
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
-      })
+      }),
     );
   });
 
@@ -30,5 +30,3 @@ describe('api.client', () => {
     await expect(api.get('/todos')).rejects.toThrow('HTTP 500');
   });
 });
-
-

@@ -11,5 +11,3 @@ describe('App', () => {
     expect(screen.getByTestId('home')).toBeInTheDocument();
   });
 });
-
-
