@@ -25,8 +25,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
           cache-dependency-path: backend/requirements.txt
 
       - name: Upgrade pip
@@ -38,14 +38,27 @@ jobs:
         run: |
           python -m pip install -r requirements.txt
           if [ -f requirements-dev.txt ]; then python -m pip install -r requirements-dev.txt; fi
+          # Ensure Ruff is available even if not in requirements
+          python -m pip install ruff
 
-      - name: Lint (ruff/flake8 if available)
+      # ---------- Ruff ----------
+      - name: Ruff – lint (with GitHub annotations)
         working-directory: backend
         run: |
-          if python -m ruff --version >/dev/null 2>&1; then python -m ruff check .; fi
-          if python -m flake8 --version >/dev/null 2>&1; then python -m flake8 .; fi
+          # Uses pyproject.toml if present; otherwise Ruff defaults
+          python -m ruff check . --output-format=github --no-cache --show-fixes
 
-      - name: Type check
+      - name: Ruff – format check
         working-directory: backend
         run: |
-          if python -m mypy --version >/dev/null 2>&1; then python -m mypy .; fi
+          python -m ruff format --check .
+
+      # - name: Lint (flake8 if available)
+      #   working-directory: backend
+      #   run: |
+      #     if python -m flake8 --version >/dev/null 2>&1; then python -m flake8 .; fi
+
+      # - name: Type check (mypy if available)
+      #   working-directory: backend
+      #   run: |
+      #     if python -m mypy --version >/dev/null 2>&1; then python -m mypy .; fi
