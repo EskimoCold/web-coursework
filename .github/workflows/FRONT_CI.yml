@@ -33,13 +33,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
-            npm ci
-          elif [ -f package.json ]; then
-            npm install
-          else
-            echo "No package.json found. Skipping install." && exit 1
-          fi
+          # if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+          #   npm ci
+          # elif [ -f package.json ]; then
+          npm install
+          # else
+            # echo "No package.json found. Skipping install." && exit 1
+          # fi
 
       - name: Prettier – check formatting
         run: |
