@@ -27,6 +27,7 @@ coverage/
 coverage.xml
 htmlcov/
 lcov.info
+test-results/
 
 # Logs
 *.log
