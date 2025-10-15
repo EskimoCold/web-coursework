@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Counter } from '../components/Counter';
+
 import { api } from '../api/client';
+import { Counter } from '../components/Counter';
 
 type Todo = { id: number; title: string };
 

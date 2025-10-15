@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
+
 import { Home } from './Home';
 
 describe('Home', () => {
