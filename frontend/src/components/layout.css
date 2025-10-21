@@ -1,0 +1,82 @@
+:root {
+  --bg: #f3f6f9;
+  --panel: #fff;
+  --ink: #0f172a;
+  --muted: #94a3b8;
+  --primary: #2b7cff;
+  --primary-ghost: #e7f0ff;
+  --stroke: #e5e7eb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    'Noto Sans';
+  color: var(--ink);
+  background: #fff;
+}
+
+.app-root {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.layout {
+  background: var(--bg);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 24px;
+}
+
+.layout-header {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.layout-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.layout-content {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  min-height: 420px;
+}
+
+.content-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+}
+
+.layout-footer {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 12px 0 0;
+}
