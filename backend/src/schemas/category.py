@@ -1,12 +1,11 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
 
 class CategoryBase(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class CategoryCreate(CategoryBase):
@@ -14,8 +13,8 @@ class CategoryCreate(CategoryBase):
 
 
 class CategoryUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
 
 
 class CategoryResponse(CategoryBase):
@@ -25,4 +24,3 @@ class CategoryResponse(CategoryBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-

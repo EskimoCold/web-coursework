@@ -3,10 +3,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.api.v1 import auth_router, categories_router, transactions_router, users_router
 from src.core.config import settings
 from src.core.database import Base, engine
-from src.api.v1 import auth_router, categories_router, transactions_router, users_router
-from src.models import RefreshToken, User, Category, Transaction  # noqa: F401
+from src.models import Category, RefreshToken, Transaction, User  # noqa: F401
 
 
 @asynccontextmanager
