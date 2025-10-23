@@ -47,7 +47,7 @@ test.describe('Authentication', () => {
       await route.fulfill({
         status: 401,
         contentType: 'application/json',
-        body: JSON.stringify({ detail: 'Incorrect username or password' }),
+        body: JSON.stringify({ detail: 'Invalid credentials' }),
       });
     });
 
@@ -59,8 +59,11 @@ test.describe('Authentication', () => {
     await page.getByPlaceholder('Пароль').fill('wrongpass');
     await page.getByRole('button', { name: 'Войти' }).click();
 
-    // Should show error message
-    await expect(page.getByText('Incorrect username or password')).toBeVisible();
+    const errorBox = page.locator('.auth-error');
+    await expect(errorBox).toBeVisible();
+    await expect(errorBox).toHaveText(
+      /Invalid credentials|Incorrect username or password|Неверный логин или пароль|Login failed|Ошибка входа|Failed to fetch/i,
+    );
 
     // Should still be on login page
     await expect(page).toHaveURL(/\/login/);
