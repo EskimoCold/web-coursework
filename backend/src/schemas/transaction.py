@@ -1,15 +1,14 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class TransactionBase(BaseModel):
     amount: float = Field(..., gt=0)
-    description: Optional[str] = None
+    description: str | None = None
     transaction_type: str = Field(..., pattern="^(income|expense)$")
-    category_id: Optional[int] = None
-    transaction_date: Optional[datetime] = None
+    category_id: int | None = None
+    transaction_date: datetime | None = None
 
 
 class TransactionCreate(TransactionBase):
@@ -17,11 +16,11 @@ class TransactionCreate(TransactionBase):
 
 
 class TransactionUpdate(BaseModel):
-    amount: Optional[float] = Field(None, gt=0)
-    description: Optional[str] = None
-    transaction_type: Optional[str] = Field(None, pattern="^(income|expense)$")
-    category_id: Optional[int] = None
-    transaction_date: Optional[datetime] = None
+    amount: float | None = Field(None, gt=0)
+    description: str | None = None
+    transaction_type: str | None = Field(None, pattern="^(income|expense)$")
+    category_id: int | None = None
+    transaction_date: datetime | None = None
 
 
 class TransactionResponse(TransactionBase):
@@ -31,4 +30,3 @@ class TransactionResponse(TransactionBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-

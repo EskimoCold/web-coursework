@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,7 +23,7 @@ async def update_current_user(
     current_user: User = Depends(get_current_user),
 ):
     update_data = user_update.model_dump(exclude_unset=True)
-    
+
     if "username" in update_data:
         result = await db.execute(
             select(User).filter(
@@ -38,16 +36,16 @@ async def update_current_user(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Username already in use",
             )
-    
+
     if "password" in update_data:
         update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
-    
+
     for field, value in update_data.items():
         setattr(current_user, field, value)
-    
+
     await db.commit()
     await db.refresh(current_user)
-    
+
     return current_user
 
 
@@ -58,4 +56,3 @@ async def delete_current_user(
 ):
     await db.delete(current_user)
     await db.commit()
-    return None

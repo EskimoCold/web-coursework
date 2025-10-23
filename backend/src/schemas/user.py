@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -18,9 +17,9 @@ class UserLogin(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username: Optional[str] = None
-    password: Optional[str] = None
-    is_active: Optional[bool] = None
+    username: str | None = None
+    password: str | None = None
+    is_active: bool | None = None
 
 
 class UserResponse(UserBase):
@@ -30,4 +29,3 @@ class UserResponse(UserBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-

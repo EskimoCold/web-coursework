@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,15 +21,15 @@ async def create_category(
         **category_data.model_dump(),
         user_id=current_user.id,
     )
-    
+
     db.add(new_category)
     await db.commit()
     await db.refresh(new_category)
-    
+
     return new_category
 
 
-@router.get("", response_model=List[CategoryResponse])
+@router.get("", response_model=list[CategoryResponse])
 async def get_categories(
     skip: int = 0,
     limit: int = 100,
@@ -39,10 +37,7 @@ async def get_categories(
     current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
-        select(Category)
-        .filter(Category.user_id == current_user.id)
-        .offset(skip)
-        .limit(limit)
+        select(Category).filter(Category.user_id == current_user.id).offset(skip).limit(limit)
     )
     categories = result.scalars().all()
     return categories
@@ -55,18 +50,16 @@ async def get_category(
     current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
-        select(Category).filter(
-            Category.id == category_id, Category.user_id == current_user.id
-        )
+        select(Category).filter(Category.id == category_id, Category.user_id == current_user.id)
     )
     category = result.scalar_one_or_none()
-    
+
     if not category:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Category not found",
         )
-    
+
     return category
 
 
@@ -78,25 +71,23 @@ async def update_category(
     current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
-        select(Category).filter(
-            Category.id == category_id, Category.user_id == current_user.id
-        )
+        select(Category).filter(Category.id == category_id, Category.user_id == current_user.id)
     )
     category = result.scalar_one_or_none()
-    
+
     if not category:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Category not found",
         )
-    
+
     update_data = category_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(category, field, value)
-    
+
     await db.commit()
     await db.refresh(category)
-    
+
     return category
 
 
@@ -107,19 +98,15 @@ async def delete_category(
     current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
-        select(Category).filter(
-            Category.id == category_id, Category.user_id == current_user.id
-        )
+        select(Category).filter(Category.id == category_id, Category.user_id == current_user.id)
     )
     category = result.scalar_one_or_none()
-    
+
     if not category:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Category not found",
         )
-    
+
     await db.delete(category)
     await db.commit()
-    
-    return None

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
@@ -34,44 +33,44 @@ async def create_transaction(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Category not found",
             )
-    
+
     new_transaction = Transaction(
         **transaction_data.model_dump(),
         user_id=current_user.id,
     )
-    
+
     db.add(new_transaction)
     await db.commit()
     await db.refresh(new_transaction)
-    
+
     return new_transaction
 
 
-@router.get("", response_model=List[TransactionResponse])
+@router.get("", response_model=list[TransactionResponse])
 async def get_transactions(
     skip: int = 0,
     limit: int = 100,
-    transaction_type: Optional[str] = Query(None, pattern="^(income|expense)$"),
-    category_id: Optional[int] = None,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    transaction_type: str | None = Query(None, pattern="^(income|expense)$"),
+    category_id: int | None = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     query = select(Transaction).filter(Transaction.user_id == current_user.id)
-    
+
     if transaction_type:
         query = query.filter(Transaction.transaction_type == transaction_type)
-    
+
     if category_id:
         query = query.filter(Transaction.category_id == category_id)
-    
+
     if start_date:
         query = query.filter(Transaction.transaction_date >= start_date)
-    
+
     if end_date:
         query = query.filter(Transaction.transaction_date <= end_date)
-    
+
     result = await db.execute(query.offset(skip).limit(limit))
     transactions = result.scalars().all()
     return transactions
@@ -89,13 +88,13 @@ async def get_transaction(
         )
     )
     transaction = result.scalar_one_or_none()
-    
+
     if not transaction:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Transaction not found",
         )
-    
+
     return transaction
 
 
@@ -112,16 +111,16 @@ async def update_transaction(
         )
     )
     transaction = result.scalar_one_or_none()
-    
+
     if not transaction:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Transaction not found",
         )
-    
+
     update_data = transaction_update.model_dump(exclude_unset=True)
-    
-    if "category_id" in update_data and update_data["category_id"]:
+
+    if update_data.get("category_id"):
         result = await db.execute(
             select(Category).filter(
                 Category.id == update_data["category_id"],
@@ -134,13 +133,13 @@ async def update_transaction(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Category not found",
             )
-    
+
     for field, value in update_data.items():
         setattr(transaction, field, value)
-    
+
     await db.commit()
     await db.refresh(transaction)
-    
+
     return transaction
 
 
@@ -156,14 +155,12 @@ async def delete_transaction(
         )
     )
     transaction = result.scalar_one_or_none()
-    
+
     if not transaction:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Transaction not found",
         )
-    
+
     await db.delete(transaction)
     await db.commit()
-    
-    return None
