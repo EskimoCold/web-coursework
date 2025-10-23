@@ -1,4 +1,5 @@
 import './sidebar.css';
+import { useAuth } from '../contexts/AuthContext';
 
 type Props = {
   active: string; // ← semicolons, not commas
@@ -8,6 +9,8 @@ type Props = {
 const NAV: string[] = ['Главная', 'Аналитика', 'Категории', 'Настройки'];
 
 export function Sidebar({ active, onSelect }: Props) {
+  const { user, logout } = useAuth();
+
   return (
     <nav className="sb" aria-label="sidebar">
       <div className="sb-brand">
@@ -17,7 +20,7 @@ export function Sidebar({ active, onSelect }: Props) {
 
       <div className="sb-user">
         <span className="sb-avatar" aria-hidden />
-        <span className="sb-user-name">Пользователь</span>
+        <span className="sb-user-name">{user?.username || 'Пользователь'}</span>
       </div>
 
       <ul className="sb-list" role="list">
@@ -41,7 +44,7 @@ export function Sidebar({ active, onSelect }: Props) {
 
       <div className="sb-spacer" />
 
-      <button className="sb-exit" aria-label="Выход">
+      <button className="sb-exit" aria-label="Выход" onClick={logout}>
         <span className="sb-dot" aria-hidden />
         <span className="sb-label">Выход</span>
       </button>
