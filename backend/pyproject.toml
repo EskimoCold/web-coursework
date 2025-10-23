@@ -6,15 +6,18 @@ extend-exclude = ["venv", ".venv", "migrations", "**/__pycache__", "build", "dis
 [tool.ruff.lint]
 # A solid, pragmatic ruleset: pycodestyle/pyflakes/imports/pyupgrade/simplify/pylint-ish/ruff extras
 select = ["E", "F", "I", "UP", "B", "SIM", "PL", "RUF"]
-ignore = ["E203"] # keep Black/Prettier-style slicing compatibility if needed
+ignore = [
+    "E203",  # keep Black/Prettier-style slicing compatibility
+    "B008",  # FastAPI uses Depends() in function defaults - this is intentional
+    "PLR0913",  # Too many arguments - acceptable for API endpoints
+]
 
 [tool.ruff.lint.isort]
-known-first-party = ["your_package_name"]  # <- change to your top-level package
+known-first-party = ["src"]
 combine-as-imports = true
 force-sort-within-sections = true
 
 [tool.ruff.format]
-# Enable if you want Ruff as your formatter (your CI already checks format)
 quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
