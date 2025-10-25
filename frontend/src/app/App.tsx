@@ -1,7 +1,8 @@
 import { useState } from 'react';
+
 import { Layout } from '../components/Layout';
-import { Sidebar } from '../components/Sidebar';
 import { SettingsPage } from '../components/SettingsPage';
+import { Sidebar } from '../components/Sidebar';
 
 export default function App() {
   const [active, setActive] = useState('Категории');
