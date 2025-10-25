@@ -1,224 +1,224 @@
 .settings-page {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 24px;
-    min-height: 600px;
-    height: 100%;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  min-height: 600px;
+  height: 100%;
 }
 
 .settings-sidebar {
-    background: var(--panel);
-    border: 1px solid var(--stroke);
-    border-radius: 16px;
-    padding: 16px 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  padding: 16px 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .settings-nav-item {
-    width: 100%;
-    padding: 16px 20px;
-    border: none;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    border-left: 3px solid transparent;
-    flex-shrink: 0;
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-left: 3px solid transparent;
+  flex-shrink: 0;
 }
 
 .settings-nav-item:hover {
-    background: var(--primary-ghost);
+  background: var(--primary-ghost);
 }
 
 .settings-nav-item.active {
-    background: var(--primary-ghost);
-    border-left-color: var(--primary);
+  background: var(--primary-ghost);
+  border-left-color: var(--primary);
 }
 
 .settings-nav-label {
-    display: block;
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--ink);
-    margin-bottom: 4px;
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 4px;
 }
 
 .settings-nav-description {
-    display: block;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.4;
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
 }
 
 .settings-content {
-    background: var(--panel);
-    border: 1px solid var(--stroke);
-    border-radius: 16px;
-    padding: 24px;
-    height: 100%;
-    overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .settings-section-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0 0 8px 0;
-    color: var(--ink);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--ink);
 }
 
 .settings-section-description {
-    color: var(--muted);
-    margin: 0 0 32px 0;
-    font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 32px 0;
+  font-size: 14px;
 }
 
 .settings-items {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .settings-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 20px;
-    border: 1px solid var(--stroke);
-    border-radius: 12px;
-    gap: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  gap: 16px;
 }
 
 .settings-item.danger {
-    border-color: #fecaca;
-    background: #fef2f2;
+  border-color: #fecaca;
+  background: #fef2f2;
 }
 
 .settings-item-content {
-    flex: 1;
+  flex: 1;
 }
 
 .settings-item-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0 0 4px 0;
-    color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: var(--ink);
 }
 
 .settings-item-description {
-    font-size: 14px;
-    color: var(--muted);
-    margin: 0;
-    line-height: 1.5;
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
 }
 
 .settings-button {
-    padding: 8px 16px;
-    border: 1px solid var(--stroke);
-    border-radius: 8px;
-    background: white;
-    color: var(--ink);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
+  padding: 8px 16px;
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .settings-button.primary {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
 }
 
 .settings-button.secondary {
-    background: var(--primary-ghost);
-    color: var(--primary);
-    border-color: var(--primary-ghost);
+  background: var(--primary-ghost);
+  color: var(--primary);
+  border-color: var(--primary-ghost);
 }
 
 .settings-button.danger {
-    background: #dc2626;
-    color: white;
-    border-color: #dc2626;
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
 }
 
 .settings-button:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .settings-button-group {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .settings-toggle {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-    flex-shrink: 0;
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
 .settings-toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 .settings-toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 24px;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
 }
 
 .settings-toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
 }
 
 input:checked + .settings-toggle-slider {
-    background-color: var(--primary);
+  background-color: var(--primary);
 }
 
 input:checked + .settings-toggle-slider:before {
-    transform: translateX(20px);
+  transform: translateX(20px);
 }
 
 .settings-select {
-    padding: 8px 12px;
-    border: 1px solid var(--stroke);
-    border-radius: 8px;
-    background: white;
-    color: var(--ink);
-    font-size: 14px;
-    min-width: 140px;
-    flex-shrink: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  font-size: 14px;
+  min-width: 140px;
+  flex-shrink: 0;
 }
 
 .settings-select:focus {
-    outline: none;
-    border-color: var(--primary);
+  outline: none;
+  border-color: var(--primary);
 }
 
 .settings-section {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
