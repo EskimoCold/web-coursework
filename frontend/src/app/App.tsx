@@ -3,8 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import { Layout } from '../components/Layout';
 
-import { SettingsPage } from '../components/SettingsPage';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { SettingsPage } from '../components/SettingsPage';
 import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { Login } from '../pages/Login';
