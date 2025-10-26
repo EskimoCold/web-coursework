@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { HomePage } from './HomePage'; // Используем named import
+import { HomePage } from './HomePage';
 
 // Mock the transactions API
 vi.mock('../../api/transactions', () => ({
@@ -40,6 +40,21 @@ vi.mock('../../api/transactions', () => ({
   },
 }));
 
+// Mock the categories API to avoid MSW errors
+vi.mock('../../api/categories', () => ({
+  categoriesApi: {
+    getCategories: vi.fn(() =>
+      Promise.resolve({
+        categories: [
+          { id: 1, name: 'Продукты', type: 'expense' },
+          { id: 2, name: 'Зарплата', type: 'income' },
+          { id: 3, name: 'Транспорт', type: 'expense' },
+        ],
+      }),
+    ),
+  },
+}));
+
 describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -60,12 +75,16 @@ describe('HomePage', () => {
       expect(screen.getByText('Общий баланс')).toBeInTheDocument();
     });
 
-    // Use more specific selectors to avoid duplicate text issues
-    const incomeCard = screen.getByText('Доходы').closest('.summary-card');
-    const expenseCard = screen.getByText('Расходы').closest('.summary-card');
+    // Use data-testid or more specific queries to avoid duplicate text issues
+    const incomeCard = screen.getByText('+ 50 000 ₽').closest('.summary-card');
+    const expenseCard = screen.getByText('- 2 300 ₽').closest('.summary-card');
 
     expect(incomeCard).toBeInTheDocument();
     expect(expenseCard).toBeInTheDocument();
+
+    // Check that the cards contain the correct headers
+    expect(incomeCard).toHaveTextContent('Доходы');
+    expect(expenseCard).toHaveTextContent('Расходы');
     expect(screen.getByText('+ 50 000 ₽')).toBeInTheDocument();
     expect(screen.getByText('- 2 300 ₽')).toBeInTheDocument();
   });
