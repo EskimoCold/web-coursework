@@ -58,10 +58,16 @@ describe('HomePage', () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      // Use more specific queries to avoid text splitting issues
-      const incomeCard = screen.getByText('Доходы').closest('.summary-card');
-      const expenseCard = screen.getByText('Расходы').closest('.summary-card');
-      const balanceCard = screen.getByText('Общий баланс').closest('.summary-card');
+      // Используем data-testid или более специфичные селекторы
+      const incomeCard =
+        screen.getByTestId('summary-income') ||
+        screen.getByText('Доходы').closest('.summary-card.income');
+      const expenseCard =
+        screen.getByTestId('summary-expense') ||
+        screen.getByText('Расходы').closest('.summary-card.expense');
+      const balanceCard =
+        screen.getByTestId('summary-balance') ||
+        screen.getByText('Общий баланс').closest('.summary-card.balance');
 
       expect(incomeCard).toHaveTextContent('50,000');
       expect(expenseCard).toHaveTextContent('2,300');
@@ -86,8 +92,12 @@ describe('HomePage', () => {
       expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
     });
 
+    // Используем role или более специфичный селектор для кнопки фильтра
+    const incomeFilterButton = screen.getByRole('button', { name: /доходы/i });
+    const expenseFilterButton = screen.getByRole('button', { name: /расходы/i });
+
     // Click on income filter
-    fireEvent.click(screen.getByText('Доходы'));
+    fireEvent.click(incomeFilterButton);
 
     await waitFor(() => {
       expect(screen.getByText('Зарплата за январь')).toBeInTheDocument();
@@ -95,7 +105,7 @@ describe('HomePage', () => {
     });
 
     // Click on expense filter
-    fireEvent.click(screen.getByText('Расходы'));
+    fireEvent.click(expenseFilterButton);
 
     await waitFor(() => {
       expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
