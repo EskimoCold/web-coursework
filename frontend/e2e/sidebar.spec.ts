@@ -2,56 +2,58 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Left navigation', () => {
-  test('loads with "Главная" active and header matches', async ({ page }) => {
-    await page.goto('/');
+  test.beforeEach(async ({ page }) => {
+    // Переходим на страницу логина и логинимся
+    await page.goto('/login');
+    await page.fill('input[type="text"]', 'testuser');
+    await page.fill('input[type="password"]', 'testpass');
+    await page.click('button[type="submit"]');
+    // Ждем редирект на главную
+    await page.waitForURL('/');
+  });
 
+  test('loads with "Главная" active and header matches', async ({ page }) => {
     // Check sidebar structure
-    await expect(page.getByLabel('sidebar')).toBeVisible();
-    await expect(page.getByRole('banner')).toBeVisible();
+    await expect(page.locator('.sb')).toBeVisible(); // Используем класс вместо aria-label
+    await expect(page.locator('.layout-header')).toBeVisible();
 
     // Header should show "Главная" (теперь это начальная страница)
-    await expect(page.getByRole('heading', { name: 'Главная' })).toBeVisible();
+    await expect(page.locator('.layout-title')).toHaveText('Главная');
 
     const home = page.getByRole('button', { name: 'Главная' });
-    await expect(home).toHaveAttribute('aria-current', 'page');
+    await expect(home).toHaveClass(/is-active/);
   });
 
   test('clicking items switches active state and updates header', async ({ page }) => {
-    await page.goto('/');
-
     // initially home is active
     const home = page.getByRole('button', { name: 'Главная' });
-    await expect(home).toHaveAttribute('aria-current', 'page');
+    await expect(home).toHaveClass(/is-active/);
 
     // click categories
     const categories = page.getByRole('button', { name: 'Категории' });
     await categories.click();
 
     // header updated
-    await expect(page.getByRole('heading', { name: 'Категории' })).toBeVisible();
+    await expect(page.locator('.layout-title')).toHaveText('Категории');
 
-    // aria-current moved
-    await expect(categories).toHaveAttribute('aria-current', 'page');
-    await expect(home).not.toHaveAttribute('aria-current', 'page');
+    // active class moved
+    await expect(categories).toHaveClass(/is-active/);
+    await expect(home).not.toHaveClass(/is-active/);
   });
 
   test('exit button is visible and positioned below the nav list', async ({ page }) => {
-    await page.goto('/');
-
-    const exit = page.getByLabel('Выход');
+    const exit = page.locator('.sb-exit');
     await expect(exit).toBeVisible();
 
     // check it's at the bottom visually (last in DOM order within sidebar)
-    const sidebar = page.getByLabel('sidebar');
+    const sidebar = page.locator('.sb');
     const lastChild = sidebar.locator('*:last-child');
-    await expect(lastChild).toHaveAttribute('aria-label', 'Выход');
+    await expect(lastChild).toHaveClass('sb-exit');
   });
 
   test('layout content area exists with proper content', async ({ page }) => {
-    await page.goto('/');
-
     // Check that main layout area exists
-    await expect(page.getByLabel('main-layout')).toBeVisible();
+    await expect(page.locator('.layout')).toBeVisible();
 
     // For home page - check summary cards exist
     await expect(page.getByText('Общий баланс')).toBeVisible();
