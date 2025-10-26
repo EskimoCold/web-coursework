@@ -37,7 +37,7 @@ vi.mock('../api/transactions', () => ({
 }));
 
 describe('HomePage', () => {
-  it('renders homepage without errors', async () => {
+  it('renders homepage with title', async () => {
     render(<HomePage />);
 
     await waitFor(() => {
@@ -45,7 +45,7 @@ describe('HomePage', () => {
     });
   });
 
-  it('displays transactions', async () => {
+  it('displays transactions correctly', async () => {
     render(<HomePage />);
 
     await waitFor(() => {
