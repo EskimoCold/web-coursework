@@ -13,8 +13,8 @@ test.describe('Basic navigation', () => {
   test('register page has form elements', async ({ page }) => {
     await page.goto('/register');
 
-    // Простые проверки что форма есть
-    await expect(page.locator('input')).toHaveCount(2); // username и password
+    // Простые проверки что форма есть (3 инпута вместо 2)
+    await expect(page.locator('input')).toHaveCount(3); // username, password, confirm password
     await expect(page.getByRole('button')).toBeVisible(); // какая-то кнопка
   });
 
