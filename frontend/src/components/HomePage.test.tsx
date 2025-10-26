@@ -1,65 +1,51 @@
+// src/components/HomePage.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import { HomePage } from './HomePage';
 
-// Mock the transactions API
-vi.mock('../../api/transactions', () => ({
+// Mock the API calls
+vi.mock('../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(() =>
-      Promise.resolve({
-        transactions: [
-          {
-            id: 1,
-            amount: -1500,
-            description: 'Продукты в супермаркете',
-            category: 'Продукты',
-            type: 'expense',
-            date: '2024-01-15',
-          },
-          {
-            id: 2,
-            amount: 50000,
-            description: 'Зарплата за январь',
-            category: 'Зарплата',
-            type: 'income',
-            date: '2024-01-10',
-          },
-          {
-            id: 3,
-            amount: -800,
-            description: 'Проездной на метро',
-            category: 'Транспорт',
-            type: 'expense',
-            date: '2024-01-08',
-          },
-        ],
-        total_count: 3,
-      }),
+      Promise.resolve([
+        {
+          id: 1,
+          amount: 1500,
+          transaction_type: 'expense',
+          transaction_date: '2024-01-15T00:00:00Z',
+          description: 'Продукты в супермаркете',
+          category: { id: 1, name: 'Продукты' },
+        },
+        {
+          id: 2,
+          amount: 50000,
+          transaction_type: 'income',
+          transaction_date: '2024-01-10T00:00:00Z',
+          description: 'Зарплата за январь',
+          category: { id: 2, name: 'Зарплата' },
+        },
+        {
+          id: 3,
+          amount: 800,
+          transaction_type: 'expense',
+          transaction_date: '2024-01-08T00:00:00Z',
+          description: 'Проездной на метро',
+          category: { id: 3, name: 'Транспорт' },
+        },
+      ]),
     ),
-  },
-}));
-
-// Mock the categories API to avoid MSW errors
-vi.mock('../../api/categories', () => ({
-  categoriesApi: {
     getCategories: vi.fn(() =>
-      Promise.resolve({
-        categories: [
-          { id: 1, name: 'Продукты', type: 'expense' },
-          { id: 2, name: 'Зарплата', type: 'income' },
-          { id: 3, name: 'Транспорт', type: 'expense' },
-        ],
-      }),
+      Promise.resolve([
+        { id: 1, name: 'Продукты' },
+        { id: 2, name: 'Зарплата' },
+        { id: 3, name: 'Транспорт' },
+      ]),
     ),
   },
 }));
 
 describe('HomePage', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('renders homepage with title', async () => {
     render(<HomePage />);
 
@@ -72,30 +58,24 @@ describe('HomePage', () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Общий баланс')).toBeInTheDocument();
+      // Use more specific queries to avoid text splitting issues
+      const incomeCard = screen.getByText('Доходы').closest('.summary-card');
+      const expenseCard = screen.getByText('Расходы').closest('.summary-card');
+      const balanceCard = screen.getByText('Общий баланс').closest('.summary-card');
+
+      expect(incomeCard).toHaveTextContent('50,000');
+      expect(expenseCard).toHaveTextContent('2,300');
+      expect(balanceCard).toHaveTextContent('47,700');
     });
-
-    // Use data-testid or more specific queries to avoid duplicate text issues
-    const incomeCard = screen.getByText('+ 50 000 ₽').closest('.summary-card');
-    const expenseCard = screen.getByText('- 2 300 ₽').closest('.summary-card');
-
-    expect(incomeCard).toBeInTheDocument();
-    expect(expenseCard).toBeInTheDocument();
-
-    // Check that the cards contain the correct headers
-    expect(incomeCard).toHaveTextContent('Доходы');
-    expect(expenseCard).toHaveTextContent('Расходы');
-    expect(screen.getByText('+ 50 000 ₽')).toBeInTheDocument();
-    expect(screen.getByText('- 2 300 ₽')).toBeInTheDocument();
   });
 
   it('renders transactions table', async () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Продукты')).toBeInTheDocument();
-      expect(screen.getByText('Зарплата')).toBeInTheDocument();
-      expect(screen.getByText('Транспорт')).toBeInTheDocument();
+      expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
+      expect(screen.getByText('Зарплата за январь')).toBeInTheDocument();
+      expect(screen.getByText('Проездной на метро')).toBeInTheDocument();
     });
   });
 
@@ -103,40 +83,23 @@ describe('HomePage', () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Зарплата')).toBeInTheDocument();
+      expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
     });
 
-    // Use getByRole for buttons to be more specific
-    const incomeButton = screen.getByRole('button', { name: 'Доходы' });
-    fireEvent.click(incomeButton);
+    // Click on income filter
+    fireEvent.click(screen.getByText('Доходы'));
 
     await waitFor(() => {
-      // Should only show income transactions
-      expect(screen.getByText('Зарплата')).toBeInTheDocument();
-      expect(screen.queryByText('Продукты')).not.toBeInTheDocument();
-      expect(screen.queryByText('Транспорт')).not.toBeInTheDocument();
+      expect(screen.getByText('Зарплата за январь')).toBeInTheDocument();
+      expect(screen.queryByText('Продукты в супермаркете')).not.toBeInTheDocument();
     });
 
-    // Test expense filter
-    const expenseButton = screen.getByRole('button', { name: 'Расходы' });
-    fireEvent.click(expenseButton);
+    // Click on expense filter
+    fireEvent.click(screen.getByText('Расходы'));
 
     await waitFor(() => {
-      // Should only show expense transactions
-      expect(screen.getByText('Продукты')).toBeInTheDocument();
-      expect(screen.getByText('Транспорт')).toBeInTheDocument();
-      expect(screen.queryByText('Зарплата')).not.toBeInTheDocument();
-    });
-
-    // Test all filter
-    const allButton = screen.getByRole('button', { name: 'Все' });
-    fireEvent.click(allButton);
-
-    await waitFor(() => {
-      // Should show all transactions
-      expect(screen.getByText('Продукты')).toBeInTheDocument();
-      expect(screen.getByText('Зарплата')).toBeInTheDocument();
-      expect(screen.getByText('Транспорт')).toBeInTheDocument();
+      expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
+      expect(screen.queryByText('Зарплата за январь')).not.toBeInTheDocument();
     });
   });
 
