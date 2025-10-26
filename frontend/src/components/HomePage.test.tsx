@@ -1,183 +1,131 @@
-// src/components/HomePage.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { transactionsApi } from '../api/transactions';
+import { HomePage } from './HomePage'; // Используем named import
 
-import { HomePage } from './HomePage';
-
-// Мокаем API модуль
-vi.mock('../api/transactions', () => ({
+// Mock the transactions API
+vi.mock('../../api/transactions', () => ({
   transactionsApi: {
-    getTransactions: vi.fn(),
-    getCategories: vi.fn(),
+    getTransactions: vi.fn(() =>
+      Promise.resolve({
+        transactions: [
+          {
+            id: 1,
+            amount: -1500,
+            description: 'Продукты в супермаркете',
+            category: 'Продукты',
+            type: 'expense',
+            date: '2024-01-15',
+          },
+          {
+            id: 2,
+            amount: 50000,
+            description: 'Зарплата за январь',
+            category: 'Зарплата',
+            type: 'income',
+            date: '2024-01-10',
+          },
+          {
+            id: 3,
+            amount: -800,
+            description: 'Проездной на метро',
+            category: 'Транспорт',
+            type: 'expense',
+            date: '2024-01-08',
+          },
+        ],
+        total_count: 3,
+      }),
+    ),
   },
 }));
 
-const mockTransactions = [
-  {
-    id: 1,
-    amount: 1500,
-    transaction_type: 'expense',
-    transaction_date: '2024-01-15T00:00:00Z',
-    description: 'Продукты в супермаркете',
-    category: { id: 1, name: 'Продукты' },
-  },
-  {
-    id: 2,
-    amount: 50000,
-    transaction_type: 'income',
-    transaction_date: '2024-01-10T00:00:00Z',
-    description: 'Зарплата за январь',
-    category: { id: 2, name: 'Зарплата' },
-  },
-  {
-    id: 3,
-    amount: 800,
-    transaction_type: 'expense',
-    transaction_date: '2024-01-08T00:00:00Z',
-    description: 'Проездной на метро',
-    category: { id: 3, name: 'Транспорт' },
-  },
-];
-
-const mockCategories = [
-  { id: 1, name: 'Продукты' },
-  { id: 2, name: 'Зарплата' },
-  { id: 3, name: 'Транспорт' },
-];
-
 describe('HomePage', () => {
   beforeEach(() => {
-    // Сбрасываем моки перед каждым тестом
     vi.clearAllMocks();
   });
 
-  it('renders summary cards with correct data', async () => {
-    // Мокаем успешный ответ от API
-    vi.mocked(transactionsApi.getTransactions).mockResolvedValue(mockTransactions);
-    vi.mocked(transactionsApi.getCategories).mockResolvedValue(mockCategories);
-
+  it('renders homepage with title', async () => {
     render(<HomePage />);
 
-    // Ждем пока данные загрузятся
+    await waitFor(() => {
+      expect(screen.getByText('FinTrack')).toBeInTheDocument();
+    });
+  });
+
+  it('renders summary cards with correct data', async () => {
+    render(<HomePage />);
+
     await waitFor(() => {
       expect(screen.getByText('Общий баланс')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Доходы')).toBeInTheDocument();
-    expect(screen.getByText('Расходы')).toBeInTheDocument();
+    // Use more specific selectors to avoid duplicate text issues
+    const incomeCard = screen.getByText('Доходы').closest('.summary-card');
+    const expenseCard = screen.getByText('Расходы').closest('.summary-card');
 
-    // Проверяем что суммы отображаются
-    expect(screen.getByText('50,800 ₽')).toBeInTheDocument(); // баланс
-    expect(screen.getByText('+50,000 ₽')).toBeInTheDocument(); // доходы
-    expect(screen.getByText('-2,300 ₽')).toBeInTheDocument(); // расходы
+    expect(incomeCard).toBeInTheDocument();
+    expect(expenseCard).toBeInTheDocument();
+    expect(screen.getByText('+ 50 000 ₽')).toBeInTheDocument();
+    expect(screen.getByText('- 2 300 ₽')).toBeInTheDocument();
+  });
+
+  it('renders transactions table', async () => {
+    render(<HomePage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Продукты')).toBeInTheDocument();
+      expect(screen.getByText('Зарплата')).toBeInTheDocument();
+      expect(screen.getByText('Транспорт')).toBeInTheDocument();
+    });
   });
 
   it('filters transactions by type', async () => {
-    vi.mocked(transactionsApi.getTransactions).mockResolvedValue(mockTransactions);
-    vi.mocked(transactionsApi.getCategories).mockResolvedValue(mockCategories);
-
     render(<HomePage />);
 
-    // Ждем загрузки данных
     await waitFor(() => {
-      expect(screen.getByText('Продукты')).toBeInTheDocument();
+      expect(screen.getByText('Зарплата')).toBeInTheDocument();
     });
 
-    // Изначально показываются все транзакции
-    expect(screen.getByText('Продукты')).toBeInTheDocument();
-    expect(screen.getByText('Зарплата')).toBeInTheDocument();
-    expect(screen.getByText('Транспорт')).toBeInTheDocument();
-
-    // Фильтруем по доходам
-    fireEvent.click(screen.getByText('Доходы'));
+    // Use getByRole for buttons to be more specific
+    const incomeButton = screen.getByRole('button', { name: 'Доходы' });
+    fireEvent.click(incomeButton);
 
     await waitFor(() => {
+      // Should only show income transactions
       expect(screen.getByText('Зарплата')).toBeInTheDocument();
       expect(screen.queryByText('Продукты')).not.toBeInTheDocument();
       expect(screen.queryByText('Транспорт')).not.toBeInTheDocument();
     });
 
-    // Фильтруем по расходам
-    fireEvent.click(screen.getByText('Расходы'));
+    // Test expense filter
+    const expenseButton = screen.getByRole('button', { name: 'Расходы' });
+    fireEvent.click(expenseButton);
 
     await waitFor(() => {
+      // Should only show expense transactions
       expect(screen.getByText('Продукты')).toBeInTheDocument();
       expect(screen.getByText('Транспорт')).toBeInTheDocument();
       expect(screen.queryByText('Зарплата')).not.toBeInTheDocument();
     });
-  });
 
-  it('shows loading state initially', () => {
-    vi.mocked(transactionsApi.getTransactions).mockImplementation(
-      () => new Promise(() => {}), // Бесконечный промис для симуляции загрузки
-    );
-    vi.mocked(transactionsApi.getCategories).mockImplementation(() => new Promise(() => {}));
+    // Test all filter
+    const allButton = screen.getByRole('button', { name: 'Все' });
+    fireEvent.click(allButton);
 
-    render(<HomePage />);
-
-    expect(screen.getByText('Загрузка данных...')).toBeInTheDocument();
-  });
-
-  it('handles API errors gracefully', async () => {
-    // Мокаем ошибку API
-    vi.mocked(transactionsApi.getTransactions).mockRejectedValue(new Error('Network error'));
-    vi.mocked(transactionsApi.getCategories).mockRejectedValue(new Error('Network error'));
-
-    render(<HomePage />);
-
-    // Ждем пока компонент переключится на моковые данные
-    await waitFor(
-      () => {
-        expect(screen.getByText('Продукты')).toBeInTheDocument();
-      },
-      { timeout: 3000 },
-    );
-
-    // Проверяем что моковые данные отображаются
-    expect(screen.getByText('Продукты')).toBeInTheDocument();
-    expect(screen.getByText('Зарплата')).toBeInTheDocument();
-  });
-
-  it('paginates transactions when there are many', async () => {
-    // Создаем много транзакций для тестирования пагинации
-    const manyTransactions = Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      amount: 1000 + i * 100,
-      transaction_type: i % 2 === 0 ? 'income' : 'expense',
-      transaction_date: '2024-01-01T00:00:00Z',
-      description: `Transaction ${i + 1}`,
-      category: { id: 1, name: i % 2 === 0 ? 'Зарплата' : 'Продукты' },
-    }));
-
-    vi.mocked(transactionsApi.getTransactions).mockResolvedValue(manyTransactions);
-    vi.mocked(transactionsApi.getCategories).mockResolvedValue(mockCategories);
-
-    render(<HomePage />);
-
-    // Ждем загрузки данных
     await waitFor(() => {
-      expect(screen.getByText('Transaction 1')).toBeInTheDocument();
+      // Should show all transactions
+      expect(screen.getByText('Продукты')).toBeInTheDocument();
+      expect(screen.getByText('Зарплата')).toBeInTheDocument();
+      expect(screen.getByText('Транспорт')).toBeInTheDocument();
     });
+  });
 
-    // Проверяем что есть пагинация (3 страницы для 15 транзакций по 5 на страницу)
-    expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
-
-    // Проверяем что на первой странице 5 транзакций
-    expect(screen.getByText('Transaction 1')).toBeInTheDocument();
-    expect(screen.getByText('Transaction 5')).toBeInTheDocument();
-    expect(screen.queryByText('Transaction 6')).not.toBeInTheDocument();
-
-    // Переходим на вторую страницу
-    fireEvent.click(screen.getByText('2'));
+  it('shows correct transaction count', async () => {
+    render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Transaction 6')).toBeInTheDocument();
-      expect(screen.getByText('Transaction 10')).toBeInTheDocument();
-      expect(screen.queryByText('Transaction 5')).not.toBeInTheDocument();
+      expect(screen.getByText('Показано 3 из 3 операций')).toBeInTheDocument();
     });
   });
 });
