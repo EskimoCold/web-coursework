@@ -6,7 +6,7 @@ test.describe('Left navigation', () => {
     await page.goto('/login');
 
     // Проверяем что страница логина загрузилась
-    await expect(page).toHaveTitle(/FinTrack/);
+    await expect(page).toHaveTitle(/Web Coursework/);
     await expect(page.getByRole('heading', { name: /вход|login/i })).toBeVisible();
 
     // Проверяем форму
@@ -19,7 +19,7 @@ test.describe('Left navigation', () => {
     await page.goto('/register');
 
     // Проверяем что страница регистрации загрузилась
-    await expect(page).toHaveTitle(/FinTrack/);
+    await expect(page).toHaveTitle(/Web Coursework/);
     await expect(page.getByRole('heading', { name: /регистрация|register/i })).toBeVisible();
 
     // Проверяем форму
