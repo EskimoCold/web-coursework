@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import * as authApi from '../api/auth';
@@ -137,7 +137,9 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('loading')).toHaveTextContent('loaded');
     });
 
-    screen.getByText('Login').click();
+    await act(async () => {
+      fireEvent.click(screen.getByText('Login'));
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('yes');
@@ -177,7 +179,9 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('loading')).toHaveTextContent('loaded');
     });
 
-    screen.getByText('Register').click();
+    await act(async () => {
+      fireEvent.click(screen.getByText('Register'));
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('yes');
@@ -212,7 +216,9 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('yes');
     });
 
-    screen.getByText('Logout').click();
+    await act(async () => {
+      fireEvent.click(screen.getByText('Logout'));
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('no');
@@ -245,7 +251,9 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('yes');
     });
 
-    screen.getByText('Logout').click();
+    await act(async () => {
+      fireEvent.click(screen.getByText('Logout'));
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('no');
