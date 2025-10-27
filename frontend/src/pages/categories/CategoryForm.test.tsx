@@ -1,10 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { CategoryForm } from './CategoryForm';
+
 import { Category, useCategories } from '../../contexts/CategoriesContext';
 
+import { CategoryForm } from './CategoryForm';
+
 vi.mock('../../components/Icon', () => ({
-  Icon: ({ source, size, className }: { source: string; size: number; className: string }) => (
+  Icon: ({ source, className }: { source: string; size: number; className: string }) => (
     <div data-testid={`icon-${source}`} className={className}>
       Icon: {source}
     </div>

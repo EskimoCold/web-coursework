@@ -1,22 +1,21 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import { AuthProvider } from '../contexts/AuthContext';
-import { CategoriesPage } from '../pages/categories/CategoriesPage';
-import { CategoryProvider } from '../contexts/CategoriesContext';
 import { Layout } from '../components/Layout';
-import { Login } from '../pages/Login';
 import { ProtectedRoute } from '../components/ProtectedRoute';
-import { Register } from '../pages/Register';
-import { SettingsPage } from '../components/SettingsPage';
 import { Sidebar } from '../components/Sidebar';
+import { AuthProvider } from '../contexts/AuthContext';
+import { CategoryProvider } from '../contexts/CategoriesContext';
+import { CategoriesPage } from '../pages/categories/CategoriesPage';
+import { Login } from '../pages/Login';
+import { Register } from '../pages/Register';
 
 function MainApp() {
   const [active, setActive] = useState('Категории');
 
   const renderContent = () => {
     if (active === 'Настройки') {
-      return <SettingsPage />;
+      // return <SettingsPage />;
     } else if (active === 'Категории') {
       return <CategoriesPage />;
     }

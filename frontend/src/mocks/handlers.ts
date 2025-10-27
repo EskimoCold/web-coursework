@@ -1,5 +1,4 @@
 import { http, HttpResponse } from 'msw';
-import { Category } from '../contexts/CategoriesContext';
 
 export const handlers = [
   http.get('/api/todos', () => {
@@ -27,7 +26,7 @@ export const handlers = [
     }
 
     const newCategory = {
-      id: id ? id : Date.now(),
+      id: id.length ? id : Date.now(),
       name,
       description,
       icon,

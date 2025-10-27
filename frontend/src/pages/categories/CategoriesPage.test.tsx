@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { CategoriesPage } from './CategoriesPage';
+
 import { Category, useCategories } from '../../contexts/CategoriesContext';
-import { CategoryWindow } from './CategoryWindow';
-import { CategoryForm } from './CategoryForm';
+
+import { CategoriesPage } from './CategoriesPage';
 
 vi.mock('./CategoryCard', () => ({
   CategoryCard: ({ cat, handleClick }: { cat: Category; handleClick: () => void }) => (

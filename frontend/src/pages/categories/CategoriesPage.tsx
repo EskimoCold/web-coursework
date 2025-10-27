@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import './categories.css';
 
-import { CategoryCard } from './CategoryCard';
-import { CategoryWindow } from './CategoryWindow';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
+
+import { CategoryCard } from './CategoryCard';
 import { CategoryForm } from './CategoryForm';
+import { CategoryWindow } from './CategoryWindow';
 
 export const CategoriesPage: React.FC = () => {
   const { categories } = useCategories();
@@ -45,7 +46,7 @@ export const CategoriesPage: React.FC = () => {
       filteredCategories.map((cat) => (
         <CategoryCard key={cat.id} cat={cat} handleClick={() => openCard(cat)} />
       )),
-    [filteredCategories, openCard],
+    [filteredCategories],
   );
 
   return (

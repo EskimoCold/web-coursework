@@ -1,11 +1,22 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CategoryWindow } from './CategoryWindow';
+
 import { Category } from '../../contexts/CategoriesContext';
-import { CategoryForm } from './CategoryForm';
+
+import { CategoryWindow } from './CategoryWindow';
+
+type Props = {
+  label: string;
+  modify: boolean; // редактирование старой категории?
+  submit: string;
+  placeholder?: {
+    category: Category;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  };
+};
 
 vi.mock('./CategoryForm', () => ({
-  CategoryForm: ({ label, modify, submit, placeholder }: any) => (
+  CategoryForm: ({ label, modify, submit, placeholder }: Props) => (
     <div data-testid="category-form">
       <div data-testid="form-label">{label}</div>
       <div data-testid="form-modify">{modify ? 'true' : 'false'}</div>

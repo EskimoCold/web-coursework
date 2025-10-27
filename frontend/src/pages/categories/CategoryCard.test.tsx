@@ -1,11 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { CategoryCard } from './CategoryCard';
+
 import { Category } from '../../contexts/CategoriesContext';
-import { Icon } from '../../components/Icon';
+
+import { CategoryCard } from './CategoryCard';
 
 vi.mock('../../components/Icon', () => ({
-  Icon: ({ source, size, className }: { source: string; size: number; className: string }) => (
+  Icon: ({ source, className }: { source: string; size: number; className: string }) => (
     <div data-testid={`icon-${source}`} className={className}>
       Icon: {source}
     </div>
