@@ -1,12 +1,12 @@
 .cat-main {
-  --cat-green: #50E3C299;
+  --cat-green: #50e3c299;
   --cat-red: #ff6b6b99;
   --cat-dark-grey: #838383;
   --cat-light-grey: #f3f6f9;
-  --cat-dark-text: #4A4B4B;
-  --cat-green-text: #319A83;
-  --cat-red-text: #E04C4C;
-  --cat-grey: #DEE2E6;
+  --cat-dark-text: #4a4b4b;
+  --cat-green-text: #319a83;
+  --cat-red-text: #e04c4c;
+  --cat-grey: #dee2e6;
   --cat-blue: #2b7cff;
 }
 
@@ -29,7 +29,6 @@
   height: 20px;
   border-radius: 10px;
 }
-
 
 .cat-text {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -84,8 +83,8 @@ input:focus {
 
 .cat-card {
   height: 120px;
-  width: 385px; 
-  border: 1px solid var(--stroke); 
+  width: 385px;
+  border: 1px solid var(--stroke);
   border-radius: 17px;
   background: var(--cat-light-grey);
   display: flex;
@@ -131,7 +130,7 @@ input:focus {
   top: 0;
   left: 0;
   z-index: 1;
-  background: #4A4B4B99;
+  background: #4a4b4b99;
 }
 
 .cat-card-icon {
@@ -159,7 +158,7 @@ input:focus {
 }
 
 .cat-form {
-  border: 1px solid var(--stroke); 
+  border: 1px solid var(--stroke);
   border-radius: 17px;
   background: var(--cat-light-grey);
   padding: 0 30px;
@@ -187,7 +186,6 @@ input:focus {
     border: 2px solid var(--cat-dark-grey);
   }
 }
-
 
 .cat-icon-grid {
   display: grid;

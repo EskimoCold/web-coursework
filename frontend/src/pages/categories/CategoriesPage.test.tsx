@@ -5,7 +5,6 @@ import { Category, useCategories } from '../../contexts/CategoriesContext';
 import { CategoryWindow } from './CategoryWindow';
 import { CategoryForm } from './CategoryForm';
 
-// Mock the components and hooks
 vi.mock('./CategoryCard', () => ({
   CategoryCard: ({ cat, handleClick }: { cat: Category; handleClick: () => void }) => (
     <div data-testid={`category-card-${cat.id}`} onClick={handleClick}>
@@ -43,22 +42,22 @@ const mockCategories: Category[] = [
     name: 'Food',
     type: 0,
     icon: 'food-icon',
-    description: 'Food expenses'
+    description: 'Food expenses',
   },
   {
     id: 2,
     name: 'Salary',
     type: 1,
     icon: 'salary-icon',
-    description: 'Salary income'
+    description: 'Salary income',
   },
   {
     id: 3,
     name: 'Entertainment',
     type: 0,
     icon: 'entertainment-icon',
-    description: 'Entertainment expenses'
-  }
+    description: 'Entertainment expenses',
+  },
 ];
 
 const renderComponent = (categories: Category[] = mockCategories) => {
@@ -108,9 +107,9 @@ describe('Categories', () => {
     const incomeButton = screen.getByText('Доходы');
     fireEvent.click(incomeButton);
 
-    expect(screen.queryByTestId('category-card-1')).not.toBeInTheDocument(); // type 0 - expense
-    expect(screen.getByTestId('category-card-2')).toBeInTheDocument(); // type 1 - income
-    expect(screen.queryByTestId('category-card-3')).not.toBeInTheDocument(); // type 0 - expense
+    expect(screen.queryByTestId('category-card-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('category-card-2')).toBeInTheDocument();
+    expect(screen.queryByTestId('category-card-3')).not.toBeInTheDocument();
   });
 
   it('should filter categories by type - expense', () => {
@@ -119,19 +118,17 @@ describe('Categories', () => {
     const expenseButton = screen.getByText('Расходы');
     fireEvent.click(expenseButton);
 
-    expect(screen.getByTestId('category-card-1')).toBeInTheDocument(); // type 0 - expense
-    expect(screen.queryByTestId('category-card-2')).not.toBeInTheDocument(); // type 1 - income
-    expect(screen.getByTestId('category-card-3')).toBeInTheDocument(); // type 0 - expense
+    expect(screen.getByTestId('category-card-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('category-card-2')).not.toBeInTheDocument();
+    expect(screen.getByTestId('category-card-3')).toBeInTheDocument();
   });
 
   it('should show all categories when "all" filter is selected', () => {
     renderComponent();
 
-    // First filter by income
     fireEvent.click(screen.getByText('Доходы'));
     expect(screen.queryByTestId('category-card-1')).not.toBeInTheDocument();
 
-    // Then go back to all
     fireEvent.click(screen.getByText('Все'));
     expect(screen.getByTestId('category-card-1')).toBeInTheDocument();
     expect(screen.getByTestId('category-card-2')).toBeInTheDocument();
@@ -151,11 +148,9 @@ describe('Categories', () => {
   it('should close category window when close button is clicked', async () => {
     renderComponent();
 
-    // Open window
     fireEvent.click(screen.getByTestId('category-card-1'));
     expect(screen.getByTestId('category-window')).toBeInTheDocument();
 
-    // Close window
     fireEvent.click(screen.getByText('Close Window'));
 
     await waitFor(() => {
@@ -177,14 +172,11 @@ describe('Categories', () => {
     const allButton = screen.getByText('Все');
     const incomeButton = screen.getByText('Доходы');
 
-    // Initially "all" should be active
     expect(allButton).toHaveClass('cat-filter-active');
     expect(incomeButton).not.toHaveClass('cat-filter-active');
 
-    // Click income button
     fireEvent.click(incomeButton);
 
-    // Now income should be active
     expect(allButton).not.toHaveClass('cat-filter-active');
     expect(incomeButton).toHaveClass('cat-filter-active');
   });
