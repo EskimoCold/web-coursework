@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type Category = {
-  id: number,
-  name: string,
-  type: number,
-  icon: string,
-  description: string,
+  id: number;
+  name: string;
+  type: number;
+  icon: string;
+  description: string;
 };
 
 type CategoryContextType = {
@@ -34,7 +34,7 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   return (
-    <CategoryContext.Provider value={{ categories, setCategories }}> {/* Добавлено setCategories */}
+    <CategoryContext.Provider value={{ categories, setCategories }}>
       {children}
     </CategoryContext.Provider>
   );

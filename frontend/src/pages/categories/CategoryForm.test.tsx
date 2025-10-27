@@ -149,15 +149,16 @@ describe('CategoryForm', () => {
     });
   });
 
-
   it('should not submit form when name is empty', async () => {
     renderComponent();
 
-    fireEvent.change(screen.queryAllByDisplayValue('')[1], { target: { value: 'New Description' } });
+    fireEvent.change(screen.queryAllByDisplayValue('')[1], {
+      target: { value: 'New Description' },
+    });
     fireEvent.click(screen.queryAllByTestId('icon-sample.png')[0]);
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
-    
+
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -171,7 +172,7 @@ describe('CategoryForm', () => {
     fireEvent.change(screen.queryAllByDisplayValue('')[0], { target: { value: 'New Category' } });
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
-    
+
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -179,23 +180,23 @@ describe('CategoryForm', () => {
     });
   });
 
-   it('should handle API error on submit', async () => {
-     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('should handle API error on submit', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-     (global.fetch as vi.Mock).mockRejectedValueOnce(new Error('API Error'));
+    (global.fetch as vi.Mock).mockRejectedValueOnce(new Error('API Error'));
 
-     renderComponent();
+    renderComponent();
 
-     fireEvent.change(screen.queryAllByDisplayValue('')[0], { target: { value: 'New Category' } });
-     fireEvent.click(screen.queryAllByTestId('icon-sample.png')[0]);
-     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    fireEvent.change(screen.queryAllByDisplayValue('')[0], { target: { value: 'New Category' } });
+    fireEvent.click(screen.queryAllByTestId('icon-sample.png')[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 
-     await waitFor(() => {
-       expect(consoleSpy).toHaveBeenCalled();
-     });
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalled();
+    });
 
-     consoleSpy.mockRestore();
-   });
+    consoleSpy.mockRestore();
+  });
 
   it('should handle delete for category modification', async () => {
     const mockResponse = {

@@ -4,7 +4,6 @@ import { CategoryCard } from './CategoryCard';
 import { Category } from '../../contexts/CategoriesContext';
 import { Icon } from '../../components/Icon';
 
-// Mock dependencies
 vi.mock('../../components/Icon', () => ({
   Icon: ({ source, size, className }: { source: string; size: number; className: string }) => (
     <div data-testid={`icon-${source}`} className={className}>
@@ -13,7 +12,6 @@ vi.mock('../../components/Icon', () => ({
   ),
 }));
 
-// Mock CSS import
 vi.mock('./categories.css', () => ({}));
 
 const mockCategory: Category = {
@@ -110,7 +108,6 @@ describe('CategoryCard', () => {
     const mockHandleClick = vi.fn();
     renderComponent({ handleClick: mockHandleClick });
 
-    // Click on different parts of the card
     fireEvent.click(screen.getByText('Test Category'));
     fireEvent.click(screen.getByText('Доход'));
     fireEvent.click(screen.getByTestId('icon-test-icon.png'));

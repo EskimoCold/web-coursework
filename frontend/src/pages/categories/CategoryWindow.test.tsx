@@ -4,7 +4,6 @@ import { CategoryWindow } from './CategoryWindow';
 import { Category } from '../../contexts/CategoriesContext';
 import { CategoryForm } from './CategoryForm';
 
-// Mock dependencies
 vi.mock('./CategoryForm', () => ({
   CategoryForm: ({ label, modify, submit, placeholder }: any) => (
     <div data-testid="category-form">
@@ -17,7 +16,6 @@ vi.mock('./CategoryForm', () => ({
   ),
 }));
 
-// Mock CSS import
 vi.mock('./categories.css', () => ({}));
 
 const mockCategory: Category = {
@@ -63,7 +61,10 @@ describe('CategoryWindow', () => {
   it('should call setOpen when background is clicked', () => {
     renderComponent();
 
-    const background = screen.getByTestId('category-form').closest('.cat-window')?.querySelector('.cat-window-bg');
+    const background = screen
+      .getByTestId('category-form')
+      .closest('.cat-window')
+      ?.querySelector('.cat-window-bg');
     fireEvent.click(background!);
 
     expect(mockSetOpen).toHaveBeenCalledWith(false);
@@ -88,8 +89,6 @@ describe('CategoryWindow', () => {
   it('should pass setOpen function to CategoryForm', () => {
     renderComponent();
 
-    // The setOpen function should be passed to CategoryForm through placeholder prop
-    // We verify this by checking that the form renders with the correct modify mode
     expect(screen.getByTestId('form-modify')).toHaveTextContent('true');
   });
 
@@ -106,8 +105,11 @@ describe('CategoryWindow', () => {
   it('should handle multiple background clicks', () => {
     renderComponent();
 
-    const background = screen.getByTestId('category-form').closest('.cat-window')?.querySelector('.cat-window-bg');
-    
+    const background = screen
+      .getByTestId('category-form')
+      .closest('.cat-window')
+      ?.querySelector('.cat-window-bg');
+
     fireEvent.click(background!);
     fireEvent.click(background!);
     fireEvent.click(background!);
@@ -120,7 +122,10 @@ describe('CategoryWindow', () => {
     const differentSetOpen = vi.fn();
     renderComponent({ setOpen: differentSetOpen });
 
-    const background = screen.getByTestId('category-form').closest('.cat-window')?.querySelector('.cat-window-bg');
+    const background = screen
+      .getByTestId('category-form')
+      .closest('.cat-window')
+      ?.querySelector('.cat-window-bg');
     fireEvent.click(background!);
 
     expect(differentSetOpen).toHaveBeenCalledWith(false);
