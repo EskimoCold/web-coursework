@@ -112,7 +112,7 @@ describe('CategoryForm', () => {
       ok: true,
       json: async () => ({
         category: {
-          id: 2,
+          id: '',
           name: 'New Category',
           description: 'New Description',
           icon: 'sample.png',
@@ -138,6 +138,7 @@ describe('CategoryForm', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          id: '',
           name: 'New Category',
           description: 'New Description',
           icon: 'sample.png',
