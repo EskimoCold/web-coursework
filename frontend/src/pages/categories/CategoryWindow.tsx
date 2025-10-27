@@ -1,6 +1,6 @@
-import { MouseEventHandler } from 'react';
 import { Category } from '../../contexts/CategoriesContext';
 import './categories.css';
+
 import { CategoryForm } from './CategoryForm';
 
 type Props = {

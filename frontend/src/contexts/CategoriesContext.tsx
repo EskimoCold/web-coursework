@@ -26,7 +26,7 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
         const data: Category[] = await response.json();
         setCategories(data);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
 

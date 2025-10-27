@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Icon } from '../../components/Icon';
 import './categories.css';
+
+import { Icon } from '../../components/Icon';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
 
 type Props = {
@@ -30,13 +31,14 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
     e.preventDefault();
 
     try {
-      const body: any = {
+      const body = {
+        id: '',
         name: name.trim(),
         description: description.trim(),
         icon: icon,
         type: type ? 1 : 0,
       };
-      if (modify && placeholder) body.id = placeholder.category.id;
+      if (modify && placeholder) body.id = placeholder.category.id.toString();
 
       const response = await fetch('/api/cat/add', {
         method: 'POST',
