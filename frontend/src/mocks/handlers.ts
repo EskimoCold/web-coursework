@@ -1,5 +1,25 @@
 import { http, HttpResponse } from 'msw';
 
+interface Category {
+  id: number | string;
+  name: string;
+  description?: string;
+  icon: string;
+  type: number;
+}
+
+interface AddCategoryRequest {
+  name: string;
+  description?: string;
+  icon: string;
+  type: number;
+  id?: number | string;
+}
+
+interface DeleteCategoryRequest {
+  id: number | string;
+}
+
 export const handlers = [
   http.get('/api/todos', () => {
     return HttpResponse.json([
@@ -19,14 +39,15 @@ export const handlers = [
     );
   }),
   http.post('/api/cat/add', async ({ request }) => {
-    const { name, description, icon, type, id } = await request.json();
+    const data = (await request.json()) as AddCategoryRequest;
+    const { name, description, icon, type, id } = data;
 
     if (!name || !icon) {
       return HttpResponse.json({ error: 'Все поля обязательны' }, { status: 400 });
     }
 
-    const newCategory = {
-      id: id.length ? id : Date.now(),
+    const newCategory: Category = {
+      id: id && id.toString().length > 0 ? id : Date.now(),
       name,
       description,
       icon,
@@ -39,7 +60,8 @@ export const handlers = [
     );
   }),
   http.delete('/api/cat/delete', async ({ request }) => {
-    const { id } = await request.json();
+    const data = (await request.json()) as DeleteCategoryRequest;
+    const { id } = data;
 
     if (id === null || id === undefined) {
       return HttpResponse.json({ error: 'Неверный ID' }, { status: 400 });
