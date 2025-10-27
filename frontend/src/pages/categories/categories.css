@@ -1,5 +1,5 @@
 .cat-main {
-  --cat-green: #50e3c299;
+    --cat-green: #50e3c299;
   --cat-red: #ff6b6b99;
   --cat-dark-grey: #838383;
   --cat-light-grey: #f3f6f9;
@@ -8,6 +8,10 @@
   --cat-red-text: #e04c4c;
   --cat-grey: #dee2e6;
   --cat-blue: #2b7cff;
+  display: grid;
+  grid-template-columns: 820fr 700fr;
+  gap: 50px;
+  padding: 40px 30px;
 }
 
 .cat-card-title {
@@ -44,13 +48,6 @@
   margin-left: 10px;
 }
 
-.cat-main {
-  display: grid;
-  grid-template-columns: 820fr 700fr;
-  gap: 50px;
-  padding: 40px 30px;
-}
-
 .cat-list-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -59,15 +56,6 @@
   max-height: 600px;
   overflow: scroll;
   scrollbar-width: none;
-}
-
-.cat-list-selectors {
-  input {
-    width: 600px;
-    height: 30px;
-    margin: 15px;
-    padding-left: 10px;
-  }
 }
 
 input {
@@ -80,6 +68,16 @@ input:focus {
   outline: none;
   border: 2px solid var(--cat-dark-grey);
 }
+
+.cat-list-selectors {
+  input {
+    width: 600px;
+    height: 30px;
+    margin: 15px;
+    padding-left: 10px;
+  }
+}
+
 
 .cat-card {
   height: 120px;
@@ -105,6 +103,36 @@ input:focus {
 .red {
   color: var(--cat-red-text);
   background-color: var(--cat-red);
+}
+
+.cat-form {
+  border: 1px solid var(--stroke);
+  border-radius: 17px;
+  background: var(--cat-light-grey);
+  padding: 0 30px;
+  height: fit-content;
+
+  input {
+    background: #fff;
+    width: 50%;
+    height: 30px;
+    padding-left: 5px;
+  }
+
+  textarea {
+    border-radius: 10px;
+    border: 1px solid var(--stroke);
+    background: #fff;
+    resize: none;
+    width: 100%;
+    height: 100px;
+    padding: 5px;
+  }
+
+  textarea:focus {
+    outline: none;
+    border: 2px solid var(--cat-dark-grey);
+  }
 }
 
 .cat-window {
@@ -157,35 +185,6 @@ input:focus {
   border-radius: 12px;
 }
 
-.cat-form {
-  border: 1px solid var(--stroke);
-  border-radius: 17px;
-  background: var(--cat-light-grey);
-  padding: 0 30px;
-  height: fit-content;
-
-  input {
-    background: #fff;
-    width: 50%;
-    height: 30px;
-    padding-left: 5px;
-  }
-
-  textarea {
-    border-radius: 10px;
-    border: 1px solid var(--stroke);
-    background: #fff;
-    resize: none;
-    width: 100%;
-    height: 100px;
-    padding: 5px;
-  }
-
-  textarea:focus {
-    outline: none;
-    border: 2px solid var(--cat-dark-grey);
-  }
-}
 
 .cat-icon-grid {
   display: grid;
