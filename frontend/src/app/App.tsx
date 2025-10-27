@@ -1,21 +1,33 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import { Layout } from '../components/Layout';
-import { ProtectedRoute } from '../components/ProtectedRoute';
-import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
+import { CategoriesPage } from '../pages/categories/CategoriesPage';
+import { CategoryProvider } from '../contexts/CategoriesContext';
+import { Layout } from '../components/Layout';
 import { Login } from '../pages/Login';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 import { Register } from '../pages/Register';
+import { SettingsPage } from '../components/SettingsPage';
+import { Sidebar } from '../components/Sidebar';
 
 function MainApp() {
   const [active, setActive] = useState('Категории');
+
+  const renderContent = () => {
+    if (active === 'Настройки') {
+      return <SettingsPage />;
+    } else if (active === 'Категории') {
+      return <CategoriesPage />;
+    }
+
+    return <div aria-label="content-placeholder" className="content-placeholder" />;
+  };
+
   return (
     <div className="app-root">
       <Sidebar active={active} onSelect={setActive} />
-      <Layout title={active}>
-        <div aria-label="content-placeholder" className="content-placeholder" />
-      </Layout>
+      <Layout title={active}>{renderContent()}</Layout>
     </div>
   );
 }
@@ -24,19 +36,21 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <MainApp />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <CategoryProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <MainApp />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </CategoryProvider>
       </AuthProvider>
     </BrowserRouter>
   );
