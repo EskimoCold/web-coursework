@@ -1,5 +1,5 @@
 .cat-main {
-    --cat-green: #50e3c299;
+  --cat-green: #50e3c299;
   --cat-red: #ff6b6b99;
   --cat-dark-grey: #838383;
   --cat-light-grey: #f3f6f9;
@@ -77,7 +77,6 @@ input:focus {
     padding-left: 10px;
   }
 }
-
 
 .cat-card {
   height: 120px;
@@ -184,7 +183,6 @@ input:focus {
   padding: 5px;
   border-radius: 12px;
 }
-
 
 .cat-icon-grid {
   display: grid;
