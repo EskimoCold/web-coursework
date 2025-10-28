@@ -1,0 +1,32 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH (git pull + docker compose up)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            cd projects/web-coursework/
+
+            git fetch --all --prune
+            git reset --hard origin/main
+
+            docker compose pull || true
+            docker compose up -d --build
+            docker image prune -f || true
+
+            echo "Deployment finished"
