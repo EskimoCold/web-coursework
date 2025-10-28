@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   db:
@@ -29,8 +29,12 @@ services:
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - SECRET_KEY=${SECRET_KEY}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - SENTRY_ENV=${SENTRY_ENV:-development}
+      - RELEASE=${RELEASE:-local}
+      - SENTRY_TRACES_SAMPLE_RATE=${SENTRY_TRACES_SAMPLE_RATE:-0.05}
     volumes:
-      - ./backend:/app
+      - ./backend:/app:Z
     depends_on:
       db:
         condition: service_healthy
@@ -42,7 +46,7 @@ services:
     restart: unless-stopped
     working_dir: /app
     volumes:
-      - ./frontend:/app
+      - ./frontend:/app:Z
       - /app/node_modules
     ports:
       - 5173:5173
