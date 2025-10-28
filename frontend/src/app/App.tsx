@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
+import { HomePage } from '../components/HomePage'; // Добавляем импорт
 import { Layout } from '../components/Layout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { SettingsPage } from '../components/SettingsPage';
@@ -12,16 +13,19 @@ import { Login } from '../pages/Login';
 import { Register } from '../pages/Register';
 
 function MainApp() {
-  const [active, setActive] = useState('Категории');
+  const [active, setActive] = useState('Главная'); // Меняем начальное состояние на "Главная"
 
   const renderContent = () => {
-    if (active === 'Настройки') {
-      return <SettingsPage />;
-    } else if (active === 'Категории') {
-      return <CategoriesPage />;
+    switch (active) {
+      case 'Главная':
+        return <HomePage />;
+      case 'Настройки':
+        return <SettingsPage />;
+      case 'Категории':
+        return <CategoriesPage />;
+      default:
+        return <div aria-label="content-placeholder" className="content-placeholder" />;
     }
-
-    return <div aria-label="content-placeholder" className="content-placeholder" />;
   };
 
   return (
