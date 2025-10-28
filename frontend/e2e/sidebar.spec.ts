@@ -43,7 +43,8 @@ test.describe('Left navigation', () => {
     await expect(page.getByLabel('sidebar')).toBeVisible();
     await expect(page.getByRole('banner')).toBeVisible();
 
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Категории');
+    await expect(page.locator('h1.layout-title')).toHaveText('Категории');
+    await expect(page.getByRole('heading', { name: 'Категории' })).toHaveText('Категории');
 
     const categories = page.getByRole('button', { name: 'Категории' });
     await expect(categories).toHaveAttribute('aria-current', 'page');
