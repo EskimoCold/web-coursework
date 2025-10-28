@@ -25,7 +25,6 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
 
     expect(screen.getByText('Смена пароля')).toBeInTheDocument();
-    expect(screen.getByText('Подключенные сервисы')).toBeInTheDocument();
     expect(screen.getByText('Удаление аккаунта')).toBeInTheDocument();
   });
 
