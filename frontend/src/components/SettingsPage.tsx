@@ -2,8 +2,6 @@ import { useState } from 'react';
 import './settings.css';
 
 function SecuritySection() {
-  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
-
   return (
     <div className="settings-section">
       <h2 className="settings-section-title">Безопасность</h2>
@@ -31,8 +29,6 @@ function SecuritySection() {
 }
 
 function DataManagementSection() {
-  const [autoBackup, setAutoBackup] = useState(true);
-
   return (
     <div className="settings-section">
       <h2 className="settings-section-title">Управление данными</h2>
@@ -106,7 +102,6 @@ function AppearanceSection() {
   );
 }
 
-// Секция "О приложении"
 function AboutSection() {
   return (
     <div className="settings-section">
