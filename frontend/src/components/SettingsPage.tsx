@@ -1,8 +1,6 @@
-// src/components/SettingsPage.tsx
 import { useState } from 'react';
 import './settings.css';
 
-// Секция безопасности
 function SecuritySection() {
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
 
@@ -17,30 +15,7 @@ function SecuritySection() {
             <h3 className="settings-item-title">Смена пароля</h3>
             <p className="settings-item-description">Обновите ваш пароль для защиты аккаунта</p>
           </div>
-          <button className="settings-button primary">Сменить пароль</button>
-        </div>
-
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Двухфакторная аутентификация</h3>
-            <p className="settings-item-description">Дополнительная защита вашего аккаунта</p>
-          </div>
-          <label className="settings-toggle">
-            <input
-              type="checkbox"
-              checked={is2FAEnabled}
-              onChange={(e) => setIs2FAEnabled(e.target.checked)}
-            />
-            <span className="settings-toggle-slider"></span>
-          </label>
-        </div>
-
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Подключенные сервисы</h3>
-            <p className="settings-item-description">Google, GitHub, Yandex</p>
-          </div>
-          <button className="settings-button secondary">Управлять</button>
+          {/*<button className="settings-button primary">Сменить пароль</button>*/}
         </div>
 
         <div className="settings-item danger">
@@ -55,7 +30,6 @@ function SecuritySection() {
   );
 }
 
-// Секция управления данными
 function DataManagementSection() {
   const [autoBackup, setAutoBackup] = useState(true);
 
@@ -64,56 +38,35 @@ function DataManagementSection() {
       <h2 className="settings-section-title">Управление данными</h2>
       <p className="settings-section-description">Экспорт, импорт и резервное копирование</p>
 
-      <div className="settings-items">
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Автоматическое резервирование</h3>
-            <p className="settings-item-description">Создание резервных копий данных</p>
-          </div>
-          <label className="settings-toggle">
-            <input
-              type="checkbox"
-              checked={autoBackup}
-              onChange={(e) => setAutoBackup(e.target.checked)}
-            />
-            <span className="settings-toggle-slider"></span>
-          </label>
+      <div className="settings-item">
+        <div className="settings-item-content">
+          <h3 className="settings-item-title">Экспорт данных</h3>
+          <p className="settings-item-description">Выгрузить все данные в файл</p>
         </div>
+        <div className="settings-button-group">
+          <button className="settings-button secondary">JSON</button>
+        </div>
+      </div>
 
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Экспорт данных</h3>
-            <p className="settings-item-description">Выгрузить все данные в файл</p>
-          </div>
-          <div className="settings-button-group">
-            <button className="settings-button secondary">JSON</button>
-            <button className="settings-button secondary">CSV</button>
-            <button className="settings-button secondary">PDF</button>
-          </div>
+      <div className="settings-item">
+        <div className="settings-item-content">
+          <h3 className="settings-item-title">Импорт данных</h3>
+          <p className="settings-item-description">Загрузить данные из файла</p>
         </div>
-
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Импорт данных</h3>
-            <p className="settings-item-description">Загрузить данные из файла</p>
-          </div>
-          <button className="settings-button primary">Выбрать файл</button>
-        </div>
+        <button className="settings-button primary">Выбрать файл</button>
       </div>
     </div>
   );
 }
 
-// Секция внешнего вида
 function AppearanceSection() {
   const [theme, setTheme] = useState('light');
   const [currency, setCurrency] = useState('RUB');
-  const [language, setLanguage] = useState('ru');
 
   return (
     <div className="settings-section">
       <h2 className="settings-section-title">Внешний вид</h2>
-      <p className="settings-section-description">Тема, язык и валюта</p>
+      <p className="settings-section-description">Тема и валюта</p>
 
       <div className="settings-items">
         <div className="settings-item">
@@ -146,22 +99,6 @@ function AppearanceSection() {
             <option value="USD">Доллары (USD)</option>
             <option value="EUR">Евро (EUR)</option>
             <option value="CNY">Юани (CNY)</option>
-          </select>
-        </div>
-
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Язык интерфейса</h3>
-            <p className="settings-item-description">Язык меню и элементов управления</p>
-          </div>
-          <select
-            className="settings-select"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-          >
-            <option value="ru">Русский</option>
-            <option value="en">English</option>
-            <option value="zh">中文</option>
           </select>
         </div>
       </div>
