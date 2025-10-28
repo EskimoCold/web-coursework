@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import { Layout } from '../components/Layout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { SettingsPage } from '../components/SettingsPage';
 import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
@@ -15,7 +16,7 @@ function MainApp() {
 
   const renderContent = () => {
     if (active === 'Настройки') {
-      // return <SettingsPage />;
+      return <SettingsPage />;
     } else if (active === 'Категории') {
       return <CategoriesPage />;
     }
