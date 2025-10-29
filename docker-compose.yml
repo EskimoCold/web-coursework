@@ -55,6 +55,9 @@ services:
         condition: service_started
     environment:
       - NODE_ENV=development
+      - VITE_SENTRY_DSN=${VITE_SENTRY_DSN}
+      - VITE_ENV=${VITE_ENV}
+      - VITE_RELEASE=local
 
 volumes:
   postgres_data:
