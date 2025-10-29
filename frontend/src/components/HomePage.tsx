@@ -1,5 +1,6 @@
 // src/components/HomePage.tsx
 import { useState, useEffect, useCallback } from 'react';
+
 import { transactionsApi, Transaction, Category, TransactionCreate } from '../api/transactions';
 import './home.css';
 
@@ -81,23 +82,19 @@ export function HomePage() {
 
       if (useBackend) {
         try {
-          console.log('Loading data from backend...');
           const [transactionsData, categoriesData] = await Promise.all([
             transactionsApi.getTransactions(),
             transactionsApi.getCategories(),
           ]);
-          console.log('Loaded categories from backend:', categoriesData);
           applyData(transactionsData, categoriesData, true);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-          console.error('Backend error:', error);
           setBackendError(`Бэкенд недоступен: ${errorMessage}`);
           setUseBackend(false);
           // Используем мок-данные с пустыми категориями для формы
           applyData(MOCK_TRANSACTIONS, [], false);
         }
       } else {
-        console.log('Using mock data');
         // В мок-режиме тоже используем пустые категории
         applyData(MOCK_TRANSACTIONS, [], false);
       }
@@ -157,8 +154,6 @@ export function HomePage() {
         );
         if (selectedCategory) {
           categoryId = selectedCategory.id;
-        } else {
-          console.warn('Selected category not found in backend categories, using null');
         }
       }
 
@@ -169,8 +164,6 @@ export function HomePage() {
         category_id: categoryId,
         transaction_date: formData.transaction_date,
       };
-
-      console.log('Submitting transaction:', submitData);
 
       if (useBackend) {
         await transactionsApi.createTransaction(submitData);
@@ -188,7 +181,6 @@ export function HomePage() {
       // Перезагружаем данные
       await loadData();
     } catch (error) {
-      console.error('Ошибка создания транзакции:', error);
       if (error instanceof Error) {
         if (error.message.includes('Category not found')) {
           alert(
