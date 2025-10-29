@@ -420,8 +420,7 @@
 }
 
 .form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.form-group select:focus {
   outline: none;
   border-color: #4f46e5;
 }
@@ -430,6 +429,11 @@
   resize: vertical;
   min-height: 80px;
   font-family: inherit;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4f46e5;
 }
 
 .form-actions {
@@ -469,15 +473,15 @@
   transition: all 0.3s ease;
 }
 
-.submit-button:hover:not(:disabled) {
-  background: #4338ca;
-  transform: translateY(-1px);
-}
-
 .submit-button:disabled {
   background: #9ca3af;
   cursor: not-allowed;
   transform: none;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #4338ca;
+  transform: translateY(-1px);
 }
 
 .backend-error {
