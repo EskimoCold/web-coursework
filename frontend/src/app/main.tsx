@@ -1,3 +1,6 @@
+import '../sentry.client';
+
+import * as Sentry from '@sentry/react';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -13,7 +16,9 @@ async function enableMocks() {
 enableMocks().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <App />
+      <Sentry.ErrorBoundary fallback={<div>Something went wrong.</div>}>
+        <App />
+      </Sentry.ErrorBoundary>
     </React.StrictMode>,
   );
 });
