@@ -10,7 +10,6 @@ const getAuthToken = (): string | null => {
 export const categoriesApi = {
   async getCategories() {
     const token = getAuthToken();
-
     if (!token) throw new Error('Authorization failed');
 
     const response = await fetch(`${API_URL}/categories`, {
@@ -21,7 +20,7 @@ export const categoriesApi = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({}));
       throw new Error(error.detail || 'Cannot get categories');
     }
 
@@ -30,7 +29,6 @@ export const categoriesApi = {
 
   async addCategory(name: string, description: string) {
     const token = getAuthToken();
-
     if (!token) throw new Error('Authorization failed');
 
     const response = await fetch(`${API_URL}/categories`, {
@@ -39,14 +37,11 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        name: name,
-        description: description,
-      }),
+      body: JSON.stringify({ name, description }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({}));
       throw new Error(error.detail || 'Cannot add category');
     }
 
@@ -54,6 +49,9 @@ export const categoriesApi = {
   },
 
   async updateCategory(category: Category) {
+    const token = getAuthToken();
+    if (!token) throw new Error('Authorization failed');
+
     const response = await fetch(`${API_URL}/categories/${category.id}`, {
       method: 'PUT',
       headers: {
@@ -67,7 +65,7 @@ export const categoriesApi = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({}));
       throw new Error(error.detail || `Cannot update category ${category.id}`);
     }
 
@@ -75,6 +73,9 @@ export const categoriesApi = {
   },
 
   async deleteCategory(id: number) {
+    const token = getAuthToken();
+    if (!token) throw new Error('Authorization failed');
+
     const response = await fetch(`${API_URL}/categories/${id}`, {
       method: 'DELETE',
       headers: {
@@ -84,10 +85,15 @@ export const categoriesApi = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({}));
       throw new Error(error.detail || `Cannot delete category ${id}`);
     }
 
-    return response.json();
+    // Some backends return 204 No Content for DELETE:
+    try {
+      return await response.json();
+    } catch {
+      return { ok: true };
+    }
   },
 };
