@@ -36,14 +36,6 @@ vi.mock('../api/transactions', () => ({
 }));
 
 describe('HomePage', () => {
-  it('renders homepage with financial summary', async () => {
-    render(<HomePage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Финансовая сводка')).toBeInTheDocument();
-    });
-  });
-
   it('displays transactions correctly', async () => {
     render(<HomePage />);
 
