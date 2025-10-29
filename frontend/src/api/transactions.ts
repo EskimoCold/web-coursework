@@ -1,5 +1,5 @@
 // src/api/transactions.ts
-import { api } from './client';
+import { api, BASE_URL } from './client';
 
 export interface Transaction {
   id: number;
@@ -20,7 +20,50 @@ export interface Category {
   description?: string;
 }
 
+export interface TransactionCreate {
+  amount: number;
+  description: string;
+  transaction_type: 'income' | 'expense';
+  category_id?: number | null;
+  transaction_date: string;
+}
+
+// Функция для получения токена
+const getAuthToken = (): string | null => {
+  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+  return token;
+};
+
 export const transactionsApi = {
-  getTransactions: () => api.get<Transaction[]>('/v1/transactions'),
-  getCategories: () => api.get<Category[]>('/v1/categories'),
+  getTransactions: () => api.get<Transaction[]>('/transactions'),
+  getCategories: () => api.get<Category[]>('/categories'),
+  createTransaction: (data: TransactionCreate) => {
+    const token = getAuthToken();
+
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    return fetch(BASE_URL + '/transactions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }).then((response) => {
+      if (!response.ok) {
+        // Попробуем получить детальную ошибку от сервера
+        return response
+          .json()
+          .then((errorData) => {
+            throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+          })
+          .catch(() => {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          });
+      }
+      return response.json();
+    });
+  },
 };
