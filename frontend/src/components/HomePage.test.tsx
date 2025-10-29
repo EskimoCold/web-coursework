@@ -1,4 +1,3 @@
-// src/components/HomePage.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
@@ -37,11 +36,11 @@ vi.mock('../api/transactions', () => ({
 }));
 
 describe('HomePage', () => {
-  it('renders homepage with title', async () => {
+  it('renders homepage with financial summary', async () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText('FinTrack')).toBeInTheDocument();
+      expect(screen.getByText('Финансовая сводка')).toBeInTheDocument();
     });
   });
 
