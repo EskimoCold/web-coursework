@@ -14,6 +14,7 @@ export const CategoriesPage: React.FC = () => {
   const [isOpen, setOpen] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
+  /*
   const [filter, setFilter] = useState('all');
   const filters = useMemo(
     () => [
@@ -23,6 +24,7 @@ export const CategoriesPage: React.FC = () => {
     ],
     [],
   );
+  */
 
   const openCard = (cat: Category) => {
     setCardWindow(cat);
@@ -32,13 +34,13 @@ export const CategoriesPage: React.FC = () => {
   const filteredCategories = useMemo(
     () =>
       categories
-        .filter((cat) => {
+        /*.filter((cat) => {
           if (filter === 'all') return true;
           else if (filter === 'income') return !!cat.type;
           else return !cat.type;
-        })
+        })*/
         .filter((cat) => cat.name.toLowerCase().includes(searchQuery.toLowerCase())),
-    [filter, categories, searchQuery],
+    [/*filter, */ categories, searchQuery],
   );
 
   const categoryCards = useMemo(
@@ -60,6 +62,7 @@ export const CategoriesPage: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          {/*
           <div className="cat-filters cat-text">
             {filters.map((f) => (
               <button
@@ -71,6 +74,7 @@ export const CategoriesPage: React.FC = () => {
               </button>
             ))}
           </div>
+          */}
         </div>
         <div className="cat-list-grid">{categoryCards}</div>
       </div>
