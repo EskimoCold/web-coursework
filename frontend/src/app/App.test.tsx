@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import * as AuthContext from '../contexts/AuthContext';
 
@@ -7,8 +7,18 @@ import App from './App';
 
 vi.mock('../contexts/AuthContext');
 
+// Mock для предотвращения ошибок API
+vi.mock('../api/client', () => ({
+  client: {
+    get: vi.fn(() => Promise.resolve({ data: [] })),
+    post: vi.fn(() => Promise.resolve({ data: {} })),
+    put: vi.fn(() => Promise.resolve({ data: {} })),
+    delete: vi.fn(() => Promise.resolve({ data: {} })),
+  },
+}));
+
 describe('App', () => {
-  it('should render without crashing', () => {
+  beforeEach(() => {
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -21,7 +31,9 @@ describe('App', () => {
     vi.mocked(AuthContext.AuthProvider).mockImplementation(
       ({ children }: { children: React.ReactNode }) => <>{children}</>,
     );
+  });
 
+  it('should render without crashing', () => {
     const { container } = render(<App />);
     expect(container).toBeInTheDocument();
   });

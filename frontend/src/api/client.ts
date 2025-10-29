@@ -1,5 +1,5 @@
 // src/api/client.ts
-const BASE_URL = '/api';
+export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const url = `${BASE_URL}${path}`;
