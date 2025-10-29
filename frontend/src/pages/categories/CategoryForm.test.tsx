@@ -1,7 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { categoriesApi } from '../../api/categories';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
+
 import { CategoryForm } from './CategoryForm';
 
 // --- Mocks ---
@@ -26,8 +28,6 @@ vi.mock('../../api/categories', () => ({
     deleteCategory: vi.fn(),
   },
 }));
-
-import { categoriesApi } from '../../api/categories';
 
 // --- Shared test helpers ---
 const mockSetCategories = vi.fn();
