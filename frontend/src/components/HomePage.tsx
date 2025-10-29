@@ -89,11 +89,9 @@ export function HomePage() {
           const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
           setBackendError(`Бэкенд недоступен: ${errorMessage}`);
           setUseBackend(false);
-          // Используем мок-данные с пустыми категориями для формы
           applyData(MOCK_TRANSACTIONS, [], false);
         }
       } else {
-        // В мок-режиме тоже используем пустые категории
         applyData(MOCK_TRANSACTIONS, [], false);
       }
     } catch (err: unknown) {
@@ -295,7 +293,8 @@ export function HomePage() {
               <tr key={transaction.id}>
                 <td className="category-cell">
                   <span className="category-badge">
-                    {transaction.category?.name || 'Без категории'}
+                    {categories?.find((c) => Number(c.id) === Number(transaction.category_id))
+                      ?.name ?? 'Без категории'}
                   </span>
                 </td>
                 <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
