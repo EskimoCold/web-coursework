@@ -169,10 +169,11 @@ export function HomePage() {
         await transactionsApi.createTransaction(submitData);
       } else {
         // Для мок-данных просто добавляем новую транзакцию в список
+        const { category_id, ...transactionData } = submitData;
         const newTransaction: Transaction = {
           id: Math.max(0, ...transactions.map((t) => t.id)) + 1,
-          ...submitData,
-          category: categories.find((c) => c.id === submitData.category_id),
+          ...transactionData,
+          category: categories.find((c) => c.id === category_id),
         };
         setTransactions((prev) => [newTransaction, ...prev]);
       }

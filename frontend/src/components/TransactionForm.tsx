@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { transactionsApi, categoriesApi, TransactionCreate, Category } from '../api/transactions';
+import { transactionsApi, TransactionCreate, Category } from '../api/transactions';
 import './transaction-form.css';
 
 export function TransactionForm() {
@@ -23,7 +23,7 @@ export function TransactionForm() {
 
   const loadCategories = async () => {
     try {
-      const categoriesData = await categoriesApi.getCategories();
+      const categoriesData = await transactionsApi.getCategories();
       setCategories(categoriesData);
     } catch (error) {
       console.error('Ошибка загрузки категорий:', error);
