@@ -15,13 +15,32 @@ import {
 } from 'recharts';
 
 import './analytics.css';
+import { categoriesApi } from '../../api/categories';
 import { Transaction, transactionsApi } from '../../api/transactions';
+import { Category } from '../../contexts/CategoriesContext';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 
 export const AnalyticsPage: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [filter, setFilter] = useState<string>('all');
+
+  useEffect(() => {
+    (async () => {
+      const [tx, cats] = await Promise.all([
+        transactionsApi.getTransactions(),
+        categoriesApi.getCategories(), // +
+      ]);
+      setTransactions(tx);
+      setCategories(cats); // +
+    })();
+  }, []);
+
+  const categoryNameById = useMemo(
+    () => Object.fromEntries((categories ?? []).map((c) => [String(c.id), c.name])),
+    [categories],
+  );
 
   const filters = useMemo(
     () => [
@@ -134,48 +153,28 @@ export const AnalyticsPage: React.FC = () => {
   }, [filteredTransactions]);
 
   const incomeByCategory = useMemo(() => {
-    const imp = new Map<string, number>([]);
-
+    const imp = new Map<string, number>();
     filteredTransactions
       .filter((t) => t.transaction_type === 'income')
       .forEach((t) => {
-        const name = t.category?.name || 'unresolved';
+        const name = categoryNameById[String(t.category_id)] ?? t.category?.name ?? 'Без категории';
         imp.set(name, (imp.get(name) || 0) + t.amount);
       });
 
-    const res: { name: string; value: number }[] = [];
-
-    imp.forEach((value, name) =>
-      res.push({
-        name: name,
-        value: value,
-      }),
-    );
-
-    return res;
-  }, [filteredTransactions]);
+    return Array.from(imp, ([name, value]) => ({ name, value }));
+  }, [filteredTransactions, categoryNameById]);
 
   const expenseByCategory = useMemo(() => {
-    const imp = new Map<string, number>([]);
-
+    const imp = new Map<string, number>();
     filteredTransactions
       .filter((t) => t.transaction_type === 'expense')
       .forEach((t) => {
-        const name = t.category?.name || 'unresolved';
+        const name = categoryNameById[String(t.category_id)] ?? t.category?.name ?? 'Без категории';
         imp.set(name, (imp.get(name) || 0) + t.amount);
       });
 
-    const res: { name: string; value: number }[] = [];
-
-    imp.forEach((value, name) =>
-      res.push({
-        name: name,
-        value: value,
-      }),
-    );
-
-    return res;
-  }, [filteredTransactions]);
+    return Array.from(imp, ([name, value]) => ({ name, value }));
+  }, [filteredTransactions, categoryNameById]);
 
   return (
     <div className="anal-main">
@@ -256,11 +255,10 @@ export const AnalyticsPage: React.FC = () => {
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value} ₽`}
                 >
-                  {incomeByCategory.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  {expenseByCategory.map((_, index) => (
+                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                {/* <Tooltip formatter={(value) => [`${value} ₽`, 'Сумма']} /> */}
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -272,7 +270,6 @@ export const AnalyticsPage: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                {/* <Tooltip /> */}
                 <Bar dataKey="value" fill="#8884d8" />
               </BarChart>
             </ResponsiveContainer>
