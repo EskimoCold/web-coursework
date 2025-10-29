@@ -26,8 +26,6 @@ const mockCategory: Category = {
   id: 1,
   name: 'Test Category',
   description: 'Test Description',
-  // icon: 'test-icon.png',
-  // type: 1,
 };
 
 const defaultProps = {
@@ -36,7 +34,23 @@ const defaultProps = {
   modify: false,
 };
 
-const renderComponent = (props = {}) => {
+const mockLocalStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+});
+
+const renderComponent = (props = {}, token = 'mock-token') => {
+  mockLocalStorage.getItem.mockImplementation((key) => {
+    if (key === 'access_token' || key === 'token') return token;
+    return null;
+  });
+
   (useCategories as vi.Mock).mockReturnValue({
     setCategories: mockSetCategories,
   });
@@ -48,6 +62,7 @@ describe('CategoryForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.fetch = vi.fn();
+    mockLocalStorage.getItem.mockClear();
   });
 
   it('should render form with all elements for new category', () => {
@@ -57,7 +72,6 @@ describe('CategoryForm', () => {
     expect(screen.getByText('Название категории')).toBeInTheDocument();
     expect(screen.getByText('Описание')).toBeInTheDocument();
     expect(screen.getByText('Выберите иконку')).toBeInTheDocument();
-    // expect(screen.getByText('Тип')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Удалить' })).not.toBeInTheDocument();
   });
@@ -73,7 +87,6 @@ describe('CategoryForm', () => {
 
     expect(screen.getByDisplayValue('Test Category')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test Description')).toBeInTheDocument();
-    // expect(screen.getByText('Доход')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Удалить' })).toBeInTheDocument();
   });
 
@@ -88,15 +101,6 @@ describe('CategoryForm', () => {
     expect(nameInput).toHaveValue('New Category');
     expect(descriptionTextarea).toHaveValue('New Description');
   });
-
-  // it('should toggle category type when type button is clicked', () => {
-  //   renderComponent();
-
-  //   const typeButton = screen.getByText('Доход');
-  //   fireEvent.click(typeButton);
-
-  //   expect(screen.getByText('Расход')).toBeInTheDocument();
-  // });
 
   it('should select icon when icon is clicked', () => {
     renderComponent();
@@ -136,7 +140,10 @@ describe('CategoryForm', () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/categories', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer mock-token',
+        },
         body: JSON.stringify({
           name: 'New Category',
           description: 'New Description',
@@ -170,7 +177,10 @@ describe('CategoryForm', () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/categories/1', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer mock-token',
+        },
         body: JSON.stringify({
           name: 'Test Category',
           description: 'Test Description',
@@ -222,7 +232,6 @@ describe('CategoryForm', () => {
     renderComponent();
 
     fireEvent.change(screen.queryAllByDisplayValue('')[0], { target: { value: 'New Category' } });
-    //fireEvent.click(screen.queryAllByTestId('icon-sample.png')[0]);
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 
     await waitFor(() => {
@@ -253,7 +262,10 @@ describe('CategoryForm', () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/categories/1', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer mock-token',
+        },
       });
     });
 

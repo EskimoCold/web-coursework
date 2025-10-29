@@ -2,9 +2,23 @@ import { Category } from '../contexts/CategoriesContext';
 
 const API_URL = import.meta.env.BACKEND_API || 'http://localhost:8000/api/v1';
 
+const getAuthToken = (): string | null => {
+  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+  return token;
+};
+
 export const categoriesApi = {
   async getCategories() {
-    const response = await fetch(`${API_URL}/categories`);
+    const token = getAuthToken();
+
+    if (!token) throw new Error('Authorization failed');
+
+    const response = await fetch(`${API_URL}/categories`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
       const error = await response.json();
@@ -15,9 +29,16 @@ export const categoriesApi = {
   },
 
   async addCategory(name: string, description: string) {
+    const token = getAuthToken();
+
+    if (!token) throw new Error('Authorization failed');
+
     const response = await fetch(`${API_URL}/categories`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         name: name,
         description: description,
@@ -33,9 +54,16 @@ export const categoriesApi = {
   },
 
   async updateCategory(category: Category) {
+    const token = getAuthToken();
+
+    if (!token) throw new Error('Authorization failed');
+
     const response = await fetch(`${API_URL}/categories/${category.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         name: category.name,
         description: category.description,
@@ -51,9 +79,16 @@ export const categoriesApi = {
   },
 
   async deleteCategory(id: number) {
+    const token = getAuthToken();
+
+    if (!token) throw new Error('Authorization failed');
+
     const response = await fetch(`${API_URL}/categories/${id}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!response.ok) {
