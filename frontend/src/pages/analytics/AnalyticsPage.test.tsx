@@ -1,17 +1,52 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, beforeAll, afterAll } from 'vitest';
 
 import { Transaction, transactionsApi } from '../../api/transactions';
-
 import { AnalyticsPage } from './AnalyticsPage';
 
+/** 🔧 NEW: silence console noise from React effects during tests (optional) */
+let errSpy: ReturnType<typeof vi.spyOn>;
+let warnSpy: ReturnType<typeof vi.spyOn>;
+beforeAll(() => {
+  errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+});
+afterAll(() => {
+  errSpy?.mockRestore();
+  warnSpy?.mockRestore();
+});
+
+/** 🔧 NEW: mock categories API so it never throws for missing token */
+vi.mock('../../api/categories', () => ({
+  categoriesApi: {
+    getCategories: vi.fn().mockResolvedValue([
+      { id: 1, name: 'Salary', type: 1, icon: 'salary', description: '' },
+      { id: 2, name: 'Food', type: 0, icon: 'food', description: '' },
+      { id: 3, name: 'Entertainment', type: 0, icon: 'entertainment', description: '' },
+      { id: 4, name: 'Freelance', type: 1, icon: 'freelance', description: '' },
+    ]),
+  },
+}));
+
+/** keep your transactions mock */
 vi.mock('../../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(),
   },
 }));
 
+/** (optional) if any helper reads a token, provide a fake one */
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    getItem: (k: string) => (k === 'access_token' || k === 'token' ? 'test-token' : null),
+    setItem: () => {},
+    removeItem: () => {},
+    clear: () => {},
+  },
+});
+
+/** keep your Recharts mock */
 vi.mock('recharts', () => ({
   AreaChart: ({ children, data }: { children: ReactNode; data: unknown }) => (
     <div data-testid="area-chart" data-data={JSON.stringify(data)}>
@@ -33,14 +68,14 @@ vi.mock('recharts', () => ({
       {children}
     </div>
   ),
-  Area: ({ dataKey }: { dataKey: string }) => <div data-testid={`area-${dataKey}`}></div>,
-  Bar: ({ dataKey }: { dataKey: string }) => <div data-testid={`bar-${dataKey}`}></div>,
-  Cell: ({ fill }: { fill: string }) => <div data-testid="cell" data-fill={fill}></div>,
-  XAxis: ({ dataKey }: { dataKey: string }) => <div data-testid={`xaxis-${dataKey}`}></div>,
-  YAxis: () => <div data-testid="yaxis"></div>,
-  CartesianGrid: () => <div data-testid="cartesian-grid"></div>,
+  Area: ({ dataKey }: { dataKey: string }) => <div data-testid={`area-${dataKey}`} />,
+  Bar: ({ dataKey }: { dataKey: string }) => <div data-testid={`bar-${dataKey}`} />,
+  Cell: ({ fill }: { fill: string }) => <div data-testid="cell" data-fill={fill} />,
+  XAxis: ({ dataKey }: { dataKey: string }) => <div data-testid={`xaxis-${dataKey}`} />,
+  YAxis: () => <div data-testid="yaxis" />,
+  CartesianGrid: () => <div data-testid="cartesian-grid" />,
   Tooltip: ({ formatter }: { formatter?: unknown }) => (
-    <div data-testid="tooltip" data-formatter={formatter ? 'true' : 'false'}></div>
+    <div data-testid="tooltip" data-formatter={formatter ? 'true' : 'false'} />
   ),
   ResponsiveContainer: ({
     children,
@@ -116,7 +151,6 @@ describe('AnalyticsPage', () => {
 
   it('should render all filter buttons', () => {
     renderComponent();
-
     expect(screen.getByText('Неделя')).toBeInTheDocument();
     expect(screen.getByText('Месяц')).toBeInTheDocument();
     expect(screen.getByText('Год')).toBeInTheDocument();
@@ -125,24 +159,20 @@ describe('AnalyticsPage', () => {
 
   it('should have "all" filter active by default', () => {
     renderComponent();
-
     const allTimeButton = screen.getByText('Все время');
     expect(allTimeButton).toHaveClass('anal-filter-active');
   });
 
   it('should change active filter when clicked', () => {
     renderComponent();
-
     const weekButton = screen.getByText('Неделя');
     fireEvent.click(weekButton);
-
     expect(weekButton).toHaveClass('anal-filter-active');
     expect(screen.getByText('Все время')).not.toHaveClass('anal-filter-active');
   });
 
   it('should display summary information', async () => {
     renderComponent();
-
     await waitFor(() => {
       expect(screen.getByText('Общий баланс')).toBeInTheDocument();
       expect(screen.getByText('Доходы')).toBeInTheDocument();
@@ -153,20 +183,17 @@ describe('AnalyticsPage', () => {
 
   it('should calculate correct balance', async () => {
     renderComponent();
-
     await waitFor(() => {
-      const totalBalance = 1000 + 1500 - 500 - 200; // incomes - expenses
+      const totalBalance = 1000 + 1500 - 500 - 200;
       expect(screen.getByText(`${totalBalance} ₽`)).toBeInTheDocument();
     });
   });
 
   it('should calculate correct incomes and expenses', async () => {
     renderComponent();
-
     await waitFor(() => {
       const totalIncomes = 1000 + 1500;
       const totalExpenses = 500 + 200;
-
       expect(screen.getByText(`${totalIncomes} ₽`)).toBeInTheDocument();
       expect(screen.getByText(`${totalExpenses} ₽`)).toBeInTheDocument();
     });
@@ -174,7 +201,6 @@ describe('AnalyticsPage', () => {
 
   it('should display correct number of transactions', async () => {
     renderComponent();
-
     await waitFor(() => {
       expect(screen.getByText(`${mockTransactions.length}`)).toBeInTheDocument();
     });
@@ -182,7 +208,6 @@ describe('AnalyticsPage', () => {
 
   it('should render all chart containers', async () => {
     renderComponent();
-
     await waitFor(() => {
       expect(screen.getByText('Динамика доходов и расходов')).toBeInTheDocument();
       expect(screen.getByText('Расходы по категориям')).toBeInTheDocument();
@@ -203,7 +228,6 @@ describe('AnalyticsPage', () => {
     ];
 
     renderComponent(recentTransaction);
-
     const weekButton = screen.getByText('Неделя');
     fireEvent.click(weekButton);
 
@@ -214,7 +238,6 @@ describe('AnalyticsPage', () => {
 
   it('should group transactions by date for area chart', async () => {
     renderComponent();
-
     await waitFor(() => {
       expect(screen.getByTestId('area-chart')).toBeInTheDocument();
     });
@@ -222,7 +245,6 @@ describe('AnalyticsPage', () => {
 
   it('should categorize incomes correctly', async () => {
     renderComponent();
-
     await waitFor(() => {
       expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
     });
@@ -230,7 +252,6 @@ describe('AnalyticsPage', () => {
 
   it('should categorize expenses correctly', async () => {
     renderComponent();
-
     await waitFor(() => {
       expect(screen.getByTestId('pie-chart')).toBeInTheDocument();
     });
@@ -238,7 +259,6 @@ describe('AnalyticsPage', () => {
 
   it('should apply correct CSS classes to values', async () => {
     renderComponent();
-
     await waitFor(() => {
       expect(screen.getByText('Общий баланс').nextElementSibling).toHaveClass('anal-value total');
       expect(screen.getByText('Доходы').nextElementSibling).toHaveClass('anal-value income');
