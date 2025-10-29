@@ -1,32 +1,34 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import { HomePage } from '../components/HomePage'; // Добавляем импорт
+import { HomePage } from '../components/HomePage';
 import { Layout } from '../components/Layout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { SettingsPage } from '../components/SettingsPage';
 import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
+import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { Login } from '../pages/Login';
 import { Register } from '../pages/Register';
 
 function MainApp() {
-  const [active, setActive] = useState('Главная'); // Меняем начальное состояние на "Главная"
+  const [active, setActive] = useState('Главная');
 
-  const renderContent = () => {
-    switch (active) {
-      case 'Главная':
-        return <HomePage />;
-      case 'Настройки':
-        return <SettingsPage />;
-      case 'Категории':
-        return <CategoriesPage />;
-      default:
-        return <div aria-label="content-placeholder" className="content-placeholder" />;
-    }
-  };
+  const pages = useMemo(
+    () =>
+      new Map<string, JSX.Element>([
+        ['Главная', <HomePage key={0} />],
+        ['Настройки', <SettingsPage key={0} />],
+        ['Категории', <CategoriesPage key={0} />],
+        ['Аналитика', <AnalyticsPage key={0} />],
+      ]),
+    [],
+  );
+
+  const renderContent = () =>
+    pages.get(active) || <div aria-label="content-placeholder" className="content-placeholder" />;
 
   return (
     <div className="app-root">
