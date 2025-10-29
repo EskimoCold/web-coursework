@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+import { categoriesApi } from '../api/categories';
+
 export type Category = {
   id: number;
   name: string;
-  type: number;
-  icon: string;
+  //  type: number;
+  //  icon: string;
   description: string;
 };
 
@@ -21,9 +23,7 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/cat/list');
-        if (!response.ok) throw new Error('Ошибка загрузки');
-        const data: Category[] = await response.json();
+        const data = await categoriesApi.getCategories();
         setCategories(data);
       } catch (err) {
         console.error(err);

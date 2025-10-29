@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import './categories.css';
 
+import { categoriesApi } from '../../api/categories';
 import { Icon } from '../../components/Icon';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
 
@@ -20,8 +21,9 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
   const [description, setDescription] = useState(
     placeholder ? placeholder.category.description : '',
   );
-  const [icon, setIcon] = useState<string>(placeholder ? placeholder.category.icon : '');
-  const [type, setType] = useState<boolean>(placeholder ? !!placeholder.category.type : true);
+  // const [icon, setIcon] = useState<string>(placeholder ? placeholder.category.icon : '');
+  // const [type, setType] = useState<boolean>(placeholder ? !!placeholder.category.type : true);
+  const [icon, setIcon] = useState<string>('sample.png');
   const isSubmittable = useMemo(() => !!name.trim().length && !!icon.length, [name, icon]);
 
   // здесь нужен useIcons (пока что его нет, потому что нет иконок) из контекста CategoryContext
@@ -31,36 +33,29 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
     e.preventDefault();
 
     try {
-      const body = {
-        id: '',
-        name: name.trim(),
-        description: description.trim(),
-        icon: icon,
-        type: type ? 1 : 0,
-      };
-      if (modify && placeholder) body.id = placeholder.category.id.toString();
+      if (modify) {
+        if (!placeholder) throw new Error('Category that you want update must have id');
 
-      const response = await fetch('/api/cat/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!response.ok) throw new Error('Ошибка');
+        const category: Category = {
+          id: placeholder.category.id,
+          name: name.trim(),
+          description: description.trim(),
+        };
+
+        const updatedCategory = await categoriesApi.updateCategory(category);
+        setCategories((prev) =>
+          prev.map((cat) => (cat.id === placeholder.category.id ? updatedCategory : cat)),
+        );
+
+        placeholder.setOpen(false);
+      } else {
+        const newCategory = await categoriesApi.addCategory(name, description);
+        setCategories((prev) => [...prev, newCategory]);
+      }
 
       setName('');
       setDescription('');
       setIcon('');
-
-      const result = await response.json();
-
-      const newCategory = result.category;
-      if (!placeholder) setCategories((prev) => [...prev, newCategory]);
-      else {
-        setCategories((prev) =>
-          prev.map((cat) => (cat.id === placeholder.category.id ? newCategory : cat)),
-        );
-        placeholder.setOpen(false);
-      }
     } catch (err) {
       console.error(err);
     }
@@ -69,19 +64,12 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
   const handleDelete = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!placeholder) return;
-
     try {
-      const response = await fetch('/api/cat/delete', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: placeholder.category.id,
-        }),
-      });
-      if (!response.ok) throw new Error('Ошибка');
+      if (!placeholder) throw new Error('Category that you want delete must have id');
 
+      categoriesApi.deleteCategory(placeholder.category.id);
       setCategories((prev) => prev.filter((cat) => cat.id !== placeholder.category.id));
+
       placeholder.setOpen(false);
     } catch (err) {
       console.error(err);
@@ -120,6 +108,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
         ))}
       </div>
 
+      {/*
       <p className="cat-title">Тип</p>
       <button
         className={`cat-button ${type ? 'green' : 'red'}`}
@@ -128,6 +117,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
       >
         {type ? 'Доход' : 'Расход'}
       </button>
+      */}
 
       <div className="cat-form-buttons">
         <button className="cat-button submit" type="submit" disabled={!isSubmittable}>
