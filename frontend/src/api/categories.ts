@@ -54,10 +54,6 @@ export const categoriesApi = {
   },
 
   async updateCategory(category: Category) {
-    const token = getAuthToken();
-
-    if (!token) throw new Error('Authorization failed');
-
     const response = await fetch(`${API_URL}/categories/${category.id}`, {
       method: 'PUT',
       headers: {
@@ -79,10 +75,6 @@ export const categoriesApi = {
   },
 
   async deleteCategory(id: number) {
-    const token = getAuthToken();
-
-    if (!token) throw new Error('Authorization failed');
-
     const response = await fetch(`${API_URL}/categories/${id}`, {
       method: 'DELETE',
       headers: {

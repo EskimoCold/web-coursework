@@ -52,16 +52,27 @@
   margin-top: 32px;
 }
 
+/* BASE first (merged to avoid duplicates + caret fix) */
 .auth-input {
   width: 100%;
   padding: 14px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 15px;
-  transition: all 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s,
+    background-color 0.2s,
+    color 0.2s;
   box-sizing: border-box;
+
+  /* visible text & caret */
+  color: #111;
+  caret-color: #111;
+  background-color: #fff;
 }
 
+/* More specific AFTER base */
 .auth-input:focus {
   outline: none;
   border-color: #667eea;
@@ -69,7 +80,7 @@
 }
 
 .auth-input::placeholder {
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 .auth-button {
@@ -82,7 +93,10 @@
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    opacity 0.2s;
   margin-top: 8px;
 }
 
@@ -121,7 +135,9 @@
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  transition: color 0.2s;
+  transition:
+    color 0.2s,
+    text-decoration-color 0.2s;
 }
 
 .auth-link:hover {
@@ -142,4 +158,28 @@
     width: 64px;
     height: 64px;
   }
+}
+
+/* Force light UI styling; scoped so it doesn't trip specificity warnings */
+.auth-container,
+.auth-card,
+.auth-form textarea,
+.auth-form select {
+  color-scheme: light;
+}
+
+/* Autofill normalization (close block properly; no nested selectors) */
+.auth-input:-webkit-autofill,
+.auth-form textarea:-webkit-autofill,
+.auth-form select:-webkit-autofill {
+  -webkit-text-fill-color: #111 !important;
+  caret-color: #111 !important;
+  box-shadow: 0 0 0 1000px #fff inset;
+  border: 2px solid #e5e7eb;
+}
+
+/* Selection highlight */
+.auth-card ::selection {
+  background: #c7d2fe;
+  color: #111;
 }
