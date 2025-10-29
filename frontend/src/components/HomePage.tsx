@@ -1,4 +1,3 @@
-// src/components/HomePage.tsx
 import { useState, useEffect, useCallback } from 'react';
 
 import { transactionsApi, Transaction, Category, TransactionCreate } from '../api/transactions';
@@ -10,7 +9,6 @@ interface TransactionSummary {
   balance: number;
 }
 
-// Мок-данные для fallback
 const MOCK_TRANSACTIONS: Transaction[] = [
   {
     id: 1,
@@ -107,19 +105,16 @@ export function HomePage() {
     }
   }, [useBackend, applyData]);
 
-  // Загрузка данных
   useEffect(() => {
     loadData();
   }, [filter, loadData]);
 
-  // Обработчик для кнопки "Добавить"
   const handleAddTransaction = () => {
     setShowAddModal(true);
   };
 
   const handleCloseModal = () => {
     setShowAddModal(false);
-    // Сброс формы
     setFormData({
       amount: '',
       description: '',
@@ -132,7 +127,6 @@ export function HomePage() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Валидация
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       alert('Пожалуйста, введите корректную сумму');
       return;
@@ -146,7 +140,6 @@ export function HomePage() {
     setFormLoading(true);
 
     try {
-      // Преобразуем category_id только если он есть в списке реальных категорий
       let categoryId: number | null = null;
       if (formData.category_id && useBackend) {
         const selectedCategory = categories.find(
@@ -168,7 +161,6 @@ export function HomePage() {
       if (useBackend) {
         await transactionsApi.createTransaction(submitData);
       } else {
-        // Для мок-данных просто добавляем новую транзакцию в список
         const { category_id, ...transactionData } = submitData;
         const newTransaction: Transaction = {
           id: Math.max(0, ...transactions.map((t) => t.id)) + 1,
@@ -177,9 +169,7 @@ export function HomePage() {
         };
         setTransactions((prev) => [newTransaction, ...prev]);
       }
-      // Закрываем модальное окно
       handleCloseModal();
-      // Перезагружаем данные
       await loadData();
     } catch (error) {
       if (error instanceof Error) {
@@ -205,7 +195,6 @@ export function HomePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Расчет сводки
   const getSummary = (): TransactionSummary => {
     const totalIncome = transactions
       .filter((t) => t.transaction_type === 'income')
@@ -220,7 +209,6 @@ export function HomePage() {
     return { totalIncome, totalExpenses, balance };
   };
 
-  // Пагинация
   const totalPages = Math.ceil(transactions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTransactions = transactions.slice(startIndex, startIndex + itemsPerPage);
@@ -237,21 +225,15 @@ export function HomePage() {
 
   return (
     <div className="home-page">
-      {/* Header */}
-      <header className="header">{/* Оставили пустым */}</header>
-
       {backendError && <div className="backend-error">⚠️ {backendError}</div>}
 
-      {/* Контейнер для сводки с кнопкой добавления */}
       <div className="summary-section">
         <div className="summary-header">
-          <h2 className="summary-title">Финансовая сводка</h2>
           <button className="add-button" onClick={handleAddTransaction}>
             + Добавить транзакцию
           </button>
         </div>
 
-        {/* Сводка */}
         <div className="summary-cards">
           <div className="summary-card balance">
             <h3>Общий баланс</h3>
@@ -270,7 +252,6 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Фильтры */}
       <div className="filters-section">
         <div className="filters">
           <button
@@ -298,7 +279,6 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Таблица */}
       <div className="transactions-table-container">
         <table className="transactions-table">
           <thead>
@@ -339,7 +319,6 @@ export function HomePage() {
         )}
       </div>
 
-      {/* Пагинация */}
       {totalPages > 1 && (
         <div className="pagination">
           <button
@@ -372,7 +351,6 @@ export function HomePage() {
         </div>
       )}
 
-      {/* Модальное окно добавления транзакции */}
       {showAddModal && (
         <div className="modal-overlay">
           <div className="modal-content">
