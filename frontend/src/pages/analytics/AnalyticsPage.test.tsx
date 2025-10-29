@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { describe, it, expect, beforeEach, vi, beforeAll, afterAll } from 'vitest';
 
 import { Transaction, transactionsApi } from '../../api/transactions';
+
 import { AnalyticsPage } from './AnalyticsPage';
 
 /** 🔧 NEW: silence console noise from React effects during tests (optional) */
