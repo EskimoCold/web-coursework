@@ -1,7 +1,6 @@
 // src/components/HomePage.tsx
 import { useState, useEffect, useCallback } from 'react';
-
-import { transactionsApi, Transaction } from '../api/transactions';
+import { transactionsApi, Transaction, Category, TransactionCreate } from '../api/transactions';
 import './home.css';
 
 interface TransactionSummary {
@@ -42,19 +41,31 @@ export function HomePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [useBackend, setUseBackend] = useState(true);
   const [backendError, setBackendError] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    amount: '',
+    description: '',
+    transaction_type: 'expense',
+    category_id: '',
+    transaction_date: new Date().toISOString().split('T')[0],
+  });
+
   const itemsPerPage = 5;
 
   const applyData = useCallback(
-    (transactionsData: Transaction[], fromBackend: boolean) => {
+    (transactionsData: Transaction[], categoriesData: Category[], fromBackend: boolean) => {
       const filteredTransactions =
         filter === 'all'
           ? transactionsData
           : transactionsData.filter((t) => t.transaction_type === filter);
 
       setTransactions(filteredTransactions);
+      setCategories(categoriesData);
 
       if (fromBackend) {
         setBackendError(null);
@@ -63,7 +74,6 @@ export function HomePage() {
     [filter],
   );
 
-  // Выносим loadData в useCallback чтобы избежать циклических зависимостей
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -71,22 +81,30 @@ export function HomePage() {
 
       if (useBackend) {
         try {
-          const [transactionsData] = await Promise.all([
+          console.log('Loading data from backend...');
+          const [transactionsData, categoriesData] = await Promise.all([
             transactionsApi.getTransactions(),
             transactionsApi.getCategories(),
           ]);
-          applyData(transactionsData, true);
+          console.log('Loaded categories from backend:', categoriesData);
+          applyData(transactionsData, categoriesData, true);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
+          console.error('Backend error:', error);
           setBackendError(`Бэкенд недоступен: ${errorMessage}`);
           setUseBackend(false);
+          // Используем мок-данные с пустыми категориями для формы
+          applyData(MOCK_TRANSACTIONS, [], false);
         }
       } else {
-        applyData(MOCK_TRANSACTIONS, false);
+        console.log('Using mock data');
+        // В мок-режиме тоже используем пустые категории
+        applyData(MOCK_TRANSACTIONS, [], false);
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка';
       setBackendError(`Ошибка: ${errorMessage}`);
+      applyData(MOCK_TRANSACTIONS, [], false);
     } finally {
       setLoading(false);
     }
@@ -96,6 +114,103 @@ export function HomePage() {
   useEffect(() => {
     loadData();
   }, [filter, loadData]);
+
+  // Обработчик для кнопки "Добавить"
+  const handleAddTransaction = () => {
+    setShowAddModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    // Сброс формы
+    setFormData({
+      amount: '',
+      description: '',
+      transaction_type: 'expense',
+      category_id: '',
+      transaction_date: new Date().toISOString().split('T')[0],
+    });
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Валидация
+    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+      alert('Пожалуйста, введите корректную сумму');
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      alert('Пожалуйста, введите описание');
+      return;
+    }
+
+    setFormLoading(true);
+
+    try {
+      // Преобразуем category_id только если он есть в списке реальных категорий
+      let categoryId: number | null = null;
+      if (formData.category_id && useBackend) {
+        const selectedCategory = categories.find(
+          (cat) => cat.id.toString() === formData.category_id,
+        );
+        if (selectedCategory) {
+          categoryId = selectedCategory.id;
+        } else {
+          console.warn('Selected category not found in backend categories, using null');
+        }
+      }
+
+      const submitData: TransactionCreate = {
+        amount: parseFloat(formData.amount),
+        description: formData.description,
+        transaction_type: formData.transaction_type as 'income' | 'expense',
+        category_id: categoryId,
+        transaction_date: formData.transaction_date,
+      };
+
+      console.log('Submitting transaction:', submitData);
+
+      if (useBackend) {
+        await transactionsApi.createTransaction(submitData);
+      } else {
+        // Для мок-данных просто добавляем новую транзакцию в список
+        const newTransaction: Transaction = {
+          id: Math.max(0, ...transactions.map((t) => t.id)) + 1,
+          ...submitData,
+          category: categories.find((c) => c.id === submitData.category_id),
+        };
+        setTransactions((prev) => [newTransaction, ...prev]);
+      }
+      // Закрываем модальное окно
+      handleCloseModal();
+      // Перезагружаем данные
+      await loadData();
+    } catch (error) {
+      console.error('Ошибка создания транзакции:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('Category not found')) {
+          alert(
+            'Ошибка: выбранная категория не найдена на сервере. Пожалуйста, выберите другую категорию или создайте транзакцию без категории.',
+          );
+        } else {
+          alert('Ошибка при создании транзакции: ' + error.message);
+        }
+      } else {
+        alert('Неизвестная ошибка при создании транзакции');
+      }
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   // Расчет сводки
   const getSummary = (): TransactionSummary => {
@@ -130,27 +245,35 @@ export function HomePage() {
   return (
     <div className="home-page">
       {/* Header */}
-      <header className="header">
-        <h1>FinTrack</h1>
-      </header>
+      <header className="header">{/* Оставили пустым */}</header>
 
       {backendError && <div className="backend-error">⚠️ {backendError}</div>}
 
-      {/* Сводка */}
-      <div className="summary-cards">
-        <div className="summary-card balance">
-          <h3>Общий баланс</h3>
-          <div className="amount">{summary.balance.toLocaleString('ru-RU')} ₽</div>
+      {/* Контейнер для сводки с кнопкой добавления */}
+      <div className="summary-section">
+        <div className="summary-header">
+          <h2 className="summary-title">Финансовая сводка</h2>
+          <button className="add-button" onClick={handleAddTransaction}>
+            + Добавить транзакцию
+          </button>
         </div>
 
-        <div className="summary-card income">
-          <h3>Доходы</h3>
-          <div className="amount">+{summary.totalIncome.toLocaleString('ru-RU')} ₽</div>
-        </div>
+        {/* Сводка */}
+        <div className="summary-cards">
+          <div className="summary-card balance">
+            <h3>Общий баланс</h3>
+            <div className="amount">{summary.balance.toLocaleString('ru-RU')} ₽</div>
+          </div>
 
-        <div className="summary-card expense">
-          <h3>Расходы</h3>
-          <div className="amount">-{summary.totalExpenses.toLocaleString('ru-RU')} ₽</div>
+          <div className="summary-card income">
+            <h3>Доходы</h3>
+            <div className="amount">+{summary.totalIncome.toLocaleString('ru-RU')} ₽</div>
+          </div>
+
+          <div className="summary-card expense">
+            <h3>Расходы</h3>
+            <div className="amount">-{summary.totalExpenses.toLocaleString('ru-RU')} ₽</div>
+          </div>
         </div>
       </div>
 
@@ -253,6 +376,107 @@ export function HomePage() {
           >
             Вперед
           </button>
+        </div>
+      )}
+
+      {/* Модальное окно добавления транзакции */}
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Добавить транзакцию</h2>
+              <button className="close-button" onClick={handleCloseModal}>
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleFormSubmit}>
+              <div className="form-group">
+                <label htmlFor="transaction_type">Тип операции *</label>
+                <select
+                  id="transaction_type"
+                  name="transaction_type"
+                  value={formData.transaction_type}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="expense">Расход</option>
+                  <option value="income">Доход</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="amount">Сумма *</label>
+                <input
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  min="0.01"
+                  step="0.01"
+                  placeholder="Введите сумму"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="description">Описание *</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows={3}
+                  placeholder="Введите описание транзакции"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="category_id">Категория</label>
+                <select
+                  id="category_id"
+                  name="category_id"
+                  value={formData.category_id}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Без категории</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+                {categories.length === 0 && useBackend && (
+                  <div className="category-hint">
+                    На сервере нет созданных категорий. Вы можете создать транзакцию без категории.
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="transaction_date">Дата *</label>
+                <input
+                  type="date"
+                  id="transaction_date"
+                  name="transaction_date"
+                  value={formData.transaction_date}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="cancel-button" onClick={handleCloseModal}>
+                  Отмена
+                </button>
+                <button type="submit" className="submit-button" disabled={formLoading}>
+                  {formLoading ? 'Создание...' : 'Создать транзакцию'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
