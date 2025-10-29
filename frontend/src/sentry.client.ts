@@ -7,15 +7,14 @@ import {
   useNavigationType,
 } from 'react-router-dom';
 
-const isProd = import.meta.env.PROD;
-const enabled = isProd || import.meta.env.VITE_SENTRY_ENABLED === '1';
-const dsn = (import.meta.env.VITE_SENTRY_DSN as string | undefined) || undefined;
+const enabled = import.meta.env.VITE_SENTRY_ENABLED === '1';
+const dsn = (import.meta.env.VITE_SENTRY_DSN as string) || undefined;
 
 if (enabled && dsn) {
   Sentry.init({
     dsn,
     release: import.meta.env.VITE_RELEASE,
-    environment: import.meta.env.VITE_ENV ?? (isProd ? 'production' : 'development'),
+    environment: import.meta.env.VITE_ENV,
     integrations: [
       Sentry.reactRouterV6BrowserTracingIntegration({
         useEffect: React.useEffect,

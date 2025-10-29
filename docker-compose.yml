@@ -58,6 +58,7 @@ services:
       - VITE_SENTRY_DSN=${VITE_SENTRY_DSN}
       - VITE_ENV=${VITE_ENV}
       - VITE_RELEASE=local
+      - VITE_SENTRY_ENABLED=${VITE_SENTRY_ENABLED}
 
 volumes:
   postgres_data:
