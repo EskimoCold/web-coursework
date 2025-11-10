@@ -109,7 +109,7 @@
 }
 
 /* Mobile Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .anal-main {
     padding: 12px;
   }
@@ -169,7 +169,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .anal-main {
     padding: 8px;
   }
