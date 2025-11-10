@@ -9,123 +9,155 @@
   --cat-grey: #dee2e6;
   --cat-blue: #2b7cff;
   --stroke: #d1d5db;
+  --base-unit: 0.25rem;
+  --spacing-xs: calc(var(--base-unit) * 1);
+  --spacing-sm: calc(var(--base-unit) * 2);
+  --spacing-md: calc(var(--base-unit) * 3);
+  --spacing-lg: calc(var(--base-unit) * 4);
+  --spacing-xl: calc(var(--base-unit) * 6);
+  --border-radius-sm: 0.5rem;
+  --border-radius-md: 0.75rem;
+  --border-radius-lg: 1rem;
+  --font-size-xs: 0.6875rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-md: 0.875rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
 }
 
-/* Layout */
 .cat-main {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
-  gap: 24px;
-  padding: 16px;
-  max-width: 1200px;
-  margin: 0 auto;
+  grid-template-columns: minmax(0, 1.2fr) minmax(20rem, 0.8fr);
+  gap: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  max-width: 100%;
   color: var(--cat-dark-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
 }
 
-/* Titles / text */
+.cat-mobile-add-button {
+  display: none;
+  width: 100%;
+  max-width: 20rem;
+  height: 3rem;
+  border-radius: var(--border-radius-lg);
+  background: var(--cat-blue);
+  color: white;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 0.25rem 0.75rem #00000015;
+  transition: all 0.2s ease;
+  margin: var(--spacing-lg) auto;
+  justify-content: center;
+  align-items: center;
+}
+
+.cat-mobile-add-button:hover {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.375rem 1rem #00000015;
+}
+
 .cat-card-title {
   color: var(--cat-dark-text);
-  font-size: 20px;
+  font-size: var(--font-size-lg);
   font-weight: 700;
-  padding: 16px 0 0 16px;
+  padding: var(--spacing-lg) 0 0 var(--spacing-lg);
   margin: 0;
 }
 
 .cat-card-type-title {
   display: inline-block;
-  font-size: 11px;
-  margin-left: 16px;
-  padding: 0 10px;
-  min-width: 84px;
-  height: 18px;
-  line-height: 18px;
-  border-radius: 9px;
+  font-size: var(--font-size-xs);
+  margin-left: var(--spacing-lg);
+  padding: 0 var(--spacing-sm);
+  min-width: 5.25rem;
+  height: 1.125rem;
+  line-height: 1.125rem;
+  border-radius: 0.5625rem;
 }
 
 .cat-text {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
 }
 
 .cat-title {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--cat-dark-grey);
-  margin: 12px 0 8px 10px;
+  margin: var(--spacing-md) 0 var(--spacing-lg) var(--spacing-sm);
 }
 
-/* ---------- Inputs: put the least specific FIRST ---------- */
 input {
-  border-radius: 10px;
+  border-radius: var(--border-radius-md);
   border: 1px solid var(--stroke);
   background: var(--cat-light-grey);
   color: inherit;
+  box-sizing: border-box;
 }
 
-/* Focus after base */
 input:focus {
   outline: none;
   border: 2px solid var(--cat-dark-grey);
 }
 
-/* Category-specific search input (no duplicate later) */
 .cat-list-selectors input {
-  width: min(420px, 100%);
-  height: 32px;
-  margin: 12px;
-  padding-left: 10px;
-
-  /* visible text/caret on light bg */
+  width: min(26.25rem, 100%);
+  height: 2rem;
+  margin: var(--spacing-md);
+  padding-left: var(--spacing-sm);
   color: #111;
   caret-color: #111;
   background-color: #fff;
 }
 
-/* Card list grid */
 .cat-list-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px 16px;
-  padding: 12px;
-  max-height: 420px;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-md);
+  max-height: 30rem;
   overflow: auto;
   scrollbar-width: thin;
 }
 
-/* WebKit scrollbar (optional tidy) */
 .cat-list-grid::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
+  height: 0.5rem;
+  width: 0.5rem;
 }
 
 .cat-list-grid::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 8px;
+  border-radius: 0.5rem;
 }
 
 .cat-list-grid::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Category card */
 .cat-card {
   width: auto;
-  min-height: 72px;
-  padding: 12px 16px;
+  min-height: 4.5rem;
+  padding: var(--spacing-md) var(--spacing-lg);
   border: 1px solid var(--stroke);
-  border-radius: 14px;
+  border-radius: var(--border-radius-lg);
   background: var(--cat-light-grey);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .cat-card:hover {
   cursor: pointer;
   outline: none;
   border: 1px solid var(--cat-dark-grey);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.125rem 0.5rem #00000015;
 }
 
-/* Color tags */
 .green {
   color: var(--cat-green-text);
   background-color: var(--cat-green);
@@ -136,31 +168,29 @@ input:focus {
   background-color: var(--cat-red);
 }
 
-/* Card icon */
 .cat-card-icon {
-  margin: 0 8px 0 16px;
-  width: 36px;
-  height: 36px;
+  margin: 0 var(--spacing-lg) 0 var(--spacing-lg);
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #00fff0; /* adjust/remove if using real SVGs */
+  background: #00fff0;
+  flex-shrink: 0;
 }
 
-.cat-card-icon img,
-.cat-card-icon svg {
-  width: 24px;
-  height: 24px;
+.cat-card-icon img {
+  width: 1.5rem;
+  height: 1.5rem;
   display: block;
 }
 
-/* Filter pill row */
 .cat-filters {
   display: inline-flex;
-  gap: 4px;
+  gap: var(--base-unit);
   background: var(--cat-grey);
-  padding: 6px 8px;
-  border-radius: 12px;
+  padding: var(--base-unit) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
 }
 
 .cat-filters button {
@@ -168,23 +198,24 @@ input:focus {
   background: none;
   border: none;
   color: var(--cat-dark-text);
-  padding: 4px 8px;
-  border-radius: 10px;
+  padding: var(--base-unit) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
 }
 
 .cat-filter-active {
   background: var(--cat-light-grey) !important;
-  padding: 4px 8px;
-  border-radius: 10px;
+  padding: var(--base-unit) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
 }
 
-/* Form panel */
 .cat-form {
   border: 1px solid var(--stroke);
-  border-radius: 14px;
+  border-radius: var(--border-radius-lg);
   background: var(--cat-light-grey);
-  padding: 16px;
+  padding: var(--spacing-lg);
   height: fit-content;
+  box-sizing: border-box;
 }
 
 .cat-main input,
@@ -195,87 +226,94 @@ input:focus {
   background-color: #fff;
 }
 
-/* Put base textarea BEFORE :focus */
 .cat-form textarea {
-  border-radius: 10px;
+  border-radius: var(--border-radius-md);
   border: 1px solid var(--stroke);
   background: #fff;
-  resize: vertical;
+  resize: none;
   width: 100%;
-  height: 84px;
-  padding: 6px;
+  min-height: 5.25rem;
+  padding: var(--base-unit);
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-/* More specific after base */
 .cat-form textarea:focus {
   outline: none;
   border: 2px solid var(--cat-dark-grey);
 }
 
-/* Form inputs */
 .cat-form input {
   background: #fff;
   width: 100%;
-  height: 32px;
-  padding-left: 6px;
+  height: 2rem;
+  padding-left: var(--base-unit);
 }
 
-/* Icon picker grid */
 .cat-icon-grid {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(2rem, 1fr));
+  gap: var(--spacing-lg);
 }
 
 .cat-grid-icon-item {
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
   border: 1px solid var(--stroke);
-  border-radius: 9999px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #00fff0; /* remove if using real icons */
+  background: #00fff0;
+  transition: all 0.2s ease;
 }
 
 .cat-grid-icon-item.selected {
   border: 2px solid var(--cat-dark-grey);
+  transform: scale(1.1);
 }
 
 .cat-grid-icon-item:hover {
   border-color: var(--cat-dark-grey);
+  transform: scale(1.05);
 }
 
-/* Form buttons */
 .cat-form-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 16px;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
 }
 
 .cat-button {
   cursor: pointer;
   border: 1px solid var(--stroke);
-  padding: 6px 12px;
-  border-radius: 10px;
+  padding: var(--base-unit) var(--spacing-md);
+  border-radius: var(--border-radius-md);
   background: #fff;
   color: var(--cat-dark-text);
+  font-size: var(--font-size-md);
+  transition: all 0.2s ease;
+  min-height: 2.25rem;
 }
 
 .cat-button:hover {
   border: 1px solid var(--cat-dark-grey);
+  transform: translateY(-0.0625rem);
 }
 
 .cat-button:disabled {
   border: 1px solid var(--cat-dark-grey);
   background: var(--cat-dark-grey);
   color: var(--cat-dark-text);
+  transform: none;
+  cursor: not-allowed;
 }
 
 .cat-button:disabled:hover {
-  cursor: default;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .submit {
@@ -284,34 +322,43 @@ input:focus {
   color: var(--cat-light-grey);
 }
 
-/* Modal */
 .cat-window {
   height: 100%;
   width: 100%;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  box-sizing: border-box;
 }
 
 .cat-window .cat-form {
-  position: absolute;
-  z-index: 10;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
+  z-index: 1010;
+  width: 100%;
+  max-width: 35rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: none;
+  top: auto;
+  left: auto;
 }
 
 .cat-window-bg {
   height: 100%;
   width: 100%;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 1005;
   background: #4a4b4b99;
+  backdrop-filter: blur(0.125rem);
 }
 
-/* Scope color-scheme to avoid repeating bare ".cat-form" after ".cat-window .cat-form" */
 .cat-main,
 .cat-main .cat-form,
 .cat-main .cat-form input,
@@ -326,7 +373,6 @@ input:focus {
   opacity: 1;
 }
 
-/* Autofill normalization */
 .cat-main input:-webkit-autofill,
 .cat-main textarea:-webkit-autofill,
 .cat-main select:-webkit-autofill {
@@ -336,214 +382,262 @@ input:focus {
   border: 1px solid var(--stroke);
 }
 
-/* Focus state enhancement (more specific than global input:focus) */
 .cat-main input:focus,
 .cat-main textarea:focus {
   outline: none;
   border-color: var(--cat-dark-grey);
-  box-shadow: 0 0 0 3px rgb(131 131 131 / 15%);
+  box-shadow: 0 0 0 0.1875rem rgb(131 131 131 / 15%);
 }
 
-/* Responsive tweaks */
-@media (width <= 1200px) {
+@media (width <= 75rem) {
   .cat-main {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
   }
 
-  .cat-list-grid {
-    max-height: 360px;
+  .cat-main > .cat-form:last-child {
+    display: none;
+  }
+
+  .cat-mobile-add-button {
+    display: flex;
+    order: 1;
+  }
+
+  .cat-list {
+    order: 0;
   }
 }
 
-@media (width <= 768px) {
+@media (width <= 48rem) {
   .cat-main {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 12px;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
 
   .cat-card-title {
-    font-size: 18px;
-    padding: 12px 0 0 12px;
+    font-size: var(--font-size-md);
+    padding: var(--spacing-md) 0 0 var(--spacing-md);
   }
 
   .cat-card-type-title {
-    margin-left: 12px;
-    font-size: 10px;
-    min-width: 76px;
+    margin-left: var(--spacing-md);
+    font-size: var(--font-size-xs);
+    min-width: 4.75rem;
   }
 
   .cat-list-selectors input {
     width: 100%;
-    margin: 10px;
+    margin: var(--spacing-sm);
+    font-size: var(--font-size-md);
   }
 
   .cat-list-grid {
     grid-template-columns: 1fr;
-    max-height: 360px;
-    padding: 10px;
-    gap: 10px;
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
   }
 
   .cat-card {
-    min-height: 64px;
-    padding: 10px 14px;
+    min-height: 4rem;
+    padding: var(--spacing-sm) var(--spacing-md);
   }
 
   .cat-card-icon {
-    width: 32px;
-    height: 32px;
-    margin: 0 6px 0 12px;
+    width: 2rem;
+    height: 2rem;
+    margin: 0 var(--base-unit) 0 var(--spacing-md);
   }
 
-  .cat-card-icon img,
-  .cat-card-icon svg {
-    width: 20px;
-    height: 20px;
+  .cat-card-icon img {
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   .cat-form {
-    padding: 14px;
+    padding: var(--spacing-md);
   }
 
   .cat-title {
-    font-size: 12px;
-    margin: 10px 0 6px 8px;
+    font-size: var(--font-size-sm);
+    margin: var(--spacing-sm) 0 var(--base-unit) var(--spacing-xs);
   }
 
   .cat-form input {
-    height: 36px;
+    height: 2.25rem;
+    font-size: var(--font-size-md);
   }
 
   .cat-form textarea {
-    height: 72px;
+    min-height: 4.5rem;
+    font-size: var(--font-size-md);
   }
 
   .cat-icon-grid {
-    grid-template-columns: repeat(8, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(auto-fit, minmax(1.75rem, 1fr));
+    gap: var(--spacing-md);
   }
 
   .cat-grid-icon-item {
-    width: 28px;
-    height: 28px;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   .cat-form-buttons {
-    padding: 12px;
-    gap: 6px;
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
   }
 
   .cat-button {
-    padding: 8px 14px;
-    font-size: 14px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-md);
+    min-height: 2.5rem;
+  }
+
+  .cat-mobile-add-button {
+    margin: var(--spacing-md) auto;
+    height: 2.75rem;
+    font-size: 0.9rem;
   }
 }
 
-@media (width <= 480px) {
+@media (width <= 30rem) {
   .cat-main {
-    padding: 8px;
-    gap: 12px;
+    padding: var(--base-unit);
+    gap: var(--spacing-md);
   }
 
   .cat-card-title {
-    font-size: 16px;
-    padding: 10px 0 0 10px;
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-sm) 0 0 var(--spacing-sm);
   }
 
   .cat-card-type-title {
-    font-size: 9px;
-    margin-left: 10px;
-    min-width: 70px;
-    padding: 0 8px;
+    font-size: var(--font-size-xs);
+    margin-left: var(--spacing-sm);
+    min-width: 4.375rem;
+    padding: 0 var(--spacing-xs);
   }
 
   .cat-list-selectors input {
-    margin: 8px;
-    font-size: 14px;
+    margin: var(--base-unit);
+    font-size: var(--font-size-sm);
   }
 
   .cat-list-grid {
-    padding: 8px;
-    gap: 8px;
-    max-height: 320px;
+    padding: var(--base-unit);
+    gap: var(--base-unit);
   }
 
   .cat-card {
-    min-height: 56px;
-    padding: 8px 12px;
-    font-size: 13px;
+    min-height: 3.5rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
   }
 
   .cat-card-icon {
-    width: 28px;
-    height: 28px;
-    margin: 0 4px 0 8px;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: 0 var(--base-unit) 0 var(--spacing-sm);
   }
 
-  .cat-card-icon img,
-  .cat-card-icon svg {
-    width: 18px;
-    height: 18px;
+  .cat-card-icon img {
+    width: 1.125rem;
+    height: 1.125rem;
   }
 
   .cat-form {
-    padding: 12px;
+    padding: var(--spacing-sm);
+    margin: 0;
   }
 
   .cat-title {
-    font-size: 11px;
-    margin: 8px 0 4px 6px;
+    font-size: var(--font-size-xs);
+    margin: var(--spacing-xs) 0 var(--base-unit) var(--spacing-xs);
   }
 
   .cat-text {
-    font-size: 10px;
+    font-size: var(--font-size-xs);
   }
 
   .cat-form input {
-    height: 34px;
-    font-size: 14px;
+    height: 2.125rem;
+    font-size: var(--font-size-sm);
   }
 
   .cat-form textarea {
-    height: 64px;
-    font-size: 14px;
+    min-height: 4rem;
+    font-size: var(--font-size-sm);
   }
 
   .cat-icon-grid {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 4px;
+    grid-template-columns: repeat(auto-fit, minmax(1.625rem, 1fr));
+    gap: var(--spacing-sm);
   }
 
   .cat-grid-icon-item {
-    width: 26px;
-    height: 26px;
+    width: 1.125rem;
+    height: 1.125rem;
   }
 
   .cat-form-buttons {
-    padding: 10px;
-    gap: 5px;
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
     flex-direction: column;
   }
 
   .cat-button {
     width: 100%;
-    padding: 10px 12px;
-    font-size: 13px;
+    padding: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    min-height: 2.375rem;
   }
 
   .cat-filters {
-    padding: 5px 6px;
+    padding: var(--base-unit) var(--spacing-xs);
   }
 
   .cat-filters button {
-    font-size: 12px;
-    padding: 3px 6px;
+    font-size: var(--font-size-xs);
+    padding: var(--base-unit) var(--spacing-xs);
+  }
+
+  .cat-window {
+    padding: var(--spacing-sm);
   }
 
   .cat-window .cat-form {
-    width: 90%;
-    max-width: 90vw;
+    width: 100%;
+    max-width: none;
+    max-height: 85vh;
+  }
+
+  .cat-mobile-add-button {
+    margin: var(--spacing-sm) auto;
+    height: 2.5rem;
+    font-size: 0.85rem;
+    max-width: 16rem;
+  }
+}
+
+@media (resolution >= 2dppx), (resolution >= 192dpi) {
+  .cat-card {
+    border-width: 0.5px;
+  }
+
+  .cat-form {
+    border-width: 0.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-card,
+  .cat-button,
+  .cat-grid-icon-item,
+  .cat-mobile-add-button {
+    transition: none;
   }
 }

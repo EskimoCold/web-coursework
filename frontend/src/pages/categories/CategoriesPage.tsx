@@ -12,6 +12,7 @@ export const CategoriesPage: React.FC = () => {
 
   const [cardWindow, setCardWindow] = useState<Category>();
   const [isOpen, setOpen] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   /*
@@ -25,6 +26,14 @@ export const CategoriesPage: React.FC = () => {
     [],
   );
   */
+
+  const isMobile = useMemo(() => {
+    const style = window.getComputedStyle(document.body);
+    const base = Number(style.fontSize.replace('px', ''));
+    const width = Number(style.width.replace('px', ''));
+    const rem = width / base;
+    return rem <= 48;
+  }, []);
 
   const openCard = (cat: Category) => {
     setCardWindow(cat);
@@ -78,11 +87,26 @@ export const CategoriesPage: React.FC = () => {
         </div>
         <div className="cat-list-grid">{categoryCards}</div>
       </div>
-      <CategoryForm label={'Добавить категорию'} modify={false} submit={'Добавить'} />
-      {
-        // Всплывающее окно для редактирования категории
-        isOpen && cardWindow && <CategoryWindow cat={cardWindow} setOpen={setOpen} />
-      }
+      {!isMobile && (
+        <CategoryForm label={'Добавить категорию'} modify={false} submit={'Добавить'} />
+      )}
+
+      <button
+        className="cat-mobile-add-button"
+        onClick={() => setShowAddForm(true)}
+        aria-label="Добавить категорию"
+      >
+        + Добавить категорию
+      </button>
+
+      {showAddForm && (
+        <div className="cat-window">
+          <div className="cat-window-bg" onClick={() => setShowAddForm(false)} />
+          <CategoryForm label={'Добавить категорию'} modify={false} submit={'Добавить'} />
+        </div>
+      )}
+
+      {isOpen && cardWindow && <CategoryWindow cat={cardWindow} setOpen={setOpen} />}
     </div>
   );
 };
