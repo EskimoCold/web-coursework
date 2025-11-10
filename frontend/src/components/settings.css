@@ -221,7 +221,7 @@ input:checked + .settings-toggle-slider::before {
 }
 
 /* Mobile Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .settings-page {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -233,8 +233,7 @@ input:checked + .settings-toggle-slider::before {
     padding: 12px;
     height: auto;
     max-height: none;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-flow: row wrap;
     gap: 10px;
     overflow: visible;
   }
@@ -255,8 +254,8 @@ input:checked + .settings-toggle-slider::before {
   }
 
   .settings-nav-item.active {
-    border-left-color: transparent;
     border-color: var(--primary);
+    border-left-color: transparent;
     background: var(--primary-ghost);
   }
 
@@ -327,7 +326,7 @@ input:checked + .settings-toggle-slider::before {
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .settings-page {
     gap: 12px;
   }

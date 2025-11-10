@@ -145,7 +145,7 @@
 }
 
 /* Mobile Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .transaction-form-container {
     padding: 16px;
     align-items: center;
@@ -199,7 +199,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .transaction-form-container {
     padding: 12px;
   }
