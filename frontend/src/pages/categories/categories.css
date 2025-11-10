@@ -623,7 +623,7 @@ input:focus {
   }
 }
 
-@media (device-pixel-ratio >= 2), (resolution >= 192dpi) {
+@media (min-device-pixel-ratio: 2), (resolution >= 192dpi) {
   .cat-card {
     border-width: 0.5px;
   }
