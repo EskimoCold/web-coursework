@@ -9,18 +9,15 @@
   --cat-grey: #dee2e6;
   --cat-blue: #2b7cff;
   --stroke: #d1d5db;
-
   --base-unit: 0.25rem;
   --spacing-xs: calc(var(--base-unit) * 1);
   --spacing-sm: calc(var(--base-unit) * 2);
   --spacing-md: calc(var(--base-unit) * 3);
   --spacing-lg: calc(var(--base-unit) * 4);
   --spacing-xl: calc(var(--base-unit) * 6);
-
   --border-radius-sm: 0.5rem;
   --border-radius-md: 0.75rem;
   --border-radius-lg: 1rem;
-
   --font-size-xs: 0.6875rem;
   --font-size-sm: 0.8125rem;
   --font-size-md: 0.875rem;
@@ -51,7 +48,7 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.25rem 0.75rem #00000015;
   transition: all 0.2s ease;
   margin: var(--spacing-lg) auto;
   justify-content: center;
@@ -60,7 +57,7 @@
 
 .cat-mobile-add-button:hover {
   transform: translateY(-0.125rem);
-  box-shadow: 0 0.375rem 1rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.375rem 1rem #00000015;
 }
 
 .cat-card-title {
@@ -158,7 +155,7 @@ input:focus {
   outline: none;
   border: 1px solid var(--cat-dark-grey);
   transform: translateY(-0.125rem);
-  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.125rem 0.5rem #00000015;
 }
 
 .green {
@@ -392,11 +389,13 @@ input:focus {
   box-shadow: 0 0 0 0.1875rem rgb(131 131 131 / 15%);
 }
 
-@media (max-width: 75rem) {
+@media (width <= 75rem) {
   .cat-main {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
     padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
   }
 
   .cat-main > .cat-form:last-child {
@@ -408,22 +407,12 @@ input:focus {
     order: 1;
   }
 
-  /* Reorder elements for mobile */
-  .cat-main {
-    display: flex;
-    flex-direction: column;
-  }
-
   .cat-list {
     order: 0;
   }
-
-  .cat-mobile-add-button {
-    order: 1;
-  }
 }
 
-@media (max-width: 48rem) {
+@media (width <= 48rem) {
   .cat-main {
     gap: var(--spacing-md);
     padding: var(--spacing-sm);
@@ -515,7 +504,7 @@ input:focus {
   }
 }
 
-@media (max-width: 30rem) {
+@media (width <= 30rem) {
   .cat-main {
     padding: var(--base-unit);
     gap: var(--spacing-md);
@@ -634,7 +623,7 @@ input:focus {
   }
 }
 
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (device-pixel-ratio >= 2), (resolution >= 192dpi) {
   .cat-card {
     border-width: 0.5px;
   }
