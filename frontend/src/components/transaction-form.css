@@ -143,3 +143,118 @@
   background: #4338ca;
   transform: translateY(-1px);
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .transaction-form-container {
+    padding: 16px;
+    align-items: center;
+  }
+
+  .transaction-form {
+    padding: 24px;
+    margin-top: 20px;
+    max-width: 100%;
+  }
+
+  .form-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .form-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .close-button {
+    width: 36px;
+    height: 36px;
+    font-size: 1.75rem;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 11px 14px;
+    font-size: 0.95rem;
+  }
+
+  .form-actions {
+    margin-top: 24px;
+    flex-direction: column;
+  }
+
+  .cancel-button,
+  .submit-button {
+    flex: 1;
+    padding: 12px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .transaction-form-container {
+    padding: 12px;
+  }
+
+  .transaction-form {
+    padding: 20px;
+    margin-top: 10px;
+    border-radius: 12px;
+  }
+
+  .form-header {
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+  }
+
+  .form-header h2 {
+    font-size: 1.15rem;
+  }
+
+  .close-button {
+    width: 32px;
+    height: 32px;
+    font-size: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  .form-group textarea {
+    min-height: 70px;
+  }
+
+  .form-actions {
+    margin-top: 20px;
+    gap: 10px;
+  }
+
+  .cancel-button,
+  .submit-button {
+    padding: 11px 18px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+}

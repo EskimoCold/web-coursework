@@ -80,3 +80,62 @@ body {
   text-align: center;
   padding: 12px 0 0;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .app-root {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .layout {
+    padding: 16px;
+    padding-bottom: 80px;
+  }
+
+  .layout-header {
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+
+  .layout-title {
+    font-size: 18px;
+  }
+
+  .layout-content {
+    border-radius: 12px;
+    min-height: 300px;
+  }
+
+  .layout-footer {
+    padding: 8px 0 0;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout {
+    padding: 12px;
+    padding-bottom: 75px;
+  }
+
+  .layout-header {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+
+  .layout-title {
+    font-size: 16px;
+  }
+
+  .layout-content {
+    border-radius: 10px;
+    min-height: 250px;
+  }
+
+  .layout-footer {
+    font-size: 10px;
+  }
+}

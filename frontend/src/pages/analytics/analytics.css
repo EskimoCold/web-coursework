@@ -107,3 +107,128 @@
   padding: 5px;
   border-radius: 12px;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .anal-main {
+    padding: 12px;
+  }
+
+  .anal-title {
+    font-size: 20px;
+    padding: 20px 0 0 20px;
+  }
+
+  .anal-dates {
+    font-size: 14px;
+    padding: 0 20px;
+  }
+
+  .anal-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 16px;
+  }
+
+  .anal-info-grid div {
+    padding: 16px;
+  }
+
+  .anal-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 16px;
+  }
+
+  .anal-charts-grid .anal-chart-container {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .anal-label {
+    font-size: 18px;
+  }
+
+  .anal-value {
+    font-size: 14px;
+    padding-top: 8px;
+  }
+
+  .anal-chart-title {
+    font-size: 16px;
+  }
+
+  .anal-filters {
+    display: block;
+    margin: 16px;
+  }
+
+  .anal-filters button {
+    font-size: 13px;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .anal-main {
+    padding: 8px;
+  }
+
+  .anal-title {
+    font-size: 18px;
+    padding: 16px 0 0 12px;
+  }
+
+  .anal-dates {
+    font-size: 13px;
+    padding: 0 12px;
+  }
+
+  .anal-info-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin: 12px;
+  }
+
+  .anal-info-grid div {
+    padding: 12px;
+  }
+
+  .anal-charts-grid {
+    gap: 12px;
+    margin: 12px;
+  }
+
+  .anal-charts-grid .anal-chart-container {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .anal-label {
+    font-size: 16px;
+  }
+
+  .anal-value {
+    font-size: 13px;
+    padding-top: 6px;
+  }
+
+  .anal-chart-title {
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  .anal-filters {
+    margin: 12px;
+    padding: 5px;
+  }
+
+  .anal-filters button {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+
+  .anal-filter-active {
+    padding: 3px;
+  }
+}
