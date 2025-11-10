@@ -357,11 +357,193 @@ input:focus {
 }
 
 @media (width <= 768px) {
+  .cat-main {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 12px;
+  }
+
   .cat-card-title {
     font-size: 18px;
+    padding: 12px 0 0 12px;
+  }
+
+  .cat-card-type-title {
+    margin-left: 12px;
+    font-size: 10px;
+    min-width: 76px;
+  }
+
+  .cat-list-selectors input {
+    width: 100%;
+    margin: 10px;
+  }
+
+  .cat-list-grid {
+    grid-template-columns: 1fr;
+    max-height: 360px;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .cat-card {
+    min-height: 64px;
+    padding: 10px 14px;
+  }
+
+  .cat-card-icon {
+    width: 32px;
+    height: 32px;
+    margin: 0 6px 0 12px;
+  }
+
+  .cat-card-icon img,
+  .cat-card-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .cat-form {
+    padding: 14px;
+  }
+
+  .cat-title {
+    font-size: 12px;
+    margin: 10px 0 6px 8px;
+  }
+
+  .cat-form input {
+    height: 36px;
+  }
+
+  .cat-form textarea {
+    height: 72px;
   }
 
   .cat-icon-grid {
     grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+  }
+
+  .cat-grid-icon-item {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cat-form-buttons {
+    padding: 12px;
+    gap: 6px;
+  }
+
+  .cat-button {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+}
+
+@media (width <= 480px) {
+  .cat-main {
+    padding: 8px;
+    gap: 12px;
+  }
+
+  .cat-card-title {
+    font-size: 16px;
+    padding: 10px 0 0 10px;
+  }
+
+  .cat-card-type-title {
+    font-size: 9px;
+    margin-left: 10px;
+    min-width: 70px;
+    padding: 0 8px;
+  }
+
+  .cat-list-selectors input {
+    margin: 8px;
+    font-size: 14px;
+  }
+
+  .cat-list-grid {
+    padding: 8px;
+    gap: 8px;
+    max-height: 320px;
+  }
+
+  .cat-card {
+    min-height: 56px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .cat-card-icon {
+    width: 28px;
+    height: 28px;
+    margin: 0 4px 0 8px;
+  }
+
+  .cat-card-icon img,
+  .cat-card-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .cat-form {
+    padding: 12px;
+  }
+
+  .cat-title {
+    font-size: 11px;
+    margin: 8px 0 4px 6px;
+  }
+
+  .cat-text {
+    font-size: 10px;
+  }
+
+  .cat-form input {
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .cat-form textarea {
+    height: 64px;
+    font-size: 14px;
+  }
+
+  .cat-icon-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+  }
+
+  .cat-grid-icon-item {
+    width: 26px;
+    height: 26px;
+  }
+
+  .cat-form-buttons {
+    padding: 10px;
+    gap: 5px;
+    flex-direction: column;
+  }
+
+  .cat-button {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .cat-filters {
+    padding: 5px 6px;
+  }
+
+  .cat-filters button {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+
+  .cat-window .cat-form {
+    width: 90%;
+    max-width: 90vw;
   }
 }

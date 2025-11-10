@@ -505,3 +505,245 @@
   margin-top: 4px;
   font-style: italic;
 }
+
+/* Mobile Responsive Styles */
+@media (width <= 768px) {
+  .home-page {
+    padding: 0 12px 12px;
+  }
+
+  .summary-section {
+    padding: 16px;
+    margin: 16px 0;
+  }
+
+  .summary-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .add-button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .summary-card {
+    padding: 16px;
+  }
+
+  .summary-card h3 {
+    font-size: 0.85rem;
+  }
+
+  .summary-card .amount {
+    font-size: 1.5rem;
+  }
+
+  .filters-section {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    align-items: stretch;
+  }
+
+  .filters {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .filter-btn {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .table-info {
+    text-align: center;
+    font-size: 0.85rem;
+  }
+
+  .transactions-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .transactions-table {
+    min-width: 600px;
+  }
+
+  .transactions-table th,
+  .transactions-table td {
+    padding: 12px;
+    font-size: 0.85rem;
+  }
+
+  .category-badge,
+  .type-badge {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px;
+  }
+
+  .pagination-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  .pagination-numbers {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .pagination-number {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  .modal-content {
+    padding: 20px;
+    max-height: 85vh;
+  }
+
+  .modal-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .form-actions {
+    margin-top: 20px;
+    flex-direction: column;
+  }
+
+  .cancel-button,
+  .submit-button {
+    flex: 1;
+    padding: 12px 20px;
+  }
+}
+
+@media (width <= 480px) {
+  .home-page {
+    padding: 0 8px 8px;
+  }
+
+  .summary-section {
+    padding: 12px;
+    margin: 12px 0;
+  }
+
+  .add-button {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .summary-card {
+    padding: 12px;
+  }
+
+  .summary-card h3 {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+  }
+
+  .summary-card .amount {
+    font-size: 1.3rem;
+  }
+
+  .filters-section {
+    padding: 12px;
+  }
+
+  .filter-btn {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .table-info {
+    font-size: 0.8rem;
+  }
+
+  .transactions-table th,
+  .transactions-table td {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+  }
+
+  .category-badge,
+  .type-badge {
+    font-size: 0.7rem;
+    padding: 2px 5px;
+  }
+
+  .pagination {
+    gap: 6px;
+    padding: 12px;
+  }
+
+  .pagination-btn,
+  .pagination-number {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+
+  .modal-content {
+    padding: 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .close-button {
+    width: 32px;
+    height: 32px;
+    font-size: 1.5rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+
+  .cancel-button,
+  .submit-button {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+}
