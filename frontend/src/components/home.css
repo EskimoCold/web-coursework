@@ -16,14 +16,13 @@
 .header {
   background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(10px);
-  padding: 1rem 2rem;
+  padding: 1rem;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   box-shadow: 0 2px 20px rgb(0 0 0 / 10%);
   border-radius: var(--radius);
   margin: 0 0 20px;
-  overflow: hidden;
 }
 
 .header-actions {
@@ -62,12 +61,14 @@
   background: #2b7cff;
   color: #fff;
   border: none;
-  padding: 12px 24px;
+  padding: 12px 20px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgb(79 70 229 / 30%);
+  width: 100%;
+  margin-bottom: 16px;
 }
 
 .add-button:hover {
@@ -81,12 +82,10 @@
   background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(10px);
   border-radius: var(--radius);
-  padding: 24px;
-  gap: 20px;
+  padding: 20px;
+  gap: 16px;
   margin: 20px 0;
   box-shadow: 0 8px 32px rgb(0 0 0 / 10%);
-  position: relative;
-  overflow: hidden;
 }
 
 .summary-header {
@@ -94,6 +93,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .summary-title {
@@ -101,12 +102,13 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
+  text-align: center;
 }
 
 .summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .summary-card {
@@ -117,7 +119,6 @@
   box-shadow: 0 4px 16px rgb(0 0 0 / 8%);
   text-align: center;
   transition: transform 0.3s ease;
-  overflow: hidden;
 }
 
 .summary-card:hover {
@@ -146,7 +147,7 @@
 }
 
 .summary-card .amount {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #1f2937;
 }
@@ -163,19 +164,20 @@
 .filters-section {
   background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(10px);
-  padding: 20px;
+  padding: 16px;
   margin: 0 0 20px;
   border-radius: var(--radius);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
   box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
-  overflow: hidden;
 }
 
 .filters {
   display: flex;
   gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .filter-btn {
@@ -186,6 +188,8 @@
   font-weight: 500;
   transition: all 0.3s ease;
   color: #374151;
+  flex: 1;
+  min-width: 80px;
 }
 
 .filter-btn.active {
@@ -202,6 +206,7 @@
 .table-info {
   color: #6b7280;
   font-size: 0.9rem;
+  text-align: center;
 }
 
 /* Table */
@@ -210,27 +215,31 @@
   backdrop-filter: blur(10px);
   margin: 0 0 20px;
   border-radius: var(--radius);
-  overflow: hidden; /* ensure rounded clipping */
+  overflow: hidden;
   box-shadow: 0 8px 32px rgb(0 0 0 / 10%);
+  overflow-x: auto;
 }
 
 .transactions-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 600px;
 }
 
 .transactions-table th {
   background: #f8fafc;
-  padding: 16px;
+  padding: 12px 8px;
   text-align: left;
   font-weight: 600;
   color: #374151;
   border-bottom: 2px solid #e5e7eb;
+  font-size: 0.8rem;
 }
 
 .transactions-table td {
-  padding: 16px;
+  padding: 12px 8px;
   border-bottom: 1px solid #f1f5f9;
+  font-size: 0.8rem;
 }
 
 .transactions-table tr:hover {
@@ -241,8 +250,9 @@
 .type-badge {
   padding: 4px 8px;
   border-radius: var(--radius);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .category-badge {
@@ -277,6 +287,8 @@
   height: 200px;
   color: #6b7280;
   font-style: italic;
+  padding: 20px;
+  text-align: center;
 }
 
 /* Pagination */
@@ -284,19 +296,22 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
+  gap: 8px;
+  padding: 16px;
+  flex-wrap: wrap;
 }
 
 .pagination-btn,
 .pagination-number {
-  padding: 8px 16px;
+  padding: 8px 12px;
   border: 1px solid #d1d5db;
   background: #fff;
   border-radius: var(--radius);
   cursor: pointer;
   transition: all 0.3s ease;
   color: #374151;
+  font-size: 0.8rem;
+  min-width: 40px;
 }
 
 .pagination-btn:disabled {
@@ -312,7 +327,9 @@
 
 .pagination-numbers {
   display: flex;
-  gap: 8px;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .pagination-number {
@@ -338,6 +355,8 @@
   height: 200px;
   font-size: 16px;
   color: #6b7280;
+  text-align: center;
+  padding: 20px;
 }
 
 /* Modal */
@@ -347,20 +366,20 @@
   background: rgb(0 0 0 / 50%);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   z-index: 1000;
   padding: 20px;
+  overflow-y: auto;
 }
 
 .modal-content {
   background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(10px);
   border-radius: var(--radius);
-  padding: 30px;
+  padding: 20px;
   width: 100%;
   max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
+  margin: auto;
   box-shadow: 0 8px 32px rgb(0 0 0 / 20%);
   border: 1px solid rgb(255 255 255 / 20%);
 }
@@ -369,14 +388,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
   border-bottom: 2px solid #f1f5f9;
 }
 
 .modal-header h2 {
   color: #374151;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   margin: 0;
 }
@@ -384,12 +403,12 @@
 .close-button {
   background: none;
   border: none;
-  font-size: 2rem;
+  font-size: 1.5rem;
   cursor: pointer;
   color: #6b7280;
   padding: 0;
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -404,12 +423,12 @@
 
 /* Form */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 600;
   color: #374151;
   font-size: 0.9rem;
@@ -419,10 +438,10 @@
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 12px;
   border: 2px solid #e5e7eb;
   border-radius: var(--radius);
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: border-color 0.3s ease;
   box-sizing: border-box;
   background: #fff;
@@ -431,7 +450,7 @@
 
 .form-group textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 70px;
   font-family: inherit;
 }
 
@@ -444,13 +463,13 @@
 
 .form-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 30px;
+  gap: 10px;
+  margin-top: 24px;
+  flex-direction: column;
 }
 
 .cancel-button {
-  flex: 1;
-  padding: 12px 24px;
+  padding: 12px 20px;
   border: 2px solid #e5e7eb;
   background: #fff;
   cursor: pointer;
@@ -458,6 +477,7 @@
   font-size: 0.9rem;
   color: #374151;
   transition: all 0.3s ease;
+  order: 2;
 }
 
 .cancel-button:hover {
@@ -466,8 +486,7 @@
 }
 
 .submit-button {
-  flex: 2;
-  padding: 12px 24px;
+  padding: 12px 20px;
   background: #2b7cff;
   color: #fff;
   border: none;
@@ -475,6 +494,7 @@
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.3s ease;
+  order: 1;
 }
 
 .submit-button:disabled {
@@ -493,9 +513,11 @@
   background: #fee2e2;
   color: #dc2626;
   padding: 12px 16px;
-  margin: 16px;
+  margin: 16px 0;
   border-radius: var(--radius);
   border: 1px solid #fecaca;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
 /* Badges */
@@ -506,244 +528,174 @@
   font-style: italic;
 }
 
-/* Mobile Responsive Styles */
-@media (width <= 768px) {
-  .home-page {
-    padding: 0 12px 12px;
-  }
+/* Mobile Cards View */
+.mobile-transactions {
+  display: none;
+}
 
-  .summary-section {
-    padding: 16px;
-    margin: 16px 0;
+.mobile-transaction-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+  border-left: 4px solid #2b7cff;
+}
+
+.mobile-transaction-card.income {
+  border-left-color: #10b981;
+}
+
+.mobile-transaction-card.expense {
+  border-left-color: #ef4444;
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.mobile-card-category {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.mobile-card-amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.mobile-card-amount.income {
+  color: #10b981;
+}
+
+.mobile-card-amount.expense {
+  color: #ef4444;
+}
+
+.mobile-card-description {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.mobile-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+/* Media Queries */
+@media (width >= 768px) {
+  .home-page {
+    padding: 0 24px 24px;
   }
 
   .summary-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
-
-  .add-button {
-    width: 100%;
-    padding: 12px 20px;
-    font-size: 0.95rem;
-  }
-
-  .summary-cards {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .summary-card {
-    padding: 16px;
-  }
-
-  .summary-card h3 {
-    font-size: 0.85rem;
-  }
-
-  .summary-card .amount {
-    font-size: 1.5rem;
-  }
-
-  .filters-section {
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    align-items: stretch;
-  }
-
-  .filters {
-    width: 100%;
+    flex-direction: row;
     justify-content: space-between;
   }
 
-  .filter-btn {
+  .add-button {
+    width: auto;
+    margin-bottom: 0;
+  }
+
+  .summary-cards {
+    flex-direction: row;
+  }
+
+  .summary-card {
     flex: 1;
-    padding: 10px 12px;
-    font-size: 0.85rem;
+  }
+
+  .filters-section {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .filters {
+    justify-content: flex-start;
+  }
+
+  .filter-btn {
+    flex: none;
   }
 
   .table-info {
-    text-align: center;
-    font-size: 0.85rem;
-  }
-
-  .transactions-table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    text-align: right;
   }
 
   .transactions-table {
-    min-width: 600px;
+    min-width: auto;
   }
 
   .transactions-table th,
   .transactions-table td {
-    padding: 12px;
-    font-size: 0.85rem;
-  }
-
-  .category-badge,
-  .type-badge {
-    font-size: 0.75rem;
-    padding: 3px 6px;
-  }
-
-  .pagination {
-    flex-wrap: wrap;
-    gap: 8px;
     padding: 16px;
-  }
-
-  .pagination-btn {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-  }
-
-  .pagination-numbers {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .pagination-number {
-    padding: 6px 10px;
-    font-size: 0.85rem;
-  }
-
-  .modal-overlay {
-    padding: 16px;
-  }
-
-  .modal-content {
-    padding: 20px;
-    max-height: 85vh;
-  }
-
-  .modal-header {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-  }
-
-  .modal-header h2 {
-    font-size: 1.25rem;
-  }
-
-  .form-group {
-    margin-bottom: 16px;
-  }
-
-  .form-group label {
-    font-size: 0.85rem;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 10px 12px;
     font-size: 0.9rem;
   }
 
   .form-actions {
-    margin-top: 20px;
-    flex-direction: column;
+    flex-direction: row;
   }
 
-  .cancel-button,
-  .submit-button {
+  .cancel-button {
+    order: 1;
     flex: 1;
-    padding: 12px 20px;
+  }
+
+  .submit-button {
+    order: 2;
+    flex: 2;
+  }
+
+  .modal-content {
+    padding: 30px;
+  }
+
+  .modal-overlay {
+    align-items: center;
+  }
+}
+
+@media (width <= 767px) {
+  .transactions-table {
+    display: none;
+  }
+
+  .mobile-transactions {
+    display: block;
   }
 }
 
 @media (width <= 480px) {
   .home-page {
-    padding: 0 8px 8px;
-  }
-
-  .summary-section {
-    padding: 12px;
-    margin: 12px 0;
-  }
-
-  .add-button {
-    padding: 10px 16px;
-    font-size: 0.9rem;
-  }
-
-  .summary-card {
-    padding: 12px;
-  }
-
-  .summary-card h3 {
-    font-size: 0.8rem;
-    margin-bottom: 8px;
+    padding: 0 12px 12px;
   }
 
   .summary-card .amount {
     font-size: 1.3rem;
   }
 
-  .filters-section {
-    padding: 12px;
-  }
-
-  .filter-btn {
-    padding: 8px 10px;
-    font-size: 0.8rem;
-  }
-
-  .table-info {
-    font-size: 0.8rem;
-  }
-
-  .transactions-table th,
-  .transactions-table td {
-    padding: 10px 8px;
-    font-size: 0.8rem;
-  }
-
-  .category-badge,
-  .type-badge {
-    font-size: 0.7rem;
-    padding: 2px 5px;
+  .modal-content {
+    padding: 16px;
+    margin: 10px;
   }
 
   .pagination {
-    gap: 6px;
-    padding: 12px;
+    gap: 4px;
   }
 
   .pagination-btn,
   .pagination-number {
-    padding: 6px 8px;
-    font-size: 0.8rem;
-  }
-
-  .modal-content {
-    padding: 16px;
-  }
-
-  .modal-header h2 {
-    font-size: 1.1rem;
-  }
-
-  .close-button {
-    width: 32px;
-    height: 32px;
-    font-size: 1.5rem;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 8px 10px;
-    font-size: 0.85rem;
-  }
-
-  .cancel-button,
-  .submit-button {
-    padding: 10px 16px;
-    font-size: 0.85rem;
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    min-width: 35px;
   }
 }

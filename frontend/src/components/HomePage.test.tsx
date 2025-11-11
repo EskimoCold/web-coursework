@@ -1,9 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { vi } from 'vitest';
+
+import { AuthProvider } from '../contexts/AuthContext';
+import { CategoryProvider } from '../contexts/CategoriesContext';
 
 import { HomePage } from './HomePage';
 
-// Mock API
+// Mock CSS files
+vi.mock('./home.css', () => ({}));
+
+// Mock the modules that are causing issues
 vi.mock('../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(() =>
@@ -26,30 +32,79 @@ vi.mock('../api/transactions', () => ({
         },
       ]),
     ),
-    getCategories: vi.fn(() =>
-      Promise.resolve([
-        { id: 1, name: 'Продукты' },
-        { id: 2, name: 'Зарплата' },
-      ]),
-    ),
+    getCategories: vi.fn(() => Promise.resolve([])),
+    createTransaction: vi.fn(),
   },
 }));
 
+// Mock categories API to avoid authorization errors
+vi.mock('../api/categories', () => ({
+  categoriesApi: {
+    getCategories: vi.fn(() => Promise.resolve([])),
+    createCategory: vi.fn(),
+    updateCategory: vi.fn(),
+    deleteCategory: vi.fn(),
+  },
+}));
+
+// Mock the contexts to avoid nested context issues
+const MockProviders = ({ children }: { children: React.ReactNode }) => (
+  <AuthProvider>
+    <CategoryProvider>{children}</CategoryProvider>
+  </AuthProvider>
+);
+
 describe('HomePage', () => {
-  it('displays transactions correctly', async () => {
-    render(<HomePage />);
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('renders without crashing', async () => {
+    render(
+      <MockProviders>
+        <HomePage />
+      </MockProviders>,
+    );
 
     await waitFor(() => {
-      expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
-      expect(screen.getByText('Зарплата за январь')).toBeInTheDocument();
+      expect(screen.getByText('Общий баланс')).toBeInTheDocument();
     });
   });
 
-  it('shows transaction count', async () => {
-    render(<HomePage />);
+  test('displays transactions correctly', async () => {
+    render(
+      <MockProviders>
+        <HomePage />
+      </MockProviders>,
+    );
 
+    // Wait for loading to complete and data to be displayed
     await waitFor(() => {
-      expect(screen.getByText(/Показано/)).toBeInTheDocument();
+      // Check for transaction descriptions - use queryAllByText since there might be multiple instances
+      const productElements = screen.queryAllByText('Продукты в супермаркете');
+      expect(productElements.length).toBeGreaterThan(0);
+
+      const salaryElements = screen.queryAllByText('Зарплата за январь');
+      expect(salaryElements.length).toBeGreaterThan(0);
     });
+
+    // Check for amounts with proper formatting - use getAllByText for multiple elements
+    await waitFor(() => {
+      const incomeAmounts = screen.getAllByText('+50 000 ₽');
+      const expenseAmounts = screen.getAllByText('-1 500 ₽');
+
+      expect(incomeAmounts.length).toBeGreaterThan(0);
+      expect(expenseAmounts.length).toBeGreaterThan(0);
+    });
+
+    // Check that summary cards are displayed
+    expect(screen.getByText('48 500 ₽')).toBeInTheDocument(); // Balance
+
+    // For summary amounts, check they exist (there might be multiple)
+    const incomeSummaryElements = screen.getAllByText('+50 000 ₽');
+    const expenseSummaryElements = screen.getAllByText('-1 500 ₽');
+
+    expect(incomeSummaryElements.length).toBeGreaterThan(0);
+    expect(expenseSummaryElements.length).toBeGreaterThan(0);
   });
 });
