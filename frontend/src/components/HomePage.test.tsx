@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
@@ -6,9 +7,9 @@ import { CategoryProvider } from '../contexts/CategoriesContext';
 import { HomePage } from './HomePage';
 
 // Mock the modules that are causing issues
-jest.mock('../api/transactions', () => ({
+vi.mock('../api/transactions', () => ({
   transactionsApi: {
-    getTransactions: jest.fn(() =>
+    getTransactions: vi.fn(() =>
       Promise.resolve([
         {
           id: 1,
@@ -28,8 +29,8 @@ jest.mock('../api/transactions', () => ({
         },
       ]),
     ),
-    getCategories: jest.fn(() => Promise.resolve([])),
-    createTransaction: jest.fn(),
+    getCategories: vi.fn(() => Promise.resolve([])),
+    createTransaction: vi.fn(),
   },
 }));
 
@@ -42,7 +43,7 @@ const MockProviders = ({ children }: { children: React.ReactNode }) => (
 
 describe('HomePage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders without crashing', async () => {
