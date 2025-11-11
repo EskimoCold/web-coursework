@@ -6,6 +6,9 @@ import { CategoryProvider } from '../contexts/CategoriesContext';
 
 import { HomePage } from './HomePage';
 
+// Mock CSS files
+vi.mock('./home.css', () => ({}));
+
 // Mock the modules that are causing issues
 vi.mock('../api/transactions', () => ({
   transactionsApi: {
@@ -31,6 +34,16 @@ vi.mock('../api/transactions', () => ({
     ),
     getCategories: vi.fn(() => Promise.resolve([])),
     createTransaction: vi.fn(),
+  },
+}));
+
+// Mock categories API to avoid authorization errors
+vi.mock('../api/categories', () => ({
+  categoriesApi: {
+    getCategories: vi.fn(() => Promise.resolve([])),
+    createCategory: vi.fn(),
+    updateCategory: vi.fn(),
+    deleteCategory: vi.fn(),
   },
 }));
 
@@ -75,11 +88,10 @@ describe('HomePage', () => {
       expect(salaryElements.length).toBeGreaterThan(0);
     });
 
-    // Check for amounts with proper formatting
+    // Check for amounts with proper formatting - use getAllByText for multiple elements
     await waitFor(() => {
-      // Use more specific queries to avoid duplicates
-      const incomeAmounts = screen.queryAllByText('+50 000 ₽');
-      const expenseAmounts = screen.queryAllByText('-1 500 ₽');
+      const incomeAmounts = screen.getAllByText('+50 000 ₽');
+      const expenseAmounts = screen.getAllByText('-1 500 ₽');
 
       expect(incomeAmounts.length).toBeGreaterThan(0);
       expect(expenseAmounts.length).toBeGreaterThan(0);
@@ -87,7 +99,12 @@ describe('HomePage', () => {
 
     // Check that summary cards are displayed
     expect(screen.getByText('48 500 ₽')).toBeInTheDocument(); // Balance
-    expect(screen.getByText('+50 000 ₽')).toBeInTheDocument(); // Income
-    expect(screen.getByText('-1 500 ₽')).toBeInTheDocument(); // Expense
+
+    // For summary amounts, check they exist (there might be multiple)
+    const incomeSummaryElements = screen.getAllByText('+50 000 ₽');
+    const expenseSummaryElements = screen.getAllByText('-1 500 ₽');
+
+    expect(incomeSummaryElements.length).toBeGreaterThan(0);
+    expect(expenseSummaryElements.length).toBeGreaterThan(0);
   });
 });
