@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import * as AuthContext from '../contexts/AuthContext';
+import * as AuthContext from '../../contexts/AuthContext';
 
 import { Register } from './Register';
 
@@ -16,7 +16,10 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-vi.mock('../contexts/AuthContext');
+// Fix the AuthContext mock - use the correct path and ensure useAuth is a mock function
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuth: vi.fn(),
+}));
 
 describe('Register', () => {
   const mockRegister = vi.fn();
@@ -200,6 +203,7 @@ describe('Register', () => {
     expect(screen.getByText('Регистрация...')).toBeInTheDocument();
 
     await waitFor(() => {
+      expect(screen.getByRole('button')).not.toBeDisabled();
       expect(screen.getByText('Зарегистрироваться')).toBeInTheDocument();
     });
   });
