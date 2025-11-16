@@ -1,17 +1,17 @@
 import { useState, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import { HomePage } from '../pages/home/HomePage';
 import { Layout } from '../components/Layout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
-import { SettingsPage } from '../pages/settings/SettingsPage';
 import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
 import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
-import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { Login } from '../pages/auth/Login';
 import { Register } from '../pages/auth/Register';
+import { CategoriesPage } from '../pages/categories/CategoriesPage';
+import { HomePage } from '../pages/home/HomePage';
+import { SettingsPage } from '../pages/settings/SettingsPage';
 
 function MainApp() {
   const [active, setActive] = useState('Главная');
