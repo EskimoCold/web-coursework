@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-import { transactionsApi, Transaction, Category, TransactionCreate } from '../api/transactions';
+import { transactionsApi, Transaction, Category, TransactionCreate } from '../../api/transactions';
 import './home.css';
 
 interface TransactionSummary {
