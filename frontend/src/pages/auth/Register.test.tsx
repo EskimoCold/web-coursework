@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import * as AuthContext from '../contexts/AuthContext';
+import * as AuthContext from '../../contexts/AuthContext';
 
 import { Register } from './Register';
 
