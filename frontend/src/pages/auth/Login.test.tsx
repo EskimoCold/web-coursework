@@ -16,13 +16,17 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-vi.mock('../contexts/AuthContext');
+// Mock the AuthContext properly
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuth: vi.fn(), // This ensures useAuth is a mock function
+}));
 
 describe('Login', () => {
   const mockLogin = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Now vi.mocked() will work correctly since useAuth is a mock function
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       login: mockLogin,
       user: null,
@@ -133,6 +137,7 @@ describe('Login', () => {
     expect(screen.getByText('Вход...')).toBeInTheDocument();
 
     await waitFor(() => {
+      expect(screen.getByRole('button')).not.toBeDisabled();
       expect(screen.getByText('Войти')).toBeInTheDocument();
     });
   });
