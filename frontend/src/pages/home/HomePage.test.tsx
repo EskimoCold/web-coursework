@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { AuthProvider } from '../contexts/AuthContext';
-import { CategoryProvider } from '../contexts/CategoriesContext';
+import { AuthProvider } from '../../contexts/AuthContext';
+import { CategoryProvider } from '../../contexts/CategoriesContext';
 
-import { HomePage } from './HomePage';
+import { HomePage } from '../../components/HomePage';
 
 // Mock CSS files
 vi.mock('./home.css', () => ({}));
