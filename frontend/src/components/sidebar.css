@@ -1,0 +1,265 @@
+:root {
+  --sb-w: 240px;
+  --sb-border: #e6e9ee;
+  --sb-bg: #fff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --pill-bg: #eaf2ff;
+  --pill-stroke: #d6e5ff;
+  --blue: #2b7cff;
+  --icon-gray: #cbd5e1;
+}
+
+/* flex column so exit anchors to bottom */
+.sb {
+  width: var(--sb-w);
+  min-height: 100vh;
+  background: #fcfdff;
+  border-right: 1px solid var(--sb-border);
+  padding: 18px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--ink);
+}
+
+/* brand */
+.sb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 8px;
+}
+
+.sb-brand-name {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.sb-brand-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--blue);
+  box-shadow: inset 0 0 0 4px var(--pill-bg);
+}
+
+/* user */
+.sb-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  margin-top: 4px;
+}
+
+.sb-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--icon-gray);
+}
+
+.sb-user-name {
+  font-size: 16px;
+}
+
+/* nav list */
+.sb-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.sb-li {
+  display: block;
+}
+
+/* nav item */
+.sb-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4px 18px 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.sb-item:hover {
+  background: #f8fafc;
+}
+
+.sb-item.is-active {
+  background: var(--pill-bg);
+  border-color: var(--pill-stroke);
+  box-shadow: 0 0 0 1px var(--pill-stroke) inset;
+}
+
+.sb-active-bar {
+  width: 4px;
+  height: 18px;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.sb-item.is-active .sb-active-bar {
+  background: var(--blue);
+}
+
+.sb-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--icon-gray);
+}
+
+.sb-label {
+  line-height: 1;
+}
+
+/* spacer works because .sb is flex */
+.sb-spacer {
+  flex: 1;
+}
+
+/* exit */
+.sb-exit {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f3f7ff;
+  border: 1px solid var(--pill-stroke);
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.sb-exit:hover {
+  background: var(--pill-bg);
+}
+
+/* Mobile Responsive Styles */
+@media (width <= 768px) {
+  .sb {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    border-right: none;
+    border-top: 1px solid var(--sb-border);
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgb(0 0 0 / 5%);
+  }
+
+  .sb-brand {
+    display: none;
+  }
+
+  .sb-user {
+    display: none;
+  }
+
+  .sb-list {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    margin: 0;
+    flex: 1;
+    justify-content: space-around;
+  }
+
+  .sb-li {
+    flex: 1;
+  }
+
+  .sb-item {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    justify-items: center;
+    padding: 8px 4px;
+    gap: 4px;
+    font-size: 11px;
+    border-radius: 8px;
+  }
+
+  .sb-active-bar {
+    display: none;
+  }
+
+  .sb-dot {
+    width: 20px;
+    height: 20px;
+  }
+
+  .sb-label {
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .sb-spacer {
+    display: none;
+  }
+
+  .sb-exit {
+    margin-top: 0;
+    padding: 8px;
+    min-width: auto;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  .sb-exit .sb-label {
+    font-size: 10px;
+  }
+}
+
+@media (width <= 480px) {
+  .sb {
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .sb-item {
+    padding: 6px 2px;
+    gap: 2px;
+  }
+
+  .sb-dot {
+    width: 18px;
+    height: 18px;
+  }
+
+  .sb-label {
+    font-size: 9px;
+  }
+
+  .sb-exit {
+    padding: 6px 4px;
+    font-size: 9px;
+  }
+
+  .sb-exit .sb-label {
+    font-size: 9px;
+  }
+}
