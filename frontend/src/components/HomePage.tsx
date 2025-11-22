@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import { transactionsApi, Transaction, Category, TransactionCreate } from '../api/transactions';
+import { useCurrency } from '../contexts/CurrencyContext';
 import './home.css';
 
 interface TransactionSummary {
@@ -54,6 +55,7 @@ export function HomePage() {
     transaction_date: new Date().toISOString().split('T')[0],
   });
 
+  const { formatAmount } = useCurrency();
   const itemsPerPage = 5;
 
   const applyData = useCallback(
@@ -235,17 +237,17 @@ export function HomePage() {
         <div className="summary-cards">
           <div className="summary-card balance">
             <h3>Общий баланс</h3>
-            <div className="amount">{summary.balance.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">{formatAmount(summary.balance)}</div>
           </div>
 
           <div className="summary-card income">
             <h3>Доходы</h3>
-            <div className="amount">+{summary.totalIncome.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">+{formatAmount(summary.totalIncome)}</div>
           </div>
 
           <div className="summary-card expense">
             <h3>Расходы</h3>
-            <div className="amount">-{summary.totalExpenses.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">-{formatAmount(summary.totalExpenses)}</div>
           </div>
         </div>
       </div>
@@ -300,7 +302,7 @@ export function HomePage() {
                 <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
                 <td className={`amount-cell ${transaction.transaction_type}`}>
                   {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {transaction.amount.toLocaleString('ru-RU')} ₽
+                  {formatAmount(transaction.amount)}
                 </td>
                 <td className="description-cell">{transaction.description}</td>
                 <td>
@@ -313,7 +315,39 @@ export function HomePage() {
           </tbody>
         </table>
 
+<<<<<<< Updated upstream
         {transactions.length === 0 && (
+=======
+        {/* Мобильное отображение */}
+        <div className="mobile-transactions">
+          {paginatedTransactions.transactions.map((transaction) => (
+            <div
+              key={transaction.id}
+              className={`mobile-transaction-card ${transaction.transaction_type}`}
+            >
+              <div className="mobile-card-header">
+                <div className="mobile-card-category">
+                  {categories?.find((c) => Number(c.id) === Number(transaction.category_id))
+                    ?.name ?? 'Без категории'}
+                </div>
+                <div className={`mobile-card-amount ${transaction.transaction_type}`}>
+                  {transaction.transaction_type === 'income' ? '+' : '-'}
+                  {formatAmount(transaction.amount)}
+                </div>
+              </div>
+              <div className="mobile-card-description">{transaction.description}</div>
+              <div className="mobile-card-footer">
+                <span>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</span>
+                <span className={`type-badge ${transaction.transaction_type}`}>
+                  {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredTransactions.length === 0 && (
+>>>>>>> Stashed changes
           <div className="empty-state">Нет транзакций для отображения</div>
         )}
       </div>
