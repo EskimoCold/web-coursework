@@ -8,6 +8,7 @@ import { SettingsPage } from '../components/SettingsPage';
 import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
+import { CurrencyProvider } from '../contexts/CurrencyContext'; // Добавляем импорт
 import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { Login } from '../pages/Login';
@@ -43,19 +44,24 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <CategoryProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <MainApp />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <CurrencyProvider>
+            {' '}
+            {/* Добавляем CurrencyProvider здесь */}
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <MainApp />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </CurrencyProvider>{' '}
+          {/* Закрытие CurrencyProvider */}
         </CategoryProvider>
       </AuthProvider>
     </BrowserRouter>
