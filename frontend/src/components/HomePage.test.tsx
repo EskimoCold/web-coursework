@@ -7,16 +7,16 @@ import { CurrencyProvider } from '../contexts/CurrencyContext';
 
 import { HomePage } from './HomePage';
 
-// Mock transactions API
+// Правильный мок для transactions API
 vi.mock('../../api/transactions', () => ({
   transactionsApi: {
-    getTransactions: vi.fn(),
+    getTransactions: vi.fn(() => Promise.resolve([])),
     createTransaction: vi.fn(),
     deleteTransaction: vi.fn(),
   },
 }));
 
-const mockTransactionsApi = await import('../api/transactions');
+import { transactionsApi } from '../api/transactions'; // Прямой импорт
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
@@ -29,10 +29,11 @@ const renderWithProviders = (component: React.ReactElement) => {
 describe('HomePage Additional Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(transactionsApi.getTransactions).mockClear();
   });
 
   it('displays empty state when no transactions', async () => {
-    mockTransactionsApi.transactionsApi.getTransactions.mockResolvedValue([]);
+    vi.mocked(transactionsApi.getTransactions).mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
@@ -42,18 +43,17 @@ describe('HomePage Additional Tests', () => {
   });
 
   it('handles API errors when loading transactions', async () => {
-    mockTransactionsApi.transactionsApi.getTransactions.mockRejectedValue(new Error('API Error'));
+    vi.mocked(transactionsApi.getTransactions).mockRejectedValue(new Error('API Error'));
 
     renderWithProviders(<HomePage />);
 
     await waitFor(() => {
-      // Компонент должен отображаться без падения
       expect(screen.getByText(/финансы/i)).toBeInTheDocument();
     });
   });
 
   it('opens transaction form when add button is clicked', async () => {
-    mockTransactionsApi.transactionsApi.getTransactions.mockResolvedValue([]);
+    vi.mocked(transactionsApi.getTransactions).mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
