@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  TooltipProps,
 } from 'recharts';
 
 import './analytics.css';
@@ -178,9 +179,32 @@ export const AnalyticsPage: React.FC = () => {
     return Array.from(imp, ([name, value]) => ({ name, value }));
   }, [filteredTransactions, categoryNameById]);
 
-  // Измененная функция для форматирования значений в тултипах
-  const formatTooltipValue = (value: unknown) => {
-    return formatAmount(Number(value));
+  // Кастомные компоненты для тултипов с правильными типами
+  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="custom-tooltip">
+          <p className="label">{`${label}`}</p>
+          {payload.map((entry, index) => (
+            <p key={index} style={{ color: entry.color }}>
+              {`${entry.name}: ${formatAmount(entry.value)}`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const CustomPieTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="custom-tooltip">
+          <p>{`${payload[0].name}: ${formatAmount(payload[0].value)}`}</p>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -224,12 +248,7 @@ export const AnalyticsPage: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
-              <Tooltip
-                formatter={(value: unknown, name: string) => [
-                  formatTooltipValue(value),
-                  name === 'income' ? 'Доход' : 'Расход',
-                ]}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Area
                 type="monotone"
                 dataKey="expense"
@@ -237,6 +256,7 @@ export const AnalyticsPage: React.FC = () => {
                 stroke="#FF8042"
                 fill="#FF8042"
                 fillOpacity={0.3}
+                name="Расходы"
               />
               <Area
                 type="monotone"
@@ -245,6 +265,7 @@ export const AnalyticsPage: React.FC = () => {
                 stroke="#00C49F"
                 fill="#00C49F"
                 fillOpacity={0.3}
+                name="Доходы"
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -269,7 +290,7 @@ export const AnalyticsPage: React.FC = () => {
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={formatTooltipValue} />
+                <Tooltip content={<CustomPieTooltip />} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -281,7 +302,7 @@ export const AnalyticsPage: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={formatTooltipValue} />
+                <Tooltip content={<CustomPieTooltip />} />
                 <Bar dataKey="value" fill="#8884d8" />
               </BarChart>
             </ResponsiveContainer>
