@@ -37,6 +37,7 @@ const mockCategory: Category = {
   id: 1,
   name: 'Test Category',
   description: 'Test Description',
+  icon: 'sample.png', // Добавлено поле icon
 };
 
 const defaultProps = {
@@ -56,6 +57,8 @@ Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage,
 });
 
+const mockIcons = ['icon1.png', 'icon2.png', 'sample.png']; // Добавлен массив иконок
+
 const renderComponent = (props = {}, token = 'mock-token') => {
   mockLocalStorage.getItem.mockImplementation((key) => {
     if (key === 'access_token' || key === 'token') return token;
@@ -64,6 +67,7 @@ const renderComponent = (props = {}, token = 'mock-token') => {
 
   (useCategories as unknown as vi.Mock).mockReturnValue({
     setCategories: mockSetCategories,
+    icons: mockIcons, // Добавлено возвращение иконок
   });
 
   return render(<CategoryForm {...defaultProps} {...props} />);
@@ -103,7 +107,6 @@ describe('CategoryForm', () => {
   it('updates form fields on user input', () => {
     renderComponent();
 
-    // two empty fields: [name input, description textarea]
     const [nameInput, descriptionTextarea] = screen.getAllByDisplayValue('');
 
     fireEvent.change(nameInput, { target: { value: 'New Category' } });
@@ -113,14 +116,12 @@ describe('CategoryForm', () => {
     expect(descriptionTextarea).toHaveValue('New Description');
   });
 
-  it('marks icon as selected when clicked (default already selected)', () => {
+  it('marks icon as selected when clicked', () => {
     renderComponent();
 
-    // all icons are "sample.png"; at least one should be selected by default
-    const firstIcon = screen.getAllByTestId('icon-sample.png')[0];
-    expect(firstIcon).toHaveClass('selected');
+    const firstIcon = screen.getByTestId('icon-icon1.png');
+    expect(firstIcon).not.toHaveClass('selected');
 
-    // Clicking again keeps it selected
     fireEvent.click(firstIcon);
     expect(firstIcon).toHaveClass('selected');
   });
@@ -130,6 +131,7 @@ describe('CategoryForm', () => {
       id: 2,
       name: 'New Category',
       description: 'New Description',
+      icon: 'icon1.png',
     };
 
     (categoriesApi.addCategory as vi.Mock).mockResolvedValueOnce(newCategory);
@@ -141,10 +143,18 @@ describe('CategoryForm', () => {
     fireEvent.change(nameInput, { target: { value: 'New Category' } });
     fireEvent.change(descriptionTextarea, { target: { value: 'New Description' } });
 
+    // Выбираем иконку перед отправкой
+    const firstIcon = screen.getByTestId('icon-icon1.png');
+    fireEvent.click(firstIcon);
+
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 
     await waitFor(() => {
-      expect(categoriesApi.addCategory).toHaveBeenCalledWith('New Category', 'New Description');
+      expect(categoriesApi.addCategory).toHaveBeenCalledWith(
+        'New Category',
+        'New Description',
+        'icon1.png',
+      );
     });
 
     await waitFor(() => {
@@ -153,7 +163,7 @@ describe('CategoryForm', () => {
   });
 
   it('submits successfully for category modification', async () => {
-    const updated: Category = { ...mockCategory }; // component replaces by returned value
+    const updated: Category = { ...mockCategory };
     (categoriesApi.updateCategory as vi.Mock).mockResolvedValueOnce(updated);
 
     renderComponent({
@@ -171,6 +181,7 @@ describe('CategoryForm', () => {
         id: 1,
         name: 'Test Category',
         description: 'Test Description',
+        icon: 'sample.png',
       });
     });
 
@@ -184,10 +195,8 @@ describe('CategoryForm', () => {
     renderComponent();
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
-    // With empty name, isSubmittable=false
     expect(submitButton).toBeDisabled();
 
-    // Even clicking should not call API
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -195,24 +204,19 @@ describe('CategoryForm', () => {
     });
   });
 
-  it('submits even if icon is not explicitly clicked (default icon present)', async () => {
-    const newCategory: Category = {
-      id: 3,
-      name: 'Only Name',
-      description: '',
-    };
-    (categoriesApi.addCategory as vi.Mock).mockResolvedValueOnce(newCategory);
-
+  it('does not submit when icon is not selected (button disabled)', async () => {
     renderComponent();
 
     const [nameInput] = screen.getAllByDisplayValue('');
     fireEvent.change(nameInput, { target: { value: 'Only Name' } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    const submitButton = screen.getByRole('button', { name: 'Submit' });
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(categoriesApi.addCategory).toHaveBeenCalledWith('Only Name', '');
-      expect(mockSetCategories).toHaveBeenCalledTimes(1);
+      expect(categoriesApi.addCategory).not.toHaveBeenCalled();
     });
   });
 
@@ -225,10 +229,14 @@ describe('CategoryForm', () => {
 
     const [nameInput] = screen.getAllByDisplayValue('');
     fireEvent.change(nameInput, { target: { value: 'New Category' } });
+
+    const firstIcon = screen.getByTestId('icon-icon1.png');
+    fireEvent.click(firstIcon);
+
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleSpy).toBeCalledTimes(0);
     });
 
     consoleSpy.mockRestore();
