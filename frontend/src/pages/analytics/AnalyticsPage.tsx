@@ -178,8 +178,9 @@ export const AnalyticsPage: React.FC = () => {
     return Array.from(imp, ([name, value]) => ({ name, value }));
   }, [filteredTransactions, categoryNameById]);
 
-  const formatTooltipValue = (value: number) => {
-    return formatAmount(value);
+  // Измененная функция для форматирования значений в тултипах
+  const formatTooltipValue = (value: unknown) => {
+    return formatAmount(Number(value));
   };
 
   return (
@@ -225,7 +226,7 @@ export const AnalyticsPage: React.FC = () => {
               <YAxis />
               <Tooltip
                 formatter={(value: unknown, name: string) => [
-                  formatTooltipValue(value as number),
+                  formatTooltipValue(value),
                   name === 'income' ? 'Доход' : 'Расход',
                 ]}
               />
@@ -268,7 +269,7 @@ export const AnalyticsPage: React.FC = () => {
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: unknown) => formatTooltipValue(value as number)} />
+                <Tooltip formatter={formatTooltipValue} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -280,7 +281,7 @@ export const AnalyticsPage: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value: unknown) => formatTooltipValue(value as number)} />
+                <Tooltip formatter={formatTooltipValue} />
                 <Bar dataKey="value" fill="#8884d8" />
               </BarChart>
             </ResponsiveContainer>
