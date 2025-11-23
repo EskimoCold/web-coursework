@@ -1,0 +1,42 @@
+// src/contexts/CategoriesContext.test.tsx
+import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import { categoriesApi } from '../api/categories';
+
+import { CategoriesProvider, useCategories } from './CategoriesContext';
+
+jest.mock('../api/categories');
+
+const mockCategoriesApi = categoriesApi as jest.Mocked<typeof categoriesApi>;
+
+const TestComponent: React.FC = () => {
+  const { categories, loading, error } = useCategories();
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <div>
+      {categories.map((cat) => (
+        <div key={cat.id}>{cat.name}</div>
+      ))}
+    </div>
+  );
+};
+
+describe('CategoriesContext Error Handling', () => {
+  it('handles API errors in CategoriesContext', async () => {
+    mockCategoriesApi.getCategories.mockRejectedValueOnce(new Error('Failed to fetch'));
+
+    render(
+      <CategoriesProvider>
+        <TestComponent />
+      </CategoriesProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/Error:/)).toBeInTheDocument();
+    });
+  });
+});
