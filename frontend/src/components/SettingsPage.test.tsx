@@ -13,8 +13,15 @@ describe('SettingsPage Additional Tests', () => {
       </CurrencyProvider>,
     );
 
-    const currencySelect = screen.getByLabelText(/валюта/i);
-    fireEvent.change(currencySelect, { target: { value: 'EUR' } });
+    // Найти вкладку "Внешний вид" и кликнуть на нее
+    const appearanceTab = screen.getByText('Внешний вид');
+    fireEvent.click(appearanceTab);
+
+    await waitFor(() => {
+      // После перехода на вкладку "Внешний вид" найти элементы валюты
+      const currencySelect = screen.getByLabelText(/валюта/i);
+      fireEvent.change(currencySelect, { target: { value: 'EUR' } });
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/евро/i)).toBeInTheDocument();
@@ -28,21 +35,32 @@ describe('SettingsPage Additional Tests', () => {
       </CurrencyProvider>,
     );
 
-    const currencySelect = screen.getByLabelText(/валюта/i);
-    fireEvent.change(currencySelect, { target: { value: 'UNKNOWN' } });
+    // Найти вкладку "Внешний вид"
+    const appearanceTab = screen.getByText('Внешний вид');
+    fireEvent.click(appearanceTab);
 
-    // Should not crash and still display the component
+    await waitFor(() => {
+      const currencySelect = screen.getByLabelText(/валюта/i);
+      fireEvent.change(currencySelect, { target: { value: 'UNKNOWN' } });
+    });
+
     expect(screen.getByText(/настройки/i)).toBeInTheDocument();
   });
 
-  it('displays current currency settings', () => {
+  it('displays current currency settings', async () => {
     render(
       <CurrencyProvider>
         <SettingsPage />
       </CurrencyProvider>,
     );
 
-    expect(screen.getByText(/настройки валюты/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/валюта/i)).toBeInTheDocument();
+    // Перейти на вкладку "Внешний вид"
+    const appearanceTab = screen.getByText('Внешний вид');
+    fireEvent.click(appearanceTab);
+
+    await waitFor(() => {
+      expect(screen.getByText(/внешний вид/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/валюта/i)).toBeInTheDocument();
+    });
   });
 });
