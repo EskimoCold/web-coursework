@@ -1,69 +1,67 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import React from 'react';
+import { vi } from 'vitest';
 
+import { CategoriesProvider } from '../contexts/CategoriesContext';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 
 import { HomePage } from './HomePage';
 
-// Mock API
-vi.mock('../api/transactions', () => ({
+// Mock transactions API
+vi.mock('../../api/transactions', () => ({
   transactionsApi: {
-    getTransactions: vi.fn(() =>
-      Promise.resolve([
-        {
-          id: 1,
-          amount: 1500,
-          transaction_type: 'expense',
-          transaction_date: '2024-01-15T00:00:00Z',
-          description: 'Продукты в супермаркете',
-          category: { id: 1, name: 'Продукты' },
-        },
-        {
-          id: 2,
-          amount: 50000,
-          transaction_type: 'income',
-          transaction_date: '2024-01-10T00:00:00Z',
-          description: 'Зарплата за январь',
-          category: { id: 2, name: 'Зарплата' },
-        },
-      ]),
-    ),
-    getCategories: vi.fn(() =>
-      Promise.resolve([
-        { id: 1, name: 'Продукты' },
-        { id: 2, name: 'Зарплата' },
-      ]),
-    ),
+    getTransactions: vi.fn(),
+    createTransaction: vi.fn(),
+    deleteTransaction: vi.fn(),
   },
 }));
 
-describe('HomePage', () => {
-  it('displays transactions correctly', async () => {
-    render(
-      <CurrencyProvider>
-        <HomePage />
-      </CurrencyProvider>,
-    );
+const mockTransactionsApi = await import('../api/transactions');
+
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <CurrencyProvider>
+      <CategoriesProvider>{component}</CategoriesProvider>
+    </CurrencyProvider>,
+  );
+};
+
+describe('HomePage Additional Tests', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('displays empty state when no transactions', async () => {
+    mockTransactionsApi.transactionsApi.getTransactions.mockResolvedValue([]);
+
+    renderWithProviders(<HomePage />);
 
     await waitFor(() => {
-      // Используем getAllByText так как есть дублирующиеся элементы (десктоп и мобильная версия)
-      const productElements = screen.getAllByText('Продукты в супермаркете');
-      expect(productElements.length).toBeGreaterThan(0);
-
-      const salaryElements = screen.getAllByText('Зарплата за январь');
-      expect(salaryElements.length).toBeGreaterThan(0);
+      expect(screen.getByText(/нет операций/i)).toBeInTheDocument();
     });
   });
 
-  it('shows transaction count', async () => {
-    render(
-      <CurrencyProvider>
-        <HomePage />
-      </CurrencyProvider>,
-    );
+  it('handles API errors when loading transactions', async () => {
+    mockTransactionsApi.transactionsApi.getTransactions.mockRejectedValue(new Error('API Error'));
+
+    renderWithProviders(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Показано/)).toBeInTheDocument();
+      // Компонент должен отображаться без падения
+      expect(screen.getByText(/финансы/i)).toBeInTheDocument();
+    });
+  });
+
+  it('opens transaction form when add button is clicked', async () => {
+    mockTransactionsApi.transactionsApi.getTransactions.mockResolvedValue([]);
+
+    renderWithProviders(<HomePage />);
+
+    const addButton = screen.getByText(/добавить операцию/i);
+    fireEvent.click(addButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/добавление операции/i)).toBeInTheDocument();
     });
   });
 });
