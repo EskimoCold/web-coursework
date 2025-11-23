@@ -46,8 +46,12 @@ describe('HomePage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
-      expect(screen.getByText('Зарплата за январь')).toBeInTheDocument();
+      // Используем getAllByText так как есть дублирующиеся элементы (десктоп и мобильная версия)
+      const productElements = screen.getAllByText('Продукты в супермаркете');
+      expect(productElements.length).toBeGreaterThan(0);
+
+      const salaryElements = screen.getAllByText('Зарплата за январь');
+      expect(salaryElements.length).toBeGreaterThan(0);
     });
   });
 
