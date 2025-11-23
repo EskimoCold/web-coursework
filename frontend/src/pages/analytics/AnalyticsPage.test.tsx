@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { describe, it, expect, beforeEach, vi, beforeAll, afterAll } from 'vitest';
 
 import { Transaction, transactionsApi } from '../../api/transactions';
+import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
 import { AnalyticsPage } from './AnalyticsPage';
 
@@ -142,7 +143,11 @@ const mockTransactions: Transaction[] = [
 
 const renderComponent = (transactions: Transaction[] = mockTransactions) => {
   (transactionsApi.getTransactions as vi.Mock).mockResolvedValue(transactions);
-  return render(<AnalyticsPage />);
+  return render(
+    <CurrencyProvider>
+      <AnalyticsPage />
+    </CurrencyProvider>,
+  );
 };
 
 describe('AnalyticsPage', () => {
