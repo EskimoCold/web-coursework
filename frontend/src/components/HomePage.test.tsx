@@ -2,12 +2,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
-import { CategoriesProvider } from '../contexts/CategoriesContext';
-import { CurrencyProvider } from '../contexts/CurrencyContext';
-
-import { HomePage } from './HomePage';
-
-// Правильный мок для transactions API
+// First: Mock API imports
 vi.mock('../../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(() => Promise.resolve([])),
@@ -16,7 +11,14 @@ vi.mock('../../api/transactions', () => ({
   },
 }));
 
-import { transactionsApi } from '../api/transactions'; // Прямой импорт
+import { transactionsApi } from '../api/transactions';
+
+// Then: Context imports
+import { CategoriesProvider } from '../contexts/CategoriesContext';
+import { CurrencyProvider } from '../contexts/CurrencyContext';
+
+// Finally: Local component imports
+import { HomePage } from './HomePage';
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
