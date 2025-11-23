@@ -224,8 +224,8 @@ export const AnalyticsPage: React.FC = () => {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip
-                formatter={(value: number, name: string) => [
-                  formatTooltipValue(value),
+                formatter={(value: unknown, name: string) => [
+                  formatTooltipValue(value as number),
                   name === 'income' ? 'Доход' : 'Расход',
                 ]}
               />
@@ -268,7 +268,7 @@ export const AnalyticsPage: React.FC = () => {
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => formatTooltipValue(value)} />
+                <Tooltip formatter={(value: unknown) => formatTooltipValue(value as number)} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -280,7 +280,7 @@ export const AnalyticsPage: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value: number) => formatTooltipValue(value)} />
+                <Tooltip formatter={(value: unknown) => formatTooltipValue(value as number)} />
                 <Bar dataKey="value" fill="#8884d8" />
               </BarChart>
             </ResponsiveContainer>
