@@ -1,5 +1,6 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { categoriesApi } from '../../api/categories';
 import { transactionsApi } from '../../api/transactions';
@@ -9,11 +10,20 @@ import { CurrencyProvider } from '../../contexts/CurrencyContext';
 import { AnalyticsPage } from './AnalyticsPage';
 
 // Mock the APIs
-jest.mock('../../api/categories');
-jest.mock('../../api/transactions');
+vi.mock('../../api/categories');
+vi.mock('../../api/transactions');
 
-const mockCategoriesApi = categoriesApi as jest.Mocked<typeof categoriesApi>;
-const mockTransactionsApi = transactionsApi as jest.Mocked<typeof transactionsApi>;
+// Define proper types for mocked APIs
+interface MockCategoriesApi {
+  getCategories: ReturnType<typeof vi.fn>;
+}
+
+interface MockTransactionsApi {
+  getTransactions: ReturnType<typeof vi.fn>;
+}
+
+const mockCategoriesApi = categoriesApi as MockCategoriesApi;
+const mockTransactionsApi = transactionsApi as MockTransactionsApi;
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
@@ -25,7 +35,7 @@ const renderWithProviders = (component: React.ReactElement) => {
 
 describe('AnalyticsPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCategoriesApi.getCategories.mockResolvedValue([
       { id: 1, name: 'Food', type: 'expense' },

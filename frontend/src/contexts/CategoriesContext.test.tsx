@@ -1,14 +1,19 @@
-// src/contexts/CategoriesContext.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { categoriesApi } from '../api/categories';
 
 import { CategoriesProvider, useCategories } from './CategoriesContext';
 
-jest.mock('../api/categories');
+vi.mock('../api/categories');
 
-const mockCategoriesApi = categoriesApi as jest.Mocked<typeof categoriesApi>;
+// Define proper type for mocked API
+interface MockCategoriesApi {
+  getCategories: ReturnType<typeof vi.fn>;
+}
+
+const mockCategoriesApi = categoriesApi as MockCategoriesApi;
 
 const TestComponent: React.FC = () => {
   const { categories, loading, error } = useCategories();
