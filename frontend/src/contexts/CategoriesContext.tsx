@@ -6,19 +6,21 @@ export type Category = {
   id: number;
   name: string;
   //  type: number;
-  //  icon: string;
+  icon: string;
   description: string;
 };
 
 type CategoryContextType = {
   categories: Category[];
   setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+  icons: string[];
 };
 
 const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
 
 export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [icons] = useState(Array.from({ length: 18 }, (_, i) => `icons/categories/${i + 1}.svg`));
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -34,7 +36,7 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   return (
-    <CategoryContext.Provider value={{ categories, setCategories }}>
+    <CategoryContext.Provider value={{ categories, setCategories, icons }}>
       {children}
     </CategoryContext.Provider>
   );
