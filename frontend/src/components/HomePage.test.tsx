@@ -12,12 +12,11 @@ vi.mock('../../api/transactions', () => ({
 }));
 
 import { transactionsApi } from '../api/transactions';
-
-// Then: Context imports
+// Then: Context imports (без пустой строки)
 import { CategoriesProvider } from '../contexts/CategoriesContext';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 
-// Finally: Local component imports
+// Finally: Local component imports (без пустой строки)
 import { HomePage } from './HomePage';
 
 const renderWithProviders = (component: React.ReactElement) => {
