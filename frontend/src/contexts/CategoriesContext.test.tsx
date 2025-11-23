@@ -2,15 +2,27 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
+// Mock the API properly before importing the context
+vi.mock('../api/categories', () => ({
+  categoriesApi: {
+    getCategories: vi.fn(),
+  },
+}));
+
+// Import after mocking
 import { categoriesApi } from '../api/categories';
 
 import { CategoriesProvider, useCategories } from './CategoriesContext';
 
-vi.mock('../api/categories');
+// Define proper types for mocked API
+interface MockApiFunction {
+  mockResolvedValue: (value: unknown) => void;
+  mockResolvedValueOnce: (value: unknown) => void;
+  mockRejectedValueOnce: (error: Error) => void;
+}
 
-// Define proper type for mocked API
 interface MockCategoriesApi {
-  getCategories: ReturnType<typeof vi.fn>;
+  getCategories: MockApiFunction;
 }
 
 const mockCategoriesApi = categoriesApi as MockCategoriesApi;

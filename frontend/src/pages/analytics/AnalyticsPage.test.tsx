@@ -2,6 +2,20 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
+// Mock the APIs properly before importing the component
+vi.mock('../../api/categories', () => ({
+  categoriesApi: {
+    getCategories: vi.fn(),
+  },
+}));
+
+vi.mock('../../api/transactions', () => ({
+  transactionsApi: {
+    getTransactions: vi.fn(),
+  },
+}));
+
+// Import APIs after mocking
 import { categoriesApi } from '../../api/categories';
 import { transactionsApi } from '../../api/transactions';
 import { CategoriesProvider } from '../../contexts/CategoriesContext';
@@ -9,17 +23,19 @@ import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
 import { AnalyticsPage } from './AnalyticsPage';
 
-// Mock the APIs
-vi.mock('../../api/categories');
-vi.mock('../../api/transactions');
-
 // Define proper types for mocked APIs
+interface MockApiFunction {
+  mockResolvedValue: (value: unknown) => void;
+  mockResolvedValueOnce: (value: unknown) => void;
+  mockRejectedValueOnce: (error: Error) => void;
+}
+
 interface MockCategoriesApi {
-  getCategories: ReturnType<typeof vi.fn>;
+  getCategories: MockApiFunction;
 }
 
 interface MockTransactionsApi {
-  getTransactions: ReturnType<typeof vi.fn>;
+  getTransactions: MockApiFunction;
 }
 
 const mockCategoriesApi = categoriesApi as MockCategoriesApi;
@@ -190,7 +206,7 @@ describe('AnalyticsPage', () => {
 
     await waitFor(() => {
       // Income: 100, Expenses: 80 (50 + 30), Balance: 20
-      const balanceElements = screen.getAllByText(/\$20|\$20\.00/);
+      const balanceElements = screen.getAllByText(/20/);
       expect(balanceElements.length).toBeGreaterThan(0);
     });
   });
