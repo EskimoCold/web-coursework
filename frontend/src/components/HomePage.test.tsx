@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
+import { CurrencyProvider } from '../contexts/CurrencyContext';
+
 import { HomePage } from './HomePage';
 
 // Mock API
@@ -37,7 +39,11 @@ vi.mock('../api/transactions', () => ({
 
 describe('HomePage', () => {
   it('displays transactions correctly', async () => {
-    render(<HomePage />);
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
@@ -46,7 +52,11 @@ describe('HomePage', () => {
   });
 
   it('shows transaction count', async () => {
-    render(<HomePage />);
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
 
     await waitFor(() => {
       expect(screen.getByText(/Показано/)).toBeInTheDocument();

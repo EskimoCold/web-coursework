@@ -8,7 +8,7 @@ import { SettingsPage } from '../components/SettingsPage';
 import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
-import { CurrencyProvider } from '../contexts/CurrencyContext'; // Добавляем импорт
+import { CurrencyProvider } from '../contexts/CurrencyContext';
 import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { Login } from '../pages/Login';
@@ -45,8 +45,6 @@ export default function App() {
       <AuthProvider>
         <CategoryProvider>
           <CurrencyProvider>
-            {' '}
-            {/* Добавляем CurrencyProvider здесь */}
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -60,8 +58,7 @@ export default function App() {
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </CurrencyProvider>{' '}
-          {/* Закрытие CurrencyProvider */}
+          </CurrencyProvider>
         </CategoryProvider>
       </AuthProvider>
     </BrowserRouter>
