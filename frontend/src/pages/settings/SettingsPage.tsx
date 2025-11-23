@@ -1,7 +1,123 @@
 import { useState } from 'react';
+
 import './settings.css';
+import { authApi } from '../../api/auth';
+
+type ChangePasswordModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (newPassword !== confirmPassword) {
+      setError('Новые пароли не совпадают');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError('Пароль должен содержать минимум 6 символов');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) throw new Error('Не авторизован');
+
+      await authApi.changePassword({ old_password: oldPassword, new_password: newPassword }, token);
+      setSuccess('Пароль успешно изменен');
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => {
+        onClose();
+        setSuccess('');
+      }, 2000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Ошибка при смене пароля');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="settings-modal">
+      <div className="settings-modal-bg" onClick={onClose} />
+      <div className="settings-modal-content">
+        <h3 className="settings-section-title" style={{ fontSize: '20px' }}>
+          Смена пароля
+        </h3>
+        <form onSubmit={handleSubmit} className="settings-form">
+          <div className="settings-form-group">
+            <label className="settings-form-label">Текущий пароль</label>
+            <input
+              type="password"
+              className="settings-form-input"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="settings-form-group">
+            <label className="settings-form-label">Новый пароль</label>
+            <input
+              type="password"
+              className="settings-form-input"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="settings-form-group">
+            <label className="settings-form-label">Подтвердите новый пароль</label>
+            <input
+              type="password"
+              className="settings-form-input"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {error && <div style={{ color: '#dc2626', fontSize: '14px' }}>{error}</div>}
+          {success && <div style={{ color: '#059669', fontSize: '14px' }}>{success}</div>}
+
+          <div className="settings-form-actions">
+            <button
+              type="button"
+              className="settings-button"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Отмена
+            </button>
+            <button type="submit" className="settings-button primary" disabled={isLoading}>
+              {isLoading ? 'Сохранение...' : 'Сохранить'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 function SecuritySection() {
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
   return (
     <div className="settings-section">
       <h2 className="settings-section-title">Безопасность</h2>
@@ -13,7 +129,9 @@ function SecuritySection() {
             <h3 className="settings-item-title">Смена пароля</h3>
             <p className="settings-item-description">Обновите ваш пароль для защиты аккаунта</p>
           </div>
-          {/*<button className="settings-button primary">Сменить пароль</button>*/}
+          <button className="settings-button primary" onClick={() => setIsPasswordModalOpen(true)}>
+            Сменить пароль
+          </button>
         </div>
 
         <div className="settings-item danger">
@@ -24,6 +142,11 @@ function SecuritySection() {
           <button className="settings-button danger">Удалить аккаунт</button>
         </div>
       </div>
+
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+      />
     </div>
   );
 }
