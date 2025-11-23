@@ -190,25 +190,24 @@ describe('AnalyticsPage', () => {
   it('should calculate correct balance', async () => {
     renderComponent();
     await waitFor(() => {
-      const totalBalance = 1000 + 1500 - 500 - 200;
-      expect(screen.getByText(`${totalBalance} ₽`)).toBeInTheDocument();
+      // Ищем отформатированную сумму с пробелом
+      expect(screen.getByText('1 800 ₽')).toBeInTheDocument();
     });
   });
 
   it('should calculate correct incomes and expenses', async () => {
     renderComponent();
     await waitFor(() => {
-      const totalIncomes = 1000 + 1500;
-      const totalExpenses = 500 + 200;
-      expect(screen.getByText(`${totalIncomes} ₽`)).toBeInTheDocument();
-      expect(screen.getByText(`${totalExpenses} ₽`)).toBeInTheDocument();
+      // Ищем отформатированные суммы с пробелами
+      expect(screen.getByText('2 500 ₽')).toBeInTheDocument();
+      expect(screen.getByText('700 ₽')).toBeInTheDocument();
     });
   });
 
   it('should display correct number of transactions', async () => {
     renderComponent();
     await waitFor(() => {
-      expect(screen.getByText(`${mockTransactions.length}`)).toBeInTheDocument();
+      expect(screen.getByText('4')).toBeInTheDocument();
     });
   });
 
@@ -266,12 +265,22 @@ describe('AnalyticsPage', () => {
   it('should apply correct CSS classes to values', async () => {
     renderComponent();
     await waitFor(() => {
-      expect(screen.getByText('Общий баланс').nextElementSibling).toHaveClass('anal-value total');
-      expect(screen.getByText('Доходы').nextElementSibling).toHaveClass('anal-value income');
-      expect(screen.getByText('Расходы').nextElementSibling).toHaveClass('anal-value expense');
-      expect(screen.getByText('Всего операций').nextElementSibling).toHaveClass(
-        'anal-value operations',
-      );
+      // Находим элементы по классам
+      const balanceValue = screen
+        .getByText('Общий баланс')
+        .closest('div')
+        ?.querySelector('.anal-value');
+      const incomeValue = screen.getByText('Доходы').closest('div')?.querySelector('.anal-value');
+      const expenseValue = screen.getByText('Расходы').closest('div')?.querySelector('.anal-value');
+      const operationsValue = screen
+        .getByText('Всего операций')
+        .closest('div')
+        ?.querySelector('.anal-value');
+
+      expect(balanceValue).toHaveClass('anal-value', 'total');
+      expect(incomeValue).toHaveClass('anal-value', 'income');
+      expect(expenseValue).toHaveClass('anal-value', 'expense');
+      expect(operationsValue).toHaveClass('anal-value', 'operations');
     });
   });
 });
