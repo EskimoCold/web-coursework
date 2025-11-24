@@ -18,8 +18,8 @@ describe('SettingsPage Additional Tests', () => {
     fireEvent.click(appearanceTab);
 
     await waitFor(() => {
-      // После перехода на вкладку "Внешний вид" найти элементы валюты
-      const currencySelect = screen.getByLabelText(/валюта/i);
+      // Исправлено: находим select по роли и имени
+      const currencySelect = screen.getByRole('combobox', { name: /валюта/i });
       fireEvent.change(currencySelect, { target: { value: 'EUR' } });
     });
 
@@ -40,7 +40,7 @@ describe('SettingsPage Additional Tests', () => {
     fireEvent.click(appearanceTab);
 
     await waitFor(() => {
-      const currencySelect = screen.getByLabelText(/валюта/i);
+      const currencySelect = screen.getByRole('combobox', { name: /валюта/i });
       fireEvent.change(currencySelect, { target: { value: 'UNKNOWN' } });
     });
 
@@ -59,8 +59,9 @@ describe('SettingsPage Additional Tests', () => {
     fireEvent.click(appearanceTab);
 
     await waitFor(() => {
-      expect(screen.getByText(/внешний вид/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/валюта/i)).toBeInTheDocument();
+      // Исправлено: используем более точный селектор для заголовка
+      expect(screen.getByRole('heading', { name: 'Внешний вид' })).toBeInTheDocument();
+      expect(screen.getByRole('combobox', { name: /валюта/i })).toBeInTheDocument();
     });
   });
 });

@@ -12,11 +12,11 @@ vi.mock('../../api/transactions', () => ({
 }));
 
 import { transactionsApi } from '../api/transactions';
-// Then: Context imports (без пустой строки)
+// Then: Context imports
 import { CategoriesProvider } from '../contexts/CategoriesContext';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 
-// Finally: Local component imports (без пустой строки)
+// Finally: Local component imports
 import { HomePage } from './HomePage';
 
 const renderWithProviders = (component: React.ReactElement) => {
@@ -30,11 +30,12 @@ const renderWithProviders = (component: React.ReactElement) => {
 describe('HomePage Additional Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(transactionsApi.getTransactions).mockClear();
+    // Исправлено: используем mockClear напрямую на функции
+    transactionsApi.getTransactions.mockClear?.();
   });
 
   it('displays empty state when no transactions', async () => {
-    vi.mocked(transactionsApi.getTransactions).mockResolvedValue([]);
+    transactionsApi.getTransactions.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
@@ -44,7 +45,7 @@ describe('HomePage Additional Tests', () => {
   });
 
   it('handles API errors when loading transactions', async () => {
-    vi.mocked(transactionsApi.getTransactions).mockRejectedValue(new Error('API Error'));
+    transactionsApi.getTransactions.mockRejectedValue(new Error('API Error'));
 
     renderWithProviders(<HomePage />);
 
@@ -54,7 +55,7 @@ describe('HomePage Additional Tests', () => {
   });
 
   it('opens transaction form when add button is clicked', async () => {
-    vi.mocked(transactionsApi.getTransactions).mockResolvedValue([]);
+    transactionsApi.getTransactions.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
