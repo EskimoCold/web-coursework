@@ -40,29 +40,29 @@ const mockCategories: Category[] = [
   {
     id: 1,
     name: 'Food',
-    type: 0,
     icon: 'food-icon',
     description: 'Food expenses',
   },
   {
     id: 2,
     name: 'Salary',
-    type: 1,
     icon: 'salary-icon',
     description: 'Salary income',
   },
   {
     id: 3,
     name: 'Entertainment',
-    type: 0,
     icon: 'entertainment-icon',
     description: 'Entertainment expenses',
   },
 ];
 
-const renderComponent = (categories: Category[] = mockCategories) => {
+const mockIcons = ['1.svg', '2.svg', '3.svg'];
+
+const renderComponent = (categories: Category[] = mockCategories, icons: string[] = mockIcons) => {
   (useCategories as vi.Mock).mockReturnValue({
     categories,
+    icons,
   });
 
   return render(<CategoriesPage />);
