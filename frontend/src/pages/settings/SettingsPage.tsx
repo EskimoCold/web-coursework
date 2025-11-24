@@ -1,7 +1,10 @@
 import { useState } from 'react';
 
 import './settings.css';
+
 import { authApi } from '../../api/auth';
+
+import { DeleteAccountModal } from './DeleteAccountModal';
 
 type ChangePasswordModalProps = {
   isOpen: boolean;
@@ -117,6 +120,7 @@ function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
 
 function SecuritySection() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
 
   return (
     <div className="settings-section">
@@ -139,13 +143,22 @@ function SecuritySection() {
             <h3 className="settings-item-title">Удаление аккаунта</h3>
             <p className="settings-item-description">Безвозвратное удаление всех данных</p>
           </div>
-          <button className="settings-button danger">Удалить аккаунт</button>
+          <button
+            className="settings-button danger"
+            onClick={() => setIsDeleteAccountModalOpen(true)}
+          >
+            Удалить аккаунт
+          </button>
         </div>
       </div>
 
       <ChangePasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
+      />
+      <DeleteAccountModal
+        isOpen={isDeleteAccountModalOpen}
+        onClose={() => setIsDeleteAccountModalOpen(false)}
       />
     </div>
   );

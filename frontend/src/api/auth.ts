@@ -119,4 +119,18 @@ export const authApi = {
       body: JSON.stringify({ refresh_token: refreshToken }),
     });
   },
+
+  async deleteAccount(accessToken: string): Promise<void> {
+    const deleteResponse = await fetch(`${API_URL}/users/me`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!deleteResponse.ok) {
+      const error = await deleteResponse.json();
+      throw new Error(error.detail || 'Delete user failed');
+    }
+  },
 };
