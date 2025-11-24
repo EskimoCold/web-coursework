@@ -1,12 +1,21 @@
 import './sidebar.css';
 import { useAuth } from '../contexts/AuthContext';
 
+import { Icon } from './Icon';
+
 type Props = {
   active: string; // ← semicolons, not commas
   onSelect: (label: string) => void;
 };
 
-const NAV: string[] = ['Главная', 'Аналитика', 'Категории', 'Настройки'];
+const NAV: { label: string; icon: string }[] = [
+  { label: 'Главная', icon: 'home.svg' },
+  { label: 'Аналитика', icon: 'analytics.svg' },
+  { label: 'Категории', icon: 'categories.svg' },
+  { label: 'Настройки', icon: 'settings.svg' },
+];
+
+const srcIconPref = 'icons/sidebar/';
 
 export function Sidebar({ active, onSelect }: Props) {
   const { user, logout } = useAuth();
@@ -19,12 +28,12 @@ export function Sidebar({ active, onSelect }: Props) {
       </div>
 
       <div className="sb-user">
-        <span className="sb-avatar" aria-hidden />
+        <Icon source={`${srcIconPref}user.svg`} size={30} style={{ borderRadius: 30 }} />
         <span className="sb-user-name">{user?.username || 'Пользователь'}</span>
       </div>
 
       <ul className="sb-list" role="list">
-        {NAV.map((label) => {
+        {NAV.map(({ label, icon }) => {
           const isActive = label === active;
           return (
             <li key={label} className="sb-li">
@@ -34,7 +43,7 @@ export function Sidebar({ active, onSelect }: Props) {
                 onClick={() => onSelect(label)}
               >
                 <span className="sb-active-bar" aria-hidden />
-                <span className="sb-dot" aria-hidden />
+                <Icon source={srcIconPref + icon} size={15} />
                 <span className="sb-label">{label}</span>
               </button>
             </li>
@@ -45,7 +54,7 @@ export function Sidebar({ active, onSelect }: Props) {
       <div className="sb-spacer" />
 
       <button className="sb-exit" aria-label="Выход" onClick={logout}>
-        <span className="sb-dot" aria-hidden />
+        <Icon source={`${srcIconPref}exit.svg`} size={15} />
         <span className="sb-label">Выход</span>
       </button>
     </nav>

@@ -24,6 +24,11 @@ export interface User {
   updated_at: string;
 }
 
+export interface PasswordChangeRequest {
+  old_password: string;
+  new_password: string;
+}
+
 export const authApi = {
   async login(data: LoginRequest): Promise<AuthResponse> {
     const response = await fetch(`${API_URL}/auth/login`, {
@@ -71,6 +76,22 @@ export const authApi = {
     }
 
     return response.json();
+  },
+
+  async changePassword(data: PasswordChangeRequest, token: string): Promise<void> {
+    const response = await fetch(`${API_URL}/users/me/password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Password change failed');
+    }
   },
 
   async refreshToken(refreshToken: string): Promise<AuthResponse> {

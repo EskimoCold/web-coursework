@@ -31,10 +31,12 @@ function MainApp() {
     pages.get(active) || <div aria-label="content-placeholder" className="content-placeholder" />;
 
   return (
-    <div className="app-root">
-      <Sidebar active={active} onSelect={setActive} />
-      <Layout title={active}>{renderContent()}</Layout>
-    </div>
+    <CategoryProvider>
+      <div className="app-root">
+        <Sidebar active={active} onSelect={setActive} />
+        <Layout title={active}>{renderContent()}</Layout>
+      </div>
+    </CategoryProvider>
   );
 }
 
@@ -42,21 +44,19 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <CategoryProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <MainApp />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </CategoryProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <MainApp />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -27,7 +27,7 @@ export const categoriesApi = {
     return response.json();
   },
 
-  async addCategory(name: string, description: string) {
+  async addCategory(name: string, description: string, icon: string) {
     const token = getAuthToken();
     if (!token) throw new Error('Authorization failed');
 
@@ -37,7 +37,7 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ name, description }),
+      body: JSON.stringify({ name, description, icon }),
     });
 
     if (!response.ok) {
@@ -61,6 +61,7 @@ export const categoriesApi = {
       body: JSON.stringify({
         name: category.name,
         description: category.description,
+        icon: category.icon,
       }),
     });
 
@@ -89,7 +90,6 @@ export const categoriesApi = {
       throw new Error(error.detail || `Cannot delete category ${id}`);
     }
 
-    // Some backends return 204 No Content for DELETE:
     try {
       return await response.json();
     } catch {

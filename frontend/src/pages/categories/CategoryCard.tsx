@@ -19,7 +19,7 @@ export const CategoryCard: React.FC<Props> = ({ cat, handleClick }: Props) => {
         </p>
         */}
       </div>
-      <Icon source={'sample.png'} size={60} className={'cat-card-icon'} />{' '}
+      <Icon source={cat.icon} size={60} className={'cat-card-icon'} />
       {/* source={cat.icon} пока нет поля cat.icon */}
     </div>
   );

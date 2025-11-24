@@ -16,18 +16,15 @@ type Props = {
 };
 
 export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placeholder }: Props) => {
-  const { setCategories } = useCategories();
+  const { setCategories, icons } = useCategories();
   const [name, setName] = useState(placeholder ? placeholder.category.name : '');
   const [description, setDescription] = useState(
     placeholder ? placeholder.category.description : '',
   );
-  // const [icon, setIcon] = useState<string>(placeholder ? placeholder.category.icon : '');
-  // const [type, setType] = useState<boolean>(placeholder ? !!placeholder.category.type : true);
-  const [icon, setIcon] = useState<string>('sample.png');
-  const isSubmittable = useMemo(() => !!name.trim().length && !!icon.length, [name, icon]);
 
-  // здесь нужен useIcons (пока что его нет, потому что нет иконок) из контекста CategoryContext
-  const possibleIconsList = Array.from({ length: 20 }, () => 'sample.png');
+  const [icon, setIcon] = useState<string>(placeholder ? placeholder.category.icon : '');
+  // const [type, setType] = useState<boolean>(placeholder ? !!placeholder.category.type : true);
+  const isSubmittable = useMemo(() => !!name.trim().length && !!icon.length, [name, icon]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +35,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
 
         const category: Category = {
           id: placeholder.category.id,
+          icon: icon,
           name: name.trim(),
           description: description.trim(),
         };
@@ -49,7 +47,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
 
         placeholder.setOpen(false);
       } else {
-        const newCategory = await categoriesApi.addCategory(name, description);
+        const newCategory = await categoriesApi.addCategory(name, description, icon);
         setCategories((prev) => [...prev, newCategory]);
       }
 
@@ -97,7 +95,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
 
       <p className="cat-title">Выберите иконку</p>
       <div className="cat-icon-grid">
-        {possibleIconsList.map((iconSrc, i) => (
+        {icons.map((iconSrc, i) => (
           <div key={iconSrc + i} onClick={() => setIcon(iconSrc)}>
             <Icon
               source={iconSrc}
