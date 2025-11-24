@@ -18,19 +18,13 @@ describe('SettingsPage Additional Tests', () => {
     fireEvent.click(appearanceTab);
 
     await waitFor(() => {
-      // Находим селект валюты по тексту заголовка и структуре DOM
-      const currencyHeading = screen.getByText('Валюта');
-      const currencySection = currencyHeading.closest('.settings-item');
-      const currencySelect = currencySection?.querySelector('select');
-
-      expect(currencySelect).toBeInTheDocument();
-      if (currencySelect) {
-        fireEvent.change(currencySelect, { target: { value: 'EUR' } });
-      }
+      // Находим селект валюты по отображаемому тексту
+      const currencySelect = screen.getByDisplayValue('Рубли (RUB)');
+      fireEvent.change(currencySelect, { target: { value: 'EUR' } });
     });
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('EUR')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('Евро (EUR)')).toBeInTheDocument();
     });
   });
 
@@ -46,18 +40,14 @@ describe('SettingsPage Additional Tests', () => {
     fireEvent.click(appearanceTab);
 
     await waitFor(() => {
-      const currencyHeading = screen.getByText('Валюта');
-      const currencySection = currencyHeading.closest('.settings-item');
-      const currencySelect = currencySection?.querySelector('select');
-
-      expect(currencySelect).toBeInTheDocument();
-      if (currencySelect) {
-        fireEvent.change(currencySelect, { target: { value: 'UNKNOWN' } });
-      }
+      const currencySelect = screen.getByDisplayValue('Рубли (RUB)');
+      fireEvent.change(currencySelect, { target: { value: 'UNKNOWN' } });
     });
 
-    // Проверяем, что компонент не упал
-    expect(screen.getByText(/внешний вид/i)).toBeInTheDocument();
+    // Используем более точный селектор для заголовка раздела
+    const sectionHeadings = screen.getAllByText('Внешний вид');
+    const mainHeading = sectionHeadings.find((element) => element.tagName === 'H2');
+    expect(mainHeading).toBeInTheDocument();
   });
 
   it('displays current currency settings', async () => {
@@ -72,15 +62,13 @@ describe('SettingsPage Additional Tests', () => {
     fireEvent.click(appearanceTab);
 
     await waitFor(() => {
-      // Проверяем наличие основных элементов
-      expect(screen.getByText('Внешний вид')).toBeInTheDocument();
-      expect(screen.getByText('Валюта')).toBeInTheDocument();
+      // Используем более точный селектор для заголовка раздела
+      const sectionHeadings = screen.getAllByText('Внешний вид');
+      const mainHeading = sectionHeadings.find((element) => element.tagName === 'H2');
+      expect(mainHeading).toBeInTheDocument();
 
-      // Проверяем, что селект валюты существует
-      const currencyHeading = screen.getByText('Валюта');
-      const currencySection = currencyHeading.closest('.settings-item');
-      const currencySelect = currencySection?.querySelector('select');
-      expect(currencySelect).toBeInTheDocument();
+      expect(screen.getByText('Валюта')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('Рубли (RUB)')).toBeInTheDocument();
     });
   });
 });
