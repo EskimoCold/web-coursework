@@ -25,6 +25,10 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        // Only fetch if we have a token (although ProtectedRoute should ensure this, extra safety)
+        const token = localStorage.getItem('access_token');
+        if (!token) return;
+
         const data = await categoriesApi.getCategories();
         setCategories(data);
       } catch (err) {
