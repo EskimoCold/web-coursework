@@ -3,22 +3,19 @@ import React from 'react';
 import { vi } from 'vitest';
 
 // Mock API imports first
-vi.mock('../../api/transactions', () => {
-  const mockGetTransactions = vi.fn();
-  const mockCreateTransaction = vi.fn();
-  const mockDeleteTransaction = vi.fn();
+const mockGetTransactions = vi.fn();
+const mockCreateTransaction = vi.fn();
+const mockDeleteTransaction = vi.fn();
 
-  return {
-    transactionsApi: {
-      getTransactions: mockGetTransactions,
-      createTransaction: mockCreateTransaction,
-      deleteTransaction: mockDeleteTransaction,
-    },
-  };
-});
+vi.mock('../../api/transactions', () => ({
+  transactionsApi: {
+    getTransactions: mockGetTransactions,
+    createTransaction: mockCreateTransaction,
+    deleteTransaction: mockDeleteTransaction,
+  },
+}));
 
-import { transactionsApi } from '../api/transactions';
-import { CategoryProvider } from '../contexts/CategoriesContext'; // Импорт правильный
+import { CategoryProvider } from '../contexts/CategoriesContext';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 
 import { HomePage } from './HomePage';
@@ -26,8 +23,7 @@ import { HomePage } from './HomePage';
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <CurrencyProvider>
-      <CategoryProvider>{component}</CategoryProvider>{' '}
-      {/* ИСПРАВЛЕНО: CategoriesProvider -> CategoryProvider */}
+      <CategoryProvider>{component}</CategoryProvider>
     </CurrencyProvider>,
   );
 };
@@ -35,10 +31,11 @@ const renderWithProviders = (component: React.ReactElement) => {
 describe('HomePage Additional Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetTransactions.mockClear();
   });
 
   it('displays empty state when no transactions', async () => {
-    vi.mocked(transactionsApi.getTransactions).mockResolvedValue([]);
+    mockGetTransactions.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
@@ -48,7 +45,7 @@ describe('HomePage Additional Tests', () => {
   });
 
   it('handles API errors when loading transactions', async () => {
-    vi.mocked(transactionsApi.getTransactions).mockRejectedValue(new Error('API Error'));
+    mockGetTransactions.mockRejectedValue(new Error('API Error'));
 
     renderWithProviders(<HomePage />);
 
@@ -58,7 +55,7 @@ describe('HomePage Additional Tests', () => {
   });
 
   it('opens transaction form when add button is clicked', async () => {
-    vi.mocked(transactionsApi.getTransactions).mockResolvedValue([]);
+    mockGetTransactions.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
