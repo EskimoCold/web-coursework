@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
 from src.core.dependencies import get_current_user
 from src.core.security import get_password_hash, verify_password
+from src.models.refresh_token import RefreshToken
 from src.models.user import User
 from src.schemas.user import UserPasswordUpdate, UserResponse, UserUpdate
 
@@ -76,5 +77,6 @@ async def delete_current_user(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    await db.execute(delete(RefreshToken).where(RefreshToken.user_id == current_user.id))
     await db.delete(current_user)
     await db.commit()
