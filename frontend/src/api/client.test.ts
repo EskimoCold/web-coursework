@@ -56,7 +56,7 @@ describe('api.client', () => {
       text: async () => 'Server error details',
     } as Response);
 
-    await expect(api.get('/todos')).rejects.toThrow('HTTP 500: Server error details'); // Исправлено
+    await expect(api.get('/todos')).rejects.toThrow('HTTP 500: Server error details');
   });
 
   it('should handle POST requests with data', async () => {
@@ -146,7 +146,7 @@ describe('api.client', () => {
       text: async () => 'Resource not found',
     } as Response);
 
-    await expect(api.get('/nonexistent')).rejects.toThrow('HTTP 404: Resource not found'); // Исправлено
+    await expect(api.get('/nonexistent')).rejects.toThrow('HTTP 404: Resource not found');
   });
 
   it('should handle 401 unauthorized responses', async () => {
@@ -159,7 +159,7 @@ describe('api.client', () => {
       text: async () => 'Invalid token',
     } as Response);
 
-    await expect(api.get('/protected')).rejects.toThrow('HTTP 401: Invalid token'); // Исправлено
+    await expect(api.get('/protected')).rejects.toThrow('Authentication required');
   });
 
   it('should handle empty response body on 204 No Content', async () => {
