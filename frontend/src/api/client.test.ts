@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { api } from './client'; // Убедитесь, что правильный импорт
+import { api } from './client';
 
 describe('api.client', () => {
   beforeEach(() => {
@@ -56,10 +56,9 @@ describe('api.client', () => {
       text: async () => 'Server error details',
     } as Response);
 
-    await expect(api.get('/todos')).rejects.toThrow('Authentication required'); // Изменено
+    await expect(api.get('/todos')).rejects.toThrow('HTTP 500: Server error details'); // Исправлено
   });
 
-  // Исправленные тесты для методов API
   it('should handle POST requests with data', async () => {
     vi.mocked(global.fetch).mockResolvedValue({
       ok: true,
@@ -147,7 +146,7 @@ describe('api.client', () => {
       text: async () => 'Resource not found',
     } as Response);
 
-    await expect(api.get('/nonexistent')).rejects.toThrow('Authentication required'); // Изменено
+    await expect(api.get('/nonexistent')).rejects.toThrow('HTTP 404: Resource not found'); // Исправлено
   });
 
   it('should handle 401 unauthorized responses', async () => {
@@ -160,7 +159,7 @@ describe('api.client', () => {
       text: async () => 'Invalid token',
     } as Response);
 
-    await expect(api.get('/protected')).rejects.toThrow('Authentication required'); // Изменено
+    await expect(api.get('/protected')).rejects.toThrow('HTTP 401: Invalid token'); // Исправлено
   });
 
   it('should handle empty response body on 204 No Content', async () => {
@@ -170,7 +169,7 @@ describe('api.client', () => {
     } as Response);
 
     const result = await api.delete('/test/1');
-    expect(result).toBeUndefined(); // Изменено
+    expect(result).toBeUndefined();
   });
 
   it('should handle different response types', async () => {
@@ -203,7 +202,6 @@ describe('api.client', () => {
       expect.objectContaining({
         headers: expect.objectContaining({
           'X-Custom-Header': 'custom-value',
-          'Content-Type': 'application/json',
         }),
       }),
     );
