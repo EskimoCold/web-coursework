@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
@@ -78,8 +78,9 @@ async def delete_current_user(
     current_user: User = Depends(get_current_user),
 ):
     await db.execute(
-        delete(RefreshToken)
-        .where(RefreshToken.user_id == current_user.id)
+        delete(RefreshToken).where(
+            RefreshToken.user_id == current_user.id
+        )
     )
     await db.delete(current_user)
     await db.commit()

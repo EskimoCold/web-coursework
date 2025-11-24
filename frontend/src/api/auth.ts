@@ -125,12 +125,12 @@ export const authApi = {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`,
-      }
+      },
     });
 
     if (!deleteResponse.ok) {
       const error = await deleteResponse.json();
       throw new Error(error.detail || 'Delete user failed');
     }
-  }
+  },
 };

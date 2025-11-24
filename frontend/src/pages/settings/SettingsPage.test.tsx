@@ -2,11 +2,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 
+import { AuthProvider } from '../../contexts/AuthContext';
+
 import { SettingsPage } from './SettingsPage';
 
 describe('SettingsPage', () => {
   it('renders all settings navigation items', () => {
-    render(<SettingsPage />);
+    render(
+      <AuthProvider>
+        <SettingsPage />
+      </AuthProvider>,
+    );
 
     const securityNav = screen.getAllByText('Безопасность');
     expect(securityNav.length).toBe(2);
@@ -22,14 +28,22 @@ describe('SettingsPage', () => {
   });
 
   it('renders security section content by default', () => {
-    render(<SettingsPage />);
+    render(
+      <AuthProvider>
+        <SettingsPage />
+      </AuthProvider>,
+    );
 
     expect(screen.getByText('Смена пароля')).toBeInTheDocument();
     expect(screen.getByText('Удаление аккаунта')).toBeInTheDocument();
   });
 
   it('switches between sections correctly', () => {
-    render(<SettingsPage />);
+    render(
+      <AuthProvider>
+        <SettingsPage />
+      </AuthProvider>,
+    );
 
     expect(screen.getByText('Смена пароля')).toBeInTheDocument();
 
