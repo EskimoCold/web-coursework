@@ -1,7 +1,9 @@
 import { useState } from 'react';
 
 import './settings.css';
+
 import { authApi } from '../../api/auth';
+
 import { DeleteAccountModal } from './DeleteAccountModal';
 
 type ChangePasswordModalProps = {
@@ -141,7 +143,12 @@ function SecuritySection() {
             <h3 className="settings-item-title">Удаление аккаунта</h3>
             <p className="settings-item-description">Безвозвратное удаление всех данных</p>
           </div>
-          <button className="settings-button danger" onClick={() => setIsDeleteAccountModalOpen(true)}>Удалить аккаунт</button>
+          <button
+            className="settings-button danger"
+            onClick={() => setIsDeleteAccountModalOpen(true)}
+          >
+            Удалить аккаунт
+          </button>
         </div>
       </div>
 

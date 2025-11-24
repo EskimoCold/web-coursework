@@ -1,13 +1,14 @@
-import { useState } from "react";
-import { authApi } from "../../api/auth";
-import { useAuth } from "../../contexts/AuthContext";
+import { useState } from 'react';
+
+import { authApi } from '../../api/auth';
+import { useAuth } from '../../contexts/AuthContext';
 
 type Props = {
-  isOpen: boolean,
-  onClose: () => void
-}
+  isOpen: boolean;
+  onClose: () => void;
+};
 
-export const DeleteAccountModal: React.FC<Props> = ({isOpen, onClose}: Props) => {
+export const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose }: Props) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { logout } = useAuth();
@@ -18,13 +19,13 @@ export const DeleteAccountModal: React.FC<Props> = ({isOpen, onClose}: Props) =>
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    
+
     try {
       const accessToken = localStorage.getItem('access_token');
       if (!accessToken) throw new Error('Не авторизован');
 
       await authApi.deleteAccount(accessToken);
-      
+
       setTimeout(() => {
         logout();
         onClose();
@@ -32,7 +33,6 @@ export const DeleteAccountModal: React.FC<Props> = ({isOpen, onClose}: Props) =>
 
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Ошибка при удалении аккаунта');
     } finally {
@@ -66,4 +66,4 @@ export const DeleteAccountModal: React.FC<Props> = ({isOpen, onClose}: Props) =>
       </div>
     </div>
   );
-}
+};
