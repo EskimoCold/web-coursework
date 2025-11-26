@@ -1,14 +1,21 @@
 import './sidebar.css';
 import { useAuth } from '../contexts/AuthContext';
+import { NavLink } from 'react-router-dom';
 
 type Props = {
   active: string; // ← semicolons, not commas
   onSelect: (label: string) => void;
 };
 
-const NAV: string[] = ['Главная', 'Аналитика', 'Категории', 'Настройки'];
+const NAV = [
+  { label: 'Главная', to: '/' },
+  { label: 'Аналитика', to: '/analytics' },
+  { label: 'Категории', to: '/categories' },
+  { label: 'Настройки', to: '/settings' },
+];
+// const NAV: string[] = ['Главная', 'Аналитика', 'Категории', 'Настройки'];
 
-export function Sidebar({ active, onSelect }: Props) {
+export function Sidebar() {
   const { user, logout } = useAuth();
 
   return (
@@ -23,7 +30,7 @@ export function Sidebar({ active, onSelect }: Props) {
         <span className="sb-user-name">{user?.username || 'Пользователь'}</span>
       </div>
 
-      <ul className="sb-list" role="list">
+      {/*<ul className="sb-list" role="list">
         {NAV.map((label) => {
           const isActive = label === active;
           return (
@@ -40,7 +47,37 @@ export function Sidebar({ active, onSelect }: Props) {
             </li>
           );
         })}
+      </ul>*/}
+
+      <ul className="sb-list" role="list">
+        {NAV.map(({ label, to }) => (
+          <li key={to}>
+            <NavLink
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) => 'sb-item' + (isActive ? ' sb-item--active' : '')}
+            >
+              {label}
+            </NavLink>
+          </li>
+        ))}
       </ul>
+      {/*
+      <ul className="sb-list" role="list">
+          {NAV.map(({ label, to }) => (
+            <li key={to}>
+              <NavLink
+                to={to}
+                end={to === '/'}
+                className={({ isActive }) =>
+                  'sb-item' + (isActive ? ' sb-item--active' : '')
+                }
+              >
+                {label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>*/}
 
       <div className="sb-spacer" />
 
