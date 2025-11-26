@@ -1,5 +1,4 @@
-import { useState, useMemo } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
 
 import { HomePage } from '../components/HomePage';
 import { Layout } from '../components/Layout';
@@ -13,27 +12,23 @@ import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { Login } from '../pages/Login';
 import { Register } from '../pages/Register';
 
-function MainApp() {
-  const [active, setActive] = useState('Главная');
+const TITLES: Record<string, string> = {
+  '/': 'Главная',
+  '/analytics': 'Аналитика',
+  '/categories': 'Категории',
+  '/settings': 'Настройки',
+};
 
-  const pages = useMemo(
-    () =>
-      new Map<string, JSX.Element>([
-        ['Главная', <HomePage key={0} />],
-        ['Настройки', <SettingsPage key={0} />],
-        ['Категории', <CategoriesPage key={0} />],
-        ['Аналитика', <AnalyticsPage key={0} />],
-      ]),
-    [],
-  );
-
-  const renderContent = () =>
-    pages.get(active) || <div aria-label="content-placeholder" className="content-placeholder" />;
+export function MainLayout() {
+  const location = useLocation();
+  const title = TITLES[location.pathname] || 'FinTrack';
 
   return (
     <div className="app-root">
-      <Sidebar active={active} onSelect={setActive} />
-      <Layout title={active}>{renderContent()}</Layout>
+      <Sidebar />
+      <Layout title={title}>
+        <Outlet />
+      </Layout>
     </div>
   );
 }
@@ -47,14 +42,18 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route
-              path="/"
               element={
                 <ProtectedRoute>
-                  <MainApp />
+                  <MainLayout />
                 </ProtectedRoute>
               }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            >
+              <Route path="/main" element={<HomePage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/main" replace />} />
           </Routes>
         </CategoryProvider>
       </AuthProvider>
