@@ -3,8 +3,6 @@ import { http, HttpResponse } from 'msw';
 import React from 'react';
 import { afterEach, beforeEach, vi } from 'vitest';
 
-import { server } from '../test/setup';
-
 // Mock API imports first - create separate mocks for each API
 const mockGetTransactions = vi.fn();
 const mockCreateTransaction = vi.fn();
@@ -29,6 +27,7 @@ vi.mock('../../api/categories', () => ({
 
 import { CategoryProvider } from '../contexts/CategoriesContext';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
+import { server } from '../test/setup';
 
 import { HomePage } from './HomePage';
 
