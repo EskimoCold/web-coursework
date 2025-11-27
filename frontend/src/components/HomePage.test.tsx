@@ -1,7 +1,6 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { setupServer } from 'msw/node';
 import React from 'react';
-import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 
 // Mock API imports first - create separate mocks for each API
 const mockGetTransactions = vi.fn();
@@ -25,12 +24,6 @@ vi.mock('../../api/categories', () => ({
   },
 }));
 
-// Setup MSW server to bypass requests for this test file
-const server = setupServer();
-beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-
 import { CategoryProvider } from '../contexts/CategoriesContext';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 
@@ -45,7 +38,14 @@ const renderWithProviders = (component: React.ReactElement) => {
 };
 
 describe('HomePage Additional Tests', () => {
+  let originalFetch: typeof global.fetch;
+
   beforeEach(() => {
+    // Save original fetch
+    originalFetch = global.fetch;
+    // Mock fetch to prevent MSW from intercepting
+    global.fetch = vi.fn() as typeof global.fetch;
+
     vi.clearAllMocks();
     mockGetTransactions.mockClear();
     mockGetCategoriesFromTransactions.mockClear();
@@ -58,6 +58,8 @@ describe('HomePage Additional Tests', () => {
   });
 
   afterEach(() => {
+    // Restore original fetch
+    global.fetch = originalFetch;
     localStorage.clear();
   });
 
