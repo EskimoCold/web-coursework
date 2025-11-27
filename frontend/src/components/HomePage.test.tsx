@@ -2,24 +2,25 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
-// Mock API imports first
+// Mock API imports first - create separate mocks for each API
 const mockGetTransactions = vi.fn();
 const mockCreateTransaction = vi.fn();
 const mockDeleteTransaction = vi.fn();
-const mockGetCategories = vi.fn();
+const mockGetCategoriesFromTransactions = vi.fn();
+const mockGetCategoriesFromCategories = vi.fn();
 
 vi.mock('../../api/transactions', () => ({
   transactionsApi: {
     getTransactions: mockGetTransactions,
     createTransaction: mockCreateTransaction,
     deleteTransaction: mockDeleteTransaction,
-    getCategories: mockGetCategories,
+    getCategories: mockGetCategoriesFromTransactions,
   },
 }));
 
 vi.mock('../../api/categories', () => ({
   categoriesApi: {
-    getCategories: mockGetCategories,
+    getCategories: mockGetCategoriesFromCategories,
   },
 }));
 
@@ -40,13 +41,23 @@ describe('HomePage Additional Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetTransactions.mockClear();
-    mockGetCategories.mockClear();
-    mockGetCategories.mockResolvedValue([]);
+    mockGetCategoriesFromTransactions.mockClear();
+    mockGetCategoriesFromCategories.mockClear();
+    // Set default mocks
+    mockGetCategoriesFromTransactions.mockResolvedValue([]);
+    mockGetCategoriesFromCategories.mockResolvedValue([]);
+    // Set token in localStorage to avoid authorization errors
+    localStorage.setItem('access_token', 'test-token');
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   it('displays empty state when no transactions', async () => {
     mockGetTransactions.mockResolvedValue([]);
-    mockGetCategories.mockResolvedValue([]);
+    mockGetCategoriesFromTransactions.mockResolvedValue([]);
+    mockGetCategoriesFromCategories.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
@@ -60,7 +71,8 @@ describe('HomePage Additional Tests', () => {
 
   it('handles API errors when loading transactions', async () => {
     mockGetTransactions.mockRejectedValue(new Error('API Error'));
-    mockGetCategories.mockResolvedValue([]);
+    mockGetCategoriesFromTransactions.mockResolvedValue([]);
+    mockGetCategoriesFromCategories.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
@@ -71,7 +83,8 @@ describe('HomePage Additional Tests', () => {
 
   it('opens transaction form when add button is clicked', async () => {
     mockGetTransactions.mockResolvedValue([]);
-    mockGetCategories.mockResolvedValue([]);
+    mockGetCategoriesFromTransactions.mockResolvedValue([]);
+    mockGetCategoriesFromCategories.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
