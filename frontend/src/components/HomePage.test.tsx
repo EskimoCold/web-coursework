@@ -1,13 +1,15 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import React from 'react';
 import { afterEach, beforeEach, vi } from 'vitest';
+
+// Import server from setup - it's now exported
 
 // Mock API imports first - create separate mocks for each API
 const mockGetTransactions = vi.fn();
 const mockCreateTransaction = vi.fn();
 const mockDeleteTransaction = vi.fn();
 const mockGetCategoriesFromTransactions = vi.fn();
-const mockGetCategoriesFromCategories = vi.fn();
 
 vi.mock('../../api/transactions', () => ({
   transactionsApi: {
@@ -18,14 +20,9 @@ vi.mock('../../api/transactions', () => ({
   },
 }));
 
-vi.mock('../../api/categories', () => ({
-  categoriesApi: {
-    getCategories: mockGetCategoriesFromCategories,
-  },
-}));
-
 import { CategoryProvider } from '../contexts/CategoriesContext';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
+import { server } from '../test/setup';
 
 import { HomePage } from './HomePage';
 
@@ -38,35 +35,30 @@ const renderWithProviders = (component: React.ReactElement) => {
 };
 
 describe('HomePage Additional Tests', () => {
-  let originalFetch: typeof global.fetch;
-
   beforeEach(() => {
-    // Save original fetch
-    originalFetch = global.fetch;
-    // Mock fetch to prevent MSW from intercepting
-    global.fetch = vi.fn() as typeof global.fetch;
+    // Setup MSW handlers for categories API (used by CategoriesContext)
+    server.use(
+      http.get('http://localhost:8000/api/v1/categories', () => {
+        return HttpResponse.json([]);
+      }),
+    );
 
     vi.clearAllMocks();
     mockGetTransactions.mockClear();
     mockGetCategoriesFromTransactions.mockClear();
-    mockGetCategoriesFromCategories.mockClear();
     // Set default mocks
     mockGetCategoriesFromTransactions.mockResolvedValue([]);
-    mockGetCategoriesFromCategories.mockResolvedValue([]);
     // Set token in localStorage to avoid authorization errors
     localStorage.setItem('access_token', 'test-token');
   });
 
   afterEach(() => {
-    // Restore original fetch
-    global.fetch = originalFetch;
     localStorage.clear();
   });
 
   it('displays empty state when no transactions', async () => {
     mockGetTransactions.mockResolvedValue([]);
     mockGetCategoriesFromTransactions.mockResolvedValue([]);
-    mockGetCategoriesFromCategories.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
@@ -81,7 +73,6 @@ describe('HomePage Additional Tests', () => {
   it('handles API errors when loading transactions', async () => {
     mockGetTransactions.mockRejectedValue(new Error('API Error'));
     mockGetCategoriesFromTransactions.mockResolvedValue([]);
-    mockGetCategoriesFromCategories.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
@@ -93,7 +84,6 @@ describe('HomePage Additional Tests', () => {
   it('opens transaction form when add button is clicked', async () => {
     mockGetTransactions.mockResolvedValue([]);
     mockGetCategoriesFromTransactions.mockResolvedValue([]);
-    mockGetCategoriesFromCategories.mockResolvedValue([]);
 
     renderWithProviders(<HomePage />);
 
