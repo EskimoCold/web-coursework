@@ -50,9 +50,12 @@ describe('HomePage Additional Tests', () => {
 
     renderWithProviders(<HomePage />);
 
-    await waitFor(() => {
-      expect(screen.getByText(/нет транзакций для отображения/i)).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/нет транзакций для отображения/i)).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   it('handles API errors when loading transactions', async () => {
