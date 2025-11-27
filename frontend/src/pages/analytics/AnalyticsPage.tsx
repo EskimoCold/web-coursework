@@ -12,7 +12,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  TooltipProps,
 } from 'recharts';
 
 import './analytics.css';
@@ -22,6 +21,19 @@ import { Category } from '../../contexts/CategoriesContext';
 import { useCurrency } from '../../contexts/CurrencyContext';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
+
+// ----------------------
+//  Custom Tooltip Types
+// ----------------------
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: {
+    name: string;
+    value: number;
+    color?: string;
+  }[];
+  label?: string;
+}
 
 export const AnalyticsPage: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -163,12 +175,15 @@ export const AnalyticsPage: React.FC = () => {
     return Array.from(imp, ([name, value]) => ({ name, value }));
   }, [filteredTransactions, categoryNameById]);
 
-  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
+  // -------------------------
+  //   FIXED CUSTOM TOOLTIP
+  // -------------------------
+  const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="custom-tooltip">
-          <p className="label">{`${label}`}</p>
-          {payload.map((entry, index) => (
+          <p className="label">{label}</p>
+          {payload.map((entry: { name: string; value: number; color?: string }, index: number) => (
             <p key={index} style={{ color: entry.color }}>
               {`${entry.name}: ${formatAmount(Number(entry.value))}`}
             </p>
@@ -179,7 +194,7 @@ export const AnalyticsPage: React.FC = () => {
     return null;
   };
 
-  const CustomPieTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
+  const CustomPieTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
         <div className="custom-tooltip">
