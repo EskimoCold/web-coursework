@@ -1,6 +1,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { setupServer } from 'msw/node';
 import React from 'react';
-import { vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
 // Mock API imports first - create separate mocks for each API
 const mockGetTransactions = vi.fn();
@@ -23,6 +24,12 @@ vi.mock('../../api/categories', () => ({
     getCategories: mockGetCategoriesFromCategories,
   },
 }));
+
+// Setup MSW server to bypass requests for this test file
+const server = setupServer();
+beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 import { CategoryProvider } from '../contexts/CategoriesContext';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
