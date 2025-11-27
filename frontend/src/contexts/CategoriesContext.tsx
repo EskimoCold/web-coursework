@@ -13,20 +13,30 @@ export type Category = {
 type CategoryContextType = {
   categories: Category[];
   setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+  loading: boolean;
+  error: string | null;
 };
 
 const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
 
 export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const data = await categoriesApi.getCategories();
         setCategories(data);
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка';
+        setError(errorMessage);
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -34,7 +44,7 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   return (
-    <CategoryContext.Provider value={{ categories, setCategories }}>
+    <CategoryContext.Provider value={{ categories, setCategories, loading, error }}>
       {children}
     </CategoryContext.Provider>
   );
