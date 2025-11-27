@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  TooltipProps,
 } from 'recharts';
 
 import './analytics.css';
@@ -21,13 +22,6 @@ import { Category } from '../../contexts/CategoriesContext';
 import { useCurrency } from '../../contexts/CurrencyContext';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
-
-// Правильный тип для payload Recharts
-interface ChartPayload {
-  name: string;
-  value: number;
-  color?: string;
-}
 
 export const AnalyticsPage: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -67,7 +61,8 @@ export const AnalyticsPage: React.FC = () => {
       month: '2-digit',
       day: '2-digit',
     });
-    return formatter.format(new Date(t));
+    const date = new Date(t);
+    return formatter.format(date);
   };
 
   const from = useMemo(() => {
@@ -92,37 +87,24 @@ export const AnalyticsPage: React.FC = () => {
 
   const to = useMemo(() => new Date(), []);
 
-  useEffect(() => {
-    const getData = async () => {
-      setTransactions(await transactionsApi.getTransactions());
-    };
-    getData();
-  }, []);
-
   const filteredTransactions = useMemo(
     () =>
       transactions
-        .map((t) => ({
-          ...t,
-          transaction_date: new Date(t.transaction_date),
-        }))
+        .map((t) => ({ ...t, transaction_date: new Date(t.transaction_date) }))
         .filter((t) => t.transaction_date >= from)
         .filter((t) => t.transaction_date <= to)
-        .map((t) => ({
-          ...t,
-          transaction_date: formatDate(t.transaction_date),
-        })),
+        .map((t) => ({ ...t, transaction_date: formatDate(t.transaction_date) })),
     [transactions, from, to],
   );
 
   const [incomes, expenses] = useMemo(
     () => [
       filteredTransactions.reduce(
-        (acc, t) => acc + (t.transaction_type === 'income' ? t.amount : 0),
+        (acc, curVal) => acc + (curVal.transaction_type === 'income' ? curVal.amount : 0),
         0,
       ),
       filteredTransactions.reduce(
-        (acc, t) => acc + (t.transaction_type === 'expense' ? t.amount : 0),
+        (acc, curVal) => acc + (curVal.transaction_type === 'expense' ? curVal.amount : 0),
         0,
       ),
     ],
@@ -130,67 +112,65 @@ export const AnalyticsPage: React.FC = () => {
   );
 
   const incomeExpenseData = useMemo(() => {
-    const map = new Map<string, [number, number]>();
+    const ied = new Map<string, Array<number>>([]);
+    filteredTransactions.forEach((transaction) => {
+      const dts = transaction.transaction_date;
+      let num = ied.get(dts);
+      const ind = transaction.transaction_type === 'income' ? 0 : 1;
 
-    filteredTransactions.forEach((t) => {
-      const date = t.transaction_date;
-      if (!map.has(date)) map.set(date, [0, 0]);
-      const arr = map.get(date)!;
-
-      if (t.transaction_type === 'income') arr[0] += t.amount;
-      else arr[1] += t.amount;
+      if (!num) {
+        num = [0, 0];
+        num[ind] = transaction.amount;
+        ied.set(dts, num);
+      } else {
+        num[ind] = num[ind] + transaction.amount;
+      }
     });
 
-    return Array.from(map, ([date, [income, expense]]) => ({
-      date,
-      income,
-      expense,
-    })).sort((a, b) => (a.date < b.date ? -1 : 1));
+    const res: { date: string; income: number; expense: number }[] = [];
+    ied.forEach((num, date) =>
+      res.push({
+        date: date,
+        income: num[0],
+        expense: num[1],
+      }),
+    );
+
+    return res.sort((a, b) => (a.date < b.date ? -1 : 1));
   }, [filteredTransactions]);
 
   const incomeByCategory = useMemo(() => {
-    const map = new Map<string, number>();
-
+    const imp = new Map<string, number>();
     filteredTransactions
       .filter((t) => t.transaction_type === 'income')
       .forEach((t) => {
         const name = categoryNameById[String(t.category_id)] ?? t.category?.name ?? 'Без категории';
-        map.set(name, (map.get(name) || 0) + t.amount);
+        imp.set(name, (imp.get(name) || 0) + t.amount);
       });
 
-    return Array.from(map, ([name, value]) => ({ name, value }));
+    return Array.from(imp, ([name, value]) => ({ name, value }));
   }, [filteredTransactions, categoryNameById]);
 
   const expenseByCategory = useMemo(() => {
-    const map = new Map<string, number>();
-
+    const imp = new Map<string, number>();
     filteredTransactions
       .filter((t) => t.transaction_type === 'expense')
       .forEach((t) => {
         const name = categoryNameById[String(t.category_id)] ?? t.category?.name ?? 'Без категории';
-        map.set(name, (map.get(name) || 0) + t.amount);
+        imp.set(name, (imp.get(name) || 0) + t.amount);
       });
 
-    return Array.from(map, ([name, value]) => ({ name, value }));
+    return Array.from(imp, ([name, value]) => ({ name, value }));
   }, [filteredTransactions, categoryNameById]);
 
-  // === FIXED TOOLTIP TYPES ===
-  const CustomTooltip = ({
-    active,
-    payload,
-    label,
-  }: {
-    active?: boolean;
-    payload?: ChartPayload[];
-    label?: string | number;
-  }) => {
+  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="custom-tooltip">
-          <p className="label">{label}</p>
-          {payload.map((entry, i) => (
-            <p key={i} style={{ color: entry.color }}>
-              {entry.name}: {formatAmount(entry.value)}
+          <p className="label">{`${label}`}</p>
+          {payload.map((entry, index) => (
+            <p key={index} style={{ color: entry.color }}>
+              {`${entry.name}: ${formatAmount(Number(entry.value))}`}
             </p>
           ))}
         </div>
@@ -199,19 +179,11 @@ export const AnalyticsPage: React.FC = () => {
     return null;
   };
 
-  const CustomPieTooltip = ({
-    active,
-    payload,
-  }: {
-    active?: boolean;
-    payload?: ChartPayload[];
-  }) => {
+  const CustomPieTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
         <div className="custom-tooltip">
-          <p>
-            {payload[0].name}: {formatAmount(payload[0].value)}
-          </p>
+          <p>{`${payload[0].name}: ${formatAmount(Number(payload[0].value))}`}</p>
         </div>
       );
     }
@@ -254,7 +226,7 @@ export const AnalyticsPage: React.FC = () => {
       <div className="anal-charts-grid">
         <div className="anal-chart-container">
           <h3 className="anal-chart-title">Динамика доходов и расходов</h3>
-          <ResponsiveContainer width="100%" height="70%">
+          <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={incomeExpenseData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
@@ -295,7 +267,7 @@ export const AnalyticsPage: React.FC = () => {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${formatAmount(value)}`}
+                  label={({ name, value }) => `${name}: ${formatAmount(Number(value))}`}
                 >
                   {expenseByCategory.map((_, index) => (
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
