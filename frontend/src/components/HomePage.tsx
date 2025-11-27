@@ -327,34 +327,6 @@ export function HomePage() {
           </tbody>
         </table>
 
-        {/* Мобильное отображение */}
-        <div className="mobile-transactions">
-          {paginatedTransactions.transactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              className={`mobile-transaction-card ${transaction.transaction_type}`}
-            >
-              <div className="mobile-card-header">
-                <div className="mobile-card-category">
-                  {categories?.find((c) => Number(c.id) === Number(transaction.category_id))
-                    ?.name ?? 'Без категории'}
-                </div>
-                <div className={`mobile-card-amount ${transaction.transaction_type}`}>
-                  {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {formatAmount(transaction.amount)}
-                </div>
-              </div>
-              <div className="mobile-card-description">{transaction.description}</div>
-              <div className="mobile-card-footer">
-                <span>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</span>
-                <span className={`type-badge ${transaction.transaction_type}`}>
-                  {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {filteredTransactions.length === 0 && (
           <div className="empty-state">Нет транзакций для отображения</div>
         )}
