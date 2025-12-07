@@ -96,7 +96,6 @@ export const authApi = {
     }
   },
 
-
   async refreshToken(): Promise<AuthResponse> {
     const response = await fetch(`${API_URL}/auth/refresh`, {
       method: 'POST',
