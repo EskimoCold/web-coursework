@@ -12,7 +12,6 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   access_token: string;
-  refresh_token: string;
   token_type: string;
 }
 
@@ -36,6 +35,7 @@ export const authApi = {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
 
@@ -69,6 +69,7 @@ export const authApi = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -85,6 +86,7 @@ export const authApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
 
@@ -94,13 +96,11 @@ export const authApi = {
     }
   },
 
-  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+
+  async refreshToken(): Promise<AuthResponse> {
     const response = await fetch(`${API_URL}/auth/refresh`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -110,13 +110,10 @@ export const authApi = {
     return response.json();
   },
 
-  async logout(refreshToken: string): Promise<void> {
+  async logout(): Promise<void> {
     await fetch(`${API_URL}/auth/logout`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'include',
     });
   },
 
@@ -126,6 +123,7 @@ export const authApi = {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      credentials: 'include',
     });
 
     if (!deleteResponse.ok) {

@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 import { categoriesApi } from '../api/categories';
+import { tokenStore } from '../api/tokenStore';
 
 export type Category = {
   id: number;
   name: string;
-  //  type: number;
   icon: string;
   description: string;
 };
@@ -25,8 +25,7 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        // Only fetch if we have a token (although ProtectedRoute should ensure this, extra safety)
-        const token = localStorage.getItem('access_token');
+        const token = tokenStore.getAccessToken();
         if (!token) return;
 
         const data = await categoriesApi.getCategories();

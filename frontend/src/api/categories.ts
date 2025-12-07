@@ -1,10 +1,10 @@
 import { Category } from '../contexts/CategoriesContext';
+import { tokenStore } from './tokenStore';
 
 const API_URL = import.meta.env.BACKEND_API || 'http://localhost:8000/api/v1';
 
 const getAuthToken = (): string | null => {
-  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-  return token;
+  return tokenStore.getAccessToken();
 };
 
 export const categoriesApi = {
@@ -17,6 +17,7 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -37,6 +38,7 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
       body: JSON.stringify({ name, description, icon }),
     });
 
@@ -58,6 +60,7 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
       body: JSON.stringify({
         name: category.name,
         description: category.description,
@@ -83,6 +86,7 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {

@@ -3,15 +3,17 @@ import { useState } from 'react';
 import './settings.css';
 
 import { authApi } from '../../api/auth';
+import { useAuth } from '../../contexts/AuthContext';
 
 import { DeleteAccountModal } from './DeleteAccountModal';
 
 type ChangePasswordModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  accessToken: string | null;
 };
 
-function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
+function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordModalProps) {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -38,10 +40,9 @@ function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
 
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
-      if (!token) throw new Error('Не авторизован');
+      if (!accessToken) throw new Error('Не авторизован');
 
-      await authApi.changePassword({ old_password: oldPassword, new_password: newPassword }, token);
+      await authApi.changePassword({ old_password: oldPassword, new_password: newPassword }, accessToken);
       setSuccess('Пароль успешно изменен');
       setOldPassword('');
       setNewPassword('');
@@ -121,6 +122,7 @@ function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
 function SecuritySection() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
+  const { accessToken } = useAuth();
 
   return (
     <div className="settings-section">
@@ -155,6 +157,7 @@ function SecuritySection() {
       <ChangePasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
+        accessToken={accessToken}
       />
       <DeleteAccountModal
         isOpen={isDeleteAccountModalOpen}

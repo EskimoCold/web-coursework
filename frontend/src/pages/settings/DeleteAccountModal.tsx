@@ -11,7 +11,7 @@ type Props = {
 export const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose }: Props) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { logout } = useAuth();
+  const { logout, accessToken } = useAuth();
 
   if (!isOpen) return null;
 
@@ -21,7 +21,6 @@ export const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose }: Props) 
     setIsLoading(true);
 
     try {
-      const accessToken = localStorage.getItem('access_token');
       if (!accessToken) throw new Error('Не авторизован');
 
       await authApi.deleteAccount(accessToken);
@@ -30,9 +29,6 @@ export const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose }: Props) 
         logout();
         onClose();
       }, 1000);
-
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Ошибка при удалении аккаунта');
     } finally {
