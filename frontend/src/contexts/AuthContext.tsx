@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 import { authApi, User, LoginRequest, RegisterRequest } from '../api/auth';
+import { tokenStore } from '../api/tokenStore';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  accessToken: string | null;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
@@ -27,30 +29,33 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const updateAccessToken = useCallback((token: string | null) => {
+    setAccessToken(token);
+    tokenStore.setAccessToken(token);
+  }, []);
 
   useEffect(() => {
     const initAuth = async () => {
-      const accessToken = localStorage.getItem('access_token');
-      if (accessToken) {
-        try {
-          const userData = await authApi.getCurrentUser(accessToken);
-          setUser(userData);
-        } catch {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-        }
+      try {
+        const response = await authApi.refreshToken();
+        updateAccessToken(response.access_token);
+        const userData = await authApi.getCurrentUser(response.access_token);
+        setUser(userData);
+      } catch {
+        updateAccessToken(null);
       }
       setIsLoading(false);
     };
 
     initAuth();
-  }, []);
+  }, [updateAccessToken]);
 
   const login = async (data: LoginRequest) => {
     const response = await authApi.login(data);
-    localStorage.setItem('access_token', response.access_token);
-    localStorage.setItem('refresh_token', response.refresh_token);
+    updateAccessToken(response.access_token);
     const userData = await authApi.getCurrentUser(response.access_token);
     setUser(userData);
   };
@@ -61,12 +66,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (refreshToken) {
-      authApi.logout(refreshToken).catch(() => {});
-    }
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    authApi.logout().catch(() => {});
+    updateAccessToken(null);
     setUser(null);
   };
 
@@ -76,6 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated: !!user,
         isLoading,
+        accessToken,
         login,
         register,
         logout,
