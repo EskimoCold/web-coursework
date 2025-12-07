@@ -1,5 +1,5 @@
-// src/api/transactions.ts
 import { api, BASE_URL } from './client';
+import { tokenStore } from './tokenStore';
 
 export interface Transaction {
   id: number;
@@ -28,10 +28,8 @@ export interface TransactionCreate {
   transaction_date: string;
 }
 
-// Функция для получения токена
 const getAuthToken = (): string | null => {
-  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-  return token;
+  return tokenStore.getAccessToken();
 };
 
 export const transactionsApi = {
@@ -50,10 +48,10 @@ export const transactionsApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     }).then((response) => {
       if (!response.ok) {
-        // Попробуем получить детальную ошибку от сервера
         return response
           .json()
           .then((errorData) => {

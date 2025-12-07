@@ -1,15 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { api } from './client';
+import { tokenStore } from './tokenStore';
 
 describe('api.client', () => {
   beforeEach(() => {
     global.fetch = vi.fn();
-    localStorage.clear();
+    tokenStore.clearAccessToken();
   });
 
-  it('should add authorization header when token exists', async () => {
-    localStorage.setItem('access_token', 'test-token');
+  it('should add authorization header when token exists in memory', async () => {
+    tokenStore.setAccessToken('test-token');
 
     vi.mocked(global.fetch).mockResolvedValue({
       ok: true,
@@ -22,6 +23,7 @@ describe('api.client', () => {
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/test'),
       expect.objectContaining({
+        credentials: 'include',
         headers: expect.objectContaining({
           Authorization: 'Bearer test-token',
         }),
@@ -29,7 +31,7 @@ describe('api.client', () => {
     );
   });
 
-  it('should not add authorization header when no token', async () => {
+  it('should not add authorization header when no token in memory', async () => {
     vi.mocked(global.fetch).mockResolvedValue({
       ok: true,
       status: 200,
@@ -41,6 +43,7 @@ describe('api.client', () => {
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/test'),
       expect.objectContaining({
+        credentials: 'include',
         headers: expect.not.objectContaining({
           Authorization: expect.any(String),
         }),
