@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   AreaChart,
   Area,
@@ -12,19 +12,25 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Line,
 } from 'recharts';
 
 import './analytics.css';
 import { categoriesApi } from '../../api/categories';
 import { Transaction, transactionsApi } from '../../api/transactions';
 import { Category } from '../../contexts/CategoriesContext';
+import { predictExpenses, ExpenseForecastPoint } from '../../ml/expensePredictor';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
+type NormalizedTransaction = Transaction & { transaction_date: Date };
 
 export const AnalyticsPage: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filter, setFilter] = useState<string>('all');
+  const [expenseForecast, setExpenseForecast] = useState<ExpenseForecastPoint[]>([]);
+  const [isForecasting, setIsForecasting] = useState(false);
+  const [forecastError, setForecastError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -52,7 +58,7 @@ export const AnalyticsPage: React.FC = () => {
     [],
   );
 
-  const formatDate = (t: string | Date) => {
+  const formatDate = useCallback((t: string | Date) => {
     const formatter = new Intl.DateTimeFormat('ru-RU', {
       year: 'numeric',
       month: '2-digit',
@@ -60,7 +66,7 @@ export const AnalyticsPage: React.FC = () => {
     });
     const date = new Date(t);
     return formatter.format(date);
-  };
+  }, []);
 
   const from = useMemo(() => {
     const now = new Date();
@@ -92,21 +98,14 @@ export const AnalyticsPage: React.FC = () => {
     getData();
   }, []);
 
-  const filteredTransactions = useMemo(
+  const filteredTransactions = useMemo<NormalizedTransaction[]>(
     () =>
       transactions
-        .map((t) => {
-          return {
-            ...t,
-            transaction_date: new Date(t.transaction_date),
-          };
-        })
-        .filter((t) => t.transaction_date >= from)
-        .filter((t) => t.transaction_date <= to)
-        .map((t) => ({
+        .map<NormalizedTransaction>((t) => ({
           ...t,
-          transaction_date: formatDate(t.transaction_date),
-        })),
+          transaction_date: new Date(t.transaction_date),
+        }))
+        .filter((t) => t.transaction_date >= from && t.transaction_date <= to),
     [transactions, from, to],
   );
 
@@ -124,32 +123,30 @@ export const AnalyticsPage: React.FC = () => {
     [filteredTransactions],
   );
 
-  const incomeExpenseData = useMemo(() => {
-    const ied = new Map<string, Array<number>>([]);
-    filteredTransactions.forEach((transaction) => {
-      const dts = transaction.transaction_date;
-      let num = ied.get(dts);
-      const ind = transaction.transaction_type === 'income' ? 0 : 1;
+  const dailyIncomeExpense = useMemo(() => {
+    const totals = new Map<number, { income: number; expense: number }>();
 
-      if (!num) {
-        num = [0, 0];
-        num[ind] = num[ind] + transaction.amount;
-        ied.set(dts, num);
-      } else {
-        num[ind] = num[ind] + transaction.amount;
+    filteredTransactions.forEach((transaction) => {
+      const day = new Date(transaction.transaction_date);
+      day.setHours(0, 0, 0, 0);
+      const key = day.getTime();
+
+      const current = totals.get(key) ?? { income: 0, expense: 0 };
+      if (transaction.transaction_type === 'income') {
+        current.income += transaction.amount;
+      } else if (transaction.transaction_type === 'expense') {
+        current.expense += transaction.amount;
       }
+      totals.set(key, current);
     });
 
-    const res: { date: string; income: number; expense: number }[] = [];
-    ied.forEach((num, date) =>
-      res.push({
-        date: date,
-        income: num[0],
-        expense: num[1],
-      }),
-    );
-
-    return res.sort((a, b) => (a.date < b.date ? -1 : 1));
+    return Array.from(totals.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([timestamp, values]) => ({
+        date: new Date(timestamp),
+        income: values.income,
+        expense: values.expense,
+      }));
   }, [filteredTransactions]);
 
   const incomeByCategory = useMemo(() => {
@@ -175,6 +172,85 @@ export const AnalyticsPage: React.FC = () => {
 
     return Array.from(imp, ([name, value]) => ({ name, value }));
   }, [filteredTransactions, categoryNameById]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const runForecast = async () => {
+      if (!dailyIncomeExpense.length) {
+        setExpenseForecast([]);
+        return;
+      }
+
+      setIsForecasting(true);
+      setForecastError(null);
+
+      try {
+        const expensesOnly = dailyIncomeExpense.filter((p) => p.expense > 0);
+        const predictions = await predictExpenses(
+          expensesOnly.length ? expensesOnly : dailyIncomeExpense,
+        );
+
+        if (!cancelled) {
+          setExpenseForecast(predictions);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setExpenseForecast([]);
+          setForecastError('Не удалось построить прогноз расходов');
+          console.error(error);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsForecasting(false);
+        }
+      }
+    };
+
+    runForecast();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dailyIncomeExpense]);
+
+  const chartData = useMemo(() => {
+    const byDate = new Map<
+      number,
+      { date: string; income: number; expense: number; predictedExpense?: number }
+    >();
+
+    dailyIncomeExpense.forEach(({ date, income, expense }) => {
+      byDate.set(date.getTime(), {
+        date: formatDate(date),
+        income,
+        expense,
+      });
+    });
+
+    expenseForecast.forEach(({ date, predictedExpense }) => {
+      const ts = date.getTime();
+      const existing = byDate.get(ts);
+      const label = formatDate(date);
+
+      if (existing) {
+        byDate.set(ts, { ...existing, predictedExpense });
+      } else {
+        byDate.set(ts, { date: label, income: 0, expense: 0, predictedExpense });
+      }
+    });
+
+    return Array.from(byDate.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([, value]) => value);
+  }, [dailyIncomeExpense, expenseForecast, formatDate]);
+
+  const tooltipFormatter = useCallback((value: number, name: string) => {
+    if (name === 'income') return [`${value} ₽`, 'Доход'];
+    if (name === 'expense') return [`${value} ₽`, 'Расход'];
+    if (name === 'predictedExpense') return [`${value} ₽`, 'Прогноз расхода'];
+    return [`${value} ₽`, name];
+  }, []);
 
   return (
     <div className="anal-main">
@@ -212,14 +288,13 @@ export const AnalyticsPage: React.FC = () => {
       <div className="anal-charts-grid">
         <div className="anal-chart-container">
           <h3 className="anal-chart-title">Динамика доходов и расходов</h3>
-          <ResponsiveContainer width="100%" height="70%">
-            <AreaChart data={incomeExpenseData}>
+          {forecastError && <p className="anal-value expense">{forecastError}</p>}
+          <ResponsiveContainer width="100%" height={320}>
+            <AreaChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
-              <Tooltip
-                formatter={(value, name) => [`${value} ₽`, name === 'income' ? 'Доход' : 'Расход']}
-              />
+              <Tooltip formatter={tooltipFormatter} />
               <Area
                 type="monotone"
                 dataKey="expense"
@@ -235,6 +310,16 @@ export const AnalyticsPage: React.FC = () => {
                 stroke="#00C49F"
                 fill="#00C49F"
                 fillOpacity={0.3}
+              />
+              <Line
+                type="monotone"
+                dataKey="predictedExpense"
+                stroke="#6A4BFF"
+                strokeWidth={2}
+                dot={false}
+                strokeDasharray="6 3"
+                connectNulls
+                isAnimationActive={!isForecasting}
               />
             </AreaChart>
           </ResponsiveContainer>

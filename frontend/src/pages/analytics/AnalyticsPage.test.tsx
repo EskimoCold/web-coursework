@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { describe, it, expect, beforeEach, vi, beforeAll, afterAll } from 'vitest';
 
 import { Transaction, transactionsApi } from '../../api/transactions';
+import { predictExpenses } from '../../ml/expensePredictor';
 
 import { AnalyticsPage } from './AnalyticsPage';
 
@@ -35,6 +36,13 @@ vi.mock('../../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(),
   },
+}));
+
+vi.mock('../../ml/expensePredictor', () => ({
+  predictExpenses: vi.fn().mockResolvedValue([
+    { date: new Date('2024-02-01'), predictedExpense: 250 },
+    { date: new Date('2024-02-02'), predictedExpense: 275 },
+  ]),
 }));
 
 /** (optional) if any helper reads a token, provide a fake one */
@@ -71,6 +79,7 @@ vi.mock('recharts', () => ({
   ),
   Area: ({ dataKey }: { dataKey: string }) => <div data-testid={`area-${dataKey}`} />,
   Bar: ({ dataKey }: { dataKey: string }) => <div data-testid={`bar-${dataKey}`} />,
+  Line: ({ dataKey }: { dataKey: string }) => <div data-testid={`line-${dataKey}`} />,
   Cell: ({ fill }: { fill: string }) => <div data-testid="cell" data-fill={fill} />,
   XAxis: ({ dataKey }: { dataKey: string }) => <div data-testid={`xaxis-${dataKey}`} />,
   YAxis: () => <div data-testid="yaxis" />,
@@ -213,6 +222,22 @@ describe('AnalyticsPage', () => {
       expect(screen.getByText('Динамика доходов и расходов')).toBeInTheDocument();
       expect(screen.getByText('Расходы по категориям')).toBeInTheDocument();
       expect(screen.getByText('Доходы по категориям')).toBeInTheDocument();
+    });
+  });
+
+  it('should show predicted expenses line on the chart', async () => {
+    (predictExpenses as vi.Mock).mockResolvedValueOnce([
+      { date: new Date('2024-02-01'), predictedExpense: 500 },
+    ]);
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('line-predictedExpense')).toBeInTheDocument();
+      const chartData = screen.getByTestId('area-chart').getAttribute('data-data') || '[]';
+      expect(JSON.parse(chartData)).toEqual(
+        expect.arrayContaining([expect.objectContaining({ predictedExpense: 500 })]),
+      );
     });
   });
 
