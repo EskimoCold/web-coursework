@@ -42,7 +42,10 @@ function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordMod
     try {
       if (!accessToken) throw new Error('Не авторизован');
 
-      await authApi.changePassword({ old_password: oldPassword, new_password: newPassword }, accessToken);
+      await authApi.changePassword(
+        { old_password: oldPassword, new_password: newPassword },
+        accessToken,
+      );
       setSuccess('Пароль успешно изменен');
       setOldPassword('');
       setNewPassword('');

@@ -1,4 +1,5 @@
 import { Category } from '../contexts/CategoriesContext';
+
 import { tokenStore } from './tokenStore';
 
 const API_URL = import.meta.env.BACKEND_API || 'http://localhost:8000/api/v1';
