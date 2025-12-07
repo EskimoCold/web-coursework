@@ -40,6 +40,7 @@ def clear_refresh_token_cookie(response: Response) -> None:
         path="/api/v1/auth",
     )
 
+
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
