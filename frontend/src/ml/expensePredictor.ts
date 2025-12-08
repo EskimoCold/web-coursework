@@ -16,6 +16,11 @@ const MODEL_PATH = '/models/expense_predictor.onnx';
 let sessionPromise: Promise<ort.InferenceSession> | null = null;
 let mutex: Promise<void> = Promise.resolve();
 
+export const __resetPredictorState = () => {
+  sessionPromise = null;
+  mutex = Promise.resolve();
+};
+
 const loadSession = async (): Promise<ort.InferenceSession> => {
   if (!sessionPromise) {
     ort.env.wasm.numThreads = 1;
