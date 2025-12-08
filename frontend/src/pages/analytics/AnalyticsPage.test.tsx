@@ -294,4 +294,48 @@ describe('AnalyticsPage', () => {
       );
     });
   });
+
+  it('should not run forecast when there are no transactions', async () => {
+    renderComponent([]);
+    await waitFor(() => {
+      expect(predictExpenses).not.toHaveBeenCalled();
+    });
+  });
+
+  it('shows forecast error when predictor fails', async () => {
+    (predictExpenses as vi.Mock).mockRejectedValueOnce(new Error('boom'));
+    renderComponent(mockTransactions);
+
+    await waitFor(() => {
+      expect(screen.getByText('Не удалось построить прогноз расходов')).toBeInTheDocument();
+    });
+  });
+
+  it('uses fallback category name when missing', async () => {
+    const missingCategoryTx: Transaction[] = [
+      {
+        id: 5,
+        amount: 300,
+        transaction_type: 'expense',
+        transaction_date: '2024-01-20',
+        category: undefined,
+        description: 'Unknown category expense',
+      } as unknown as Transaction,
+    ];
+
+    renderComponent(missingCategoryTx);
+
+    await waitFor(() => {
+      const pie = screen.getByTestId('pie');
+      const data = JSON.parse(pie.getAttribute('data-data') || '[]');
+      expect(data[0]).toMatchObject({ name: 'Без категории', value: 300 });
+    });
+  });
+
+  it('passes tooltip formatter to chart', async () => {
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getByTestId('tooltip').getAttribute('data-formatter')).toBe('true');
+    });
+  });
 });
