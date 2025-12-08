@@ -33,7 +33,7 @@ const renderApp = () => {
 };
 
 async function enableMocks() {
-  if (import.meta.env.DEV) {
+  if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_MSW === '1') {
     try {
       const { worker } = await import('../mocks/browser');
       await worker.start({

@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
+import { initAnalytics, trackPageview } from '../analytics/googleAnalytics';
 import { Layout } from '../components/Layout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { Sidebar } from '../components/Sidebar';
@@ -12,6 +13,20 @@ import { Register } from '../pages/auth/Register';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { HomePage } from '../pages/home/HomePage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
+
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
+  useEffect(() => {
+    trackPageview(location.pathname + location.search);
+  }, [location.pathname, location.search]);
+
+  return null;
+}
 
 function MainApp() {
   const [active, setActive] = useState('Главная');
@@ -44,6 +59,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <AnalyticsTracker />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
