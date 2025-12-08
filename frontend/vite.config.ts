@@ -50,6 +50,10 @@ export default defineConfig({
     }),
   ],
   build: { sourcemap: true },
+  optimizeDeps: {
+    exclude: ['onnxruntime-web'],
+  },
+  resolve: {},
   server: {
     proxy: {
       '/api': {
@@ -58,7 +62,7 @@ export default defineConfig({
         secure: false,
       },
     },
-    allowedHosts: ['localhost', '127.0.0.1', 'f0ee22d82f7f.ngrok-free.app'],
+    allowedHosts: ['localhost', '127.0.0.1', 'f0ee22d82f7f.ngrok-free.app', ''],
   },
   test: {
     environment: 'jsdom',
