@@ -1,4 +1,5 @@
 import './sidebar.css';
+import { trackEvent } from '../analytics/googleAnalytics';
 import { useAuth } from '../contexts/AuthContext';
 
 import { Icon } from './Icon';
@@ -40,7 +41,14 @@ export function Sidebar({ active, onSelect }: Props) {
               <button
                 className={`sb-item ${isActive ? 'is-active' : ''}`}
                 aria-current={isActive ? 'page' : undefined}
-                onClick={() => onSelect(label)}
+                onClick={() => {
+                  trackEvent({
+                    action: 'sidebar_click',
+                    category: 'navigation',
+                    label,
+                  });
+                  onSelect(label);
+                }}
               >
                 <span className="sb-active-bar" aria-hidden />
                 <Icon source={srcIconPref + icon} size={15} />
@@ -53,7 +61,14 @@ export function Sidebar({ active, onSelect }: Props) {
 
       <div className="sb-spacer" />
 
-      <button className="sb-exit" aria-label="Выход" onClick={logout}>
+      <button
+        className="sb-exit"
+        aria-label="Выход"
+        onClick={() => {
+          trackEvent({ action: 'sidebar_logout', category: 'navigation' });
+          logout();
+        }}
+      >
         <Icon source={`${srcIconPref}exit.svg`} size={15} />
         <span className="sb-label">Выход</span>
       </button>
