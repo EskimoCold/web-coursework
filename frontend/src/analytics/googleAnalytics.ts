@@ -14,7 +14,6 @@ export const initAnalytics = () => {
   });
 
   initialized = true;
-  console.log("INIT ANALYTICS!!")
 };
 
 export const trackPageview = (path: string) => {

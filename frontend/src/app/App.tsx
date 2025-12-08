@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
+import { initAnalytics, trackPageview } from '../analytics/googleAnalytics';
 import { Layout } from '../components/Layout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { Sidebar } from '../components/Sidebar';
-import { initAnalytics, trackPageview } from '../analytics/googleAnalytics';
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
 import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
