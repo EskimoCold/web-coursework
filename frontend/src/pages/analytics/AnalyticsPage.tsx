@@ -22,7 +22,7 @@ import { Category } from '../../contexts/CategoriesContext';
 import { predictExpenses, ExpenseForecastPoint } from '../../ml/expensePredictor';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
-type NormalizedTransaction = Transaction & { transaction_date: Date };
+type NormalizedTransaction = Omit<Transaction, 'transaction_date'> & { transaction_date: Date };
 
 export const AnalyticsPage: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
