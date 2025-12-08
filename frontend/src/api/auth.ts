@@ -1,5 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
+console.log(API_URL)
+
 export interface LoginRequest {
   username: string;
   password: string;
