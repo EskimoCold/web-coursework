@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('react-ga4', () => {
   const initialize = vi.fn();
@@ -23,6 +23,11 @@ describe('googleAnalytics', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
+    vi.stubEnv('VITE_GA_MEASUREMENT_ID', 'G-TEST');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('initializes once and sends page views', async () => {
@@ -61,7 +66,9 @@ describe('googleAnalytics', () => {
       value: 1,
     });
 
+    expect(ReactGA.initialize).toHaveBeenCalledTimes(1);
     expect(ReactGA.event).toHaveBeenCalledWith(
+      'sidebar_click',
       expect.objectContaining({
         event_category: 'navigation',
         event_label: 'Главная',
