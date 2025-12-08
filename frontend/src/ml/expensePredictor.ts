@@ -38,8 +38,8 @@ const loadSession = async (): Promise<ort.InferenceSession> => {
 };
 
 const runExclusive = async <T>(fn: () => Promise<T>): Promise<T> => {
+  let release: () => void = () => {};
   const prev = mutex;
-  let release: (() => void) | null = null;
   mutex = new Promise<void>((resolve) => {
     release = resolve;
   });
@@ -48,7 +48,7 @@ const runExclusive = async <T>(fn: () => Promise<T>): Promise<T> => {
   try {
     return await fn();
   } finally {
-    release?.();
+    release();
   }
 };
 
