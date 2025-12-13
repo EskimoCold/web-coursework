@@ -1,0 +1,221 @@
+[33md40a43b[m[33m ([m[1;36mHEAD -> [m[1;32mfeat/mobile-view-settings-page-new-feat[m[33m)[m feat: решил конфликты мёрджа
+[33m36633b1[m[33m ([m[1;31morigin/dev[m[33m)[m Merge pull request #40 from EskimoCold/feat/web-analytics
+[33ma1bec10[m fix: tests for analytics
+[33ma2423f6[m fix: chore and update packages
+[33m2979ae7[m feat: add analytics test, fix lints
+[33mbace7f1[m feat: update .env.example
+[33m5726251[m feat: add ga first version
+[33md8695eb[m Merge pull request #39 from EskimoCold/feat/ml-part
+[33ma97ee0e[m fix: minor
+[33m88e4ba3[m fix: update tests
+[33m95f639f[m fix: extend tests
+[33m7a587a0[m fix: update package lock json
+[33mfeced36[m fix: lint
+[33md3e96be[m feat: add ml first version
+[33m7a8b74f[m Merge pull request #38 from EskimoCold/chore/secure-auth
+[33m3e53ce3[m[33m ([m[1;31morigin/chore/secure-auth[m[33m)[m fix: tests
+[33mbeeb490[m chore: linted
+[33m180be0e[m chore: secure auth
+[33m81090e0[m[33m ([m[1;31morigin/feat/mobile-view-settings-page-new-feat[m[33m)[m fix: убрал дубликат транзакций
+[33m6a1500e[m fix: убрал дубликат транзакций
+[33mfcca757[m fix: убрал дубликат транзакций
+[33madf3382[m fix: убрал дубликат транзакций
+[33m6c782e7[m fix: убрал дубликат транзакций
+[33m8d63add[m fix: убрал дубликат транзакций
+[33m684bbd7[m fix: убрал дубликат транзакций
+[33m1642d4b[m fix: убрал дубликат транзакций
+[33m20086ca[m fix: убрал дубликат транзакций
+[33m1664587[m fix: убрал дубликат транзакций
+[33m40e363e[m fix: тесты
+[33m47e309d[m fix: убрал дубликат транзакций
+[33mb8aeee0[m fix: убрал дубликат транзакций
+[33m07fba81[m fix: убрал дубликат транзакций
+[33m5b95cdb[m Merge pull request #37 from EskimoCold/feat/delete-account
+[33m719ecfc[m fix: remove merge conflict markers from HomePage.tsx
+[33ma273a2b[m fix: remove merge conflict markers from HomePage.tsx
+[33m34d2f5c[m Merge pull request #35 from EskimoCold/feat/pwa
+[33m49e90f7[m[33m ([m[1;31morigin/feat/delete-account[m[33m)[m fix: format
+[33m9a25b30[m fix: ci
+[33mf8f1dc5[m[33m ([m[1;31morigin/feat/pwa[m[33m)[m fix: tests
+[33m0e435f2[m feat: delete account button
+[33mb1cee86[m feat: pwa
+[33mba911d5[m fix: remove merge conflict markers from HomePage.tsx
+[33m16ed5f9[m Merge pull request #33 from EskimoCold/feat/icons
+[33m838fab7[m[33m ([m[1;31morigin/feat/icons[m[33m)[m Merge branch 'dev' into feat/icons
+[33mc93b35b[m test: fix test
+[33m13ba1bc[m feat: add icons on pages + field in fetches
+[33mbb51f64[m feat: add field 'icon' on backend
+[33ma90dbc0[m feat: add icons svgs
+[33m735186c[m Merge pull request #32 from EskimoCold/feat/reset-password
+[33ma3886df[m[33m ([m[1;31morigin/feat/reset-password[m[33m)[m chore: linted
+[33m89b40dc[m feat: reset password
+[33m93cc1bd[m fix: remove merge conflict markers from HomePage.tsx
+[33m5cea8b1[m fix: remove merge conflict markers from HomePage.tsx
+[33m3cebf7e[m fix: remove merge conflict markers from HomePage.tsx
+[33m0eb2512[m fix: remove merge conflict markers from HomePage.tsx
+[33mdcdd97d[m fix: remove merge conflict markers from HomePage.tsx
+[33me754a9f[m fix: remove merge conflict markers from HomePage.tsx
+[33m4b1f018[m fix: remove merge conflict markers from HomePage.tsx
+[33m0a8c27d[m fix: remove merge conflict markers from HomePage.tsx
+[33ma49b725[m fix: remove merge conflict markers from HomePage.tsx
+[33m4de6422[m fix: remove merge conflict markers from HomePage.tsx
+[33m1041ebb[m fix: remove merge conflict markers from HomePage.tsx
+[33m5a90ed5[m fix: remove merge conflict markers from HomePage.tsx
+[33m453ffd6[m fix: remove merge conflict markers from HomePage.tsx
+[33m76e9ac6[m fix: remove merge conflict markers from HomePage.tsx
+[33m32142ce[m fix: remove merge conflict markers from HomePage.tsx
+[33m08ba731[m fix: remove merge conflict markers from HomePage.tsx
+[33m3320fd9[m Merge remote changes
+[33me8ce230[m feat: add export/import functionality to settings
+[33m510b188[m Mark main as merged, keep dev content
+[33m3c9755c[m Refactor: replace (#29)
+[33ma012491[m Merge pull request #27 from EskimoCold/feat/mobile-view-home-page
+[33mcf1bba5[m[33m ([m[1;31morigin/feat/mobile-view-home-page[m[33m, [m[1;32mfeat/mobile-view-home-page[m[33m)[m feat: адаптация аод телефон
+[33m74564f7[m Resolve merge conflicts
+[33maae00a6[m feat: адаптация аод телефон
+[33me5eb061[m Merge branch 'dev' into feat/mobile-view-home-page
+[33m59898f4[m feat: адаптация аод телефон
+[33mb488cf9[m feat: адаптация аод телефон
+[33mbd8f385[m feat: адаптация аод телефон
+[33mf77ef4a[m feat: адаптация аод телефон
+[33m367c761[m fix: фикс лагов
+[33ma713e4a[m Merge pull request #28 from EskimoCold/feat/mob-analytics-page
+[33m7bd1e6c[m feat: add mobile styles for analytics page
+[33m38fa469[m feat: адаптация аод телефон
+[33m613d79c[m feat: адаптация аод телефон
+[33m38a6e7b[m[33m ([m[1;32mfeat/export-import-settings[m[33m, [m[1;32mdev[m[33m)[m Merge pull request #26 from EskimoCold/feat/categories-page
+[33me32461d[m[33m ([m[1;31morigin/feat/categories-page[m[33m)[m fix: stylelint
+[33me745c8d[m fix: stylelint
+[33mb4195a8[m fix: stylelint
+[33mc7a0d6b[m feat: add mobile styles
+[33m4239196[m Merge pull request #25 from EskimoCold/feat/mobile-auth
+[33me9d0631[m[33m ([m[1;31morigin/feat/mobile-auth[m[33m)[m chore: linting
+[33mea1844e[m feat: mobile styles
+[33me5b8ef0[m Merge pull request #24 from EskimoCold/fix/minor
+[33m27e2fb6[m[33m ([m[1;31morigin/fix/minor[m[33m)[m fix: cat api
+[33m57232f1[m fix: lints
+[33m71ba725[m fix: upd tests
+[33mb9ad190[m fix: minor logic and styles
+[33mece42b1[m Merge pull request #23 from EskimoCold/feat/categories-page
+[33m3f3941e[m Merge branch 'dev' into feat/categories-page
+[33mf08af21[m Merge pull request #21 from EskimoCold/fix/home-page
+[33m6a18c8c[m fix: add auth
+[33m25d13e3[m[33m ([m[1;31morigin/fix/home-page[m[33m)[m Merge branch 'dev' into fix/home-page
+[33md81fa90[m fix: styles and overall on home pages
+[33m004091e[m Merge pull request #20 from EskimoCold/feat/anal-page
+[33mfbe7f7f[m[33m ([m[1;31morigin/feat/anal-page[m[33m)[m Merge branch 'dev' into feat/anal-page
+[33m5bcb7e8[m feat: add analytics page
+[33m1122b07[m chore: add recharts
+[33m767f413[m Merge pull request #19 from EskimoCold/feat/home-page
+[33mdda354b[m[33m ([m[1;31morigin/feat/home-page[m[33m)[m Merge branch 'dev' into feat/home-page
+[33m8e7b4a0[m[33m ([m[1;32mfeat/home-page[m[33m)[m fix: тесты
+[33m1e79f57[m fix: тесты
+[33mac2f7f6[m fix: тесты
+[33mdf2059a[m feat: добавил кнопку добавления транзакции
+[33maa68f72[m Merge pull request #18 from EskimoCold/fix/sentry
+[33m3d8f051[m[33m ([m[1;31morigin/fix/sentry[m[33m)[m fix: minor sentry
+[33m1f3fd63[m minor sentry fixes
+[33m91ad48e[m Merge pull request #17 from EskimoCold/feat/categories-page
+[33m8415c7d[m Merge branch 'dev' into feat/categories-page
+[33m0e46dac[m feat: linked to the backend
+[33m9a8352d[m Merge pull request #16 from EskimoCold/fix/settings-page
+[33mca355ea[m[33m ([m[1;31morigin/fix/settings-page[m[33m)[m fix: tests
+[33m4bef4e7[m fix: linters/tests
+[33m4653756[m fix: settings page
+[33ma8efcf8[m Merge pull request #13 from EskimoCold/feat/categories-page
+[33md8633d1[m Merge branch 'dev' into feat/categories-page
+[33m8f20f2a[m Merge pull request #15 from EskimoCold/feat/sentry
+[33m98a7c0b[m fix: upd .env.example
+[33m8768f4f[m fix: backend lint
+[33maa0f4f3[m fix: add package-lock.json
+[33m89e0640[m feat: add sentry
+[33m86a4fd8[m feat: cd (#14)
+[33m0c4ee83[m Merge branch 'dev' into feat/categories-page
+[33m5c51801[m Merge pull request #12 from EskimoCold/feat/home-page
+[33m7914746[m Merge branch 'dev' into feat/categories-page
+[33m55306c7[m fix: e2e
+[33m3db4f10[m fix: build
+[33m09c658b[m test: fix test
+[33m002fa22[m fix: formatter
+[33me517f7d[m fix: stylelint
+[33m7ff64e1[m fix: formatter
+[33m584a28b[m fix: stylelint
+[33m9e5f2dd[m fix: linter
+[33m46de533[m fix: prettier
+[33m308b2ee[m test: add tests
+[33mbdf3066[m feat: add css
+[33m5c8cebc[m feat: categories page
+[33mc5deecc[m feat: general files
+[33maf91376[m fix: тесты переделал что бы гитовские пршли
+[33me8fff48[m fix: тесты переделал что бы гитовские пршли
+[33mb4fe8db[m fix: тесты переделал что бы гитовские пршли
+[33m6a1a7ce[m fix: тесты переделал что бы гитовские пршли
+[33m8d4c70b[m feat: домашняя страница пользователя
+[33md7c19c5[m fix: тесты переделал что бы гитовские пршли
+[33m9590e6c[m fix: тесты
+[33m8fc603f[m feat: домашняя страница пользователя
+[33m9c6b50b[m feat: домашняя страница пользователя
+[33ma2efeb3[m fix: тесты переделал что бы гитовские пршли
+[33m4fa8989[m fix: тесты
+[33mbfb684f[m fix: снова фикс тестов
+[33m2107bdd[m fix: тесты переделал что бы гитовские пршли
+[33m0b508ed[m fix: фикс тестов
+[33m75370f1[m feat: домашняя страница пользователя
+[33m2e97f7c[m Merge pull request #11 from EskimoCold/feat/settings-page
+[33mcd7ee1a[m[33m ([m[1;31morigin/feat/settings-page[m[33m)[m fix: linter
+[33m0a00c6d[m fix: linter
+[33m241ed72[m fix: linter
+[33mebeb9f7[m Merge branch 'dev' into feat/settings-page
+[33mf246bb2[m[33m ([m[1;32mfeat/settings-page[m[33m)[m fix: опять фикшу тесты
+[33m06503c9[m fix: опять тесты
+[33m2b49bad[m fix: исправил тесты компонента
+[33m11e85db[m fix: опять фикшу тесты
+[33mba7ff25[m fix: покрыл компонент тестами
+[33m0226b46[m fix: снова фикшу тесты
+[33ma2fbf53[m fix: фикшу тесты на гите
+[33m3279a34[m fix: фикшу тесты на гите
+[33mb503811[m fix: вернул файл в исходное состояние
+[33maa369f8[m chore: Забыл убрать коммент:)
+[33m28e0d6b[m feat: Добавлена страница настроек
+[33maa81928[m Feat: auth page (#10)
+[33m0d778f7[m Feat: core backend (#9)
+[33m8c74750[m Merge pull request #8 from EskimoCold/feat/core-page-structure
+[33m846811e[m rm: mock e2e test
+[33m2ed27a9[m fix: unit tests
+[33md7c63e2[m feat: implement core page component
+[33m32bf95d[m trigger CI for status check registration
+[33m459a108[m CI jobs (#4)
+[33m2d1b7a7[m wip
+[33m1c6c8ac[m wip
+[33m681dab3[m wup
+[33m7426287[m wip
+[33m1f8e7fa[m wip
+[33m3dbd4dd[m fix: CI
+[33ma7c8832[m test(frontend): add client and App tests; scope coverage to src
+[33m4de72de[m test(frontend): add client and App tests; scope coverage to src
+[33ma78b8f3[m fix: CI
+[33m3310010[m fix: CI
+[33m541298c[m wip
+[33m949471d[m fix: ,
+[33me12f9d1[m chore(frontend): fix lint config; add stylelint; auto-fix CSS
+[33mc112b52[m chore: fix front
+[33m69140c8[m chore: cache dependencies
+[33mf324ca3[m add unused imports
+[33m80c57dd[m feat: add packages
+[33m51fda76[m fix: prettier lines
+[33m83f7f84[m chore: linted back
+[33me387dc9[m chore: linted back
+[33me09a58e[m fix: linted backend
+[33ma11eee5[m fix: ci dir
+[33m57f69ef[m fix: ci dir
+[33m4073b8d[m feat: backend and frontend in docker
+[33m6f7e0ea[m add package lock json
+[33m357290f[m fix: frontend ci
+[33mdf32786[m feat: add frontend base
+[33mc0528d0[m feat: git add lint configs
+[33m7bf1d25[m feat: add linters to project
+[33m0d856cc[m[33m ([m[1;32mmain[m[33m)[m fix: workflows
+[33m1ed86e5[m chore: PR template
+[33m3b14aa6[m init: md
+[33m5b06613[m init: md
+[33m66c335e[m feat: ci workflows
