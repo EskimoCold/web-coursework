@@ -1,7 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { HomePage } from './HomePage';
+import { CurrencyProvider } from '../contexts/CurrencyContext';
+
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(<CurrencyProvider>{component}</CurrencyProvider>);
+};
 
 // Mock API
 vi.mock('../api/transactions', () => ({
@@ -36,8 +41,12 @@ vi.mock('../api/transactions', () => ({
 }));
 
 describe('HomePage', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('displays transactions correctly', async () => {
-    render(<HomePage />);
+    renderWithProviders(<HomePage />);
 
     await waitFor(() => {
       expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
@@ -46,10 +55,20 @@ describe('HomePage', () => {
   });
 
   it('shows transaction count', async () => {
-    render(<HomePage />);
+    renderWithProviders(<HomePage />);
 
     await waitFor(() => {
       expect(screen.getByText(/Показано/)).toBeInTheDocument();
+    });
+  });
+
+  it('displays amounts with currency formatting', async () => {
+    renderWithProviders(<HomePage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Общий баланс')).toBeInTheDocument();
+      expect(screen.getByText('Доходы')).toBeInTheDocument();
+      expect(screen.getByText('Расходы')).toBeInTheDocument();
     });
   });
 });

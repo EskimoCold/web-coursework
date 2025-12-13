@@ -1,24 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-export type Currency = 'RUB' | 'USD' | 'EUR' | 'CNY';
+import { Currency, convertCurrency, formatCurrency, formatCurrencyAmount } from '../utils/currency';
 
 interface CurrencyContextType {
   currency: Currency;
   setCurrency: (currency: Currency) => void;
-  convertAmount: (amount: number, fromCurrency?: Currency) => number;
+  convert: (amount: number) => number;
+  format: (amount: number) => string;
   formatAmount: (amount: number) => string;
-  getCurrencySymbol: () => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-// Курсы валют (базовые значения, можно заменить на API)
-const EXCHANGE_RATES: Record<Currency, number> = {
-  RUB: 1,
-  USD: 0.011, // 1 RUB = 0.011 USD (примерно 90 RUB за 1 USD)
-  EUR: 0.01, // 1 RUB = 0.01 EUR (примерно 100 RUB за 1 EUR)
-  CNY: 0.08, // 1 RUB = 0.08 CNY (примерно 12.5 RUB за 1 CNY)
-};
+const CURRENCY_STORAGE_KEY = 'app_currency';
 
 export const useCurrency = () => {
   const context = useContext(CurrencyContext);
@@ -34,43 +27,31 @@ interface CurrencyProviderProps {
 
 export const CurrencyProvider: React.FC<CurrencyProviderProps> = ({ children }) => {
   const [currency, setCurrencyState] = useState<Currency>(() => {
-    const saved = localStorage.getItem('currency') as Currency | null;
-    return saved || 'RUB';
+    const stored = localStorage.getItem(CURRENCY_STORAGE_KEY);
+    if (stored && ['RUB', 'USD', 'EUR', 'CNY'].includes(stored)) {
+      return stored as Currency;
+    }
+    return 'RUB';
   });
 
   useEffect(() => {
-    localStorage.setItem('currency', currency);
+    localStorage.setItem(CURRENCY_STORAGE_KEY, currency);
   }, [currency]);
 
   const setCurrency = (newCurrency: Currency) => {
     setCurrencyState(newCurrency);
   };
 
-  const convertAmount = (amount: number, fromCurrency: Currency = 'RUB'): number => {
-    if (fromCurrency === currency) {
-      return amount;
-    }
-    // Конвертируем из fromCurrency в RUB, затем в целевую валюту
-    const amountInRUB = amount / EXCHANGE_RATES[fromCurrency];
-    return amountInRUB * EXCHANGE_RATES[currency];
+  const convert = (amount: number) => {
+    return convertCurrency(amount, currency);
   };
 
-  const formatAmount = (amount: number): string => {
-    const converted = convertAmount(amount);
-    return converted.toLocaleString('ru-RU', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+  const format = (amount: number) => {
+    return formatCurrency(amount, currency);
   };
 
-  const getCurrencySymbol = (): string => {
-    const symbols: Record<Currency, string> = {
-      RUB: '₽',
-      USD: '$',
-      EUR: '€',
-      CNY: '¥',
-    };
-    return symbols[currency];
+  const formatAmount = (amount: number) => {
+    return formatCurrencyAmount(amount, currency);
   };
 
   return (
@@ -78,9 +59,9 @@ export const CurrencyProvider: React.FC<CurrencyProviderProps> = ({ children }) 
       value={{
         currency,
         setCurrency,
-        convertAmount,
+        convert,
+        format,
         formatAmount,
-        getCurrencySymbol,
       }}
     >
       {children}
