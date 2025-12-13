@@ -194,7 +194,8 @@ describe('AnalyticsPage', () => {
       // Balance should be displayed with currency formatting
       const balanceElement = screen.getByText('Общий баланс').nextElementSibling;
       expect(balanceElement).toBeInTheDocument();
-      expect(balanceElement?.textContent).toContain('1 800');
+      expect(balanceElement?.textContent).toContain('1 800,00');
+      expect(balanceElement?.textContent).toContain('₽');
     });
   });
 
@@ -206,8 +207,8 @@ describe('AnalyticsPage', () => {
       const expenseElement = screen.getByText('Расходы').nextElementSibling;
       expect(incomeElement).toBeInTheDocument();
       expect(expenseElement).toBeInTheDocument();
-      expect(incomeElement?.textContent).toContain('2 500');
-      expect(expenseElement?.textContent).toContain('700');
+      expect(incomeElement?.textContent).toContain('2 500,00');
+      expect(expenseElement?.textContent).toContain('700,00');
     });
   });
 
