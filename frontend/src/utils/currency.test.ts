@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { convertCurrency, formatCurrency, formatCurrencyAmount, EXCHANGE_RATES, CURRENCY_SYMBOLS } from './currency';
-import type { Currency } from './currency';
+
+import {
+  convertCurrency,
+  formatCurrency,
+  formatCurrencyAmount,
+  EXCHANGE_RATES,
+  CURRENCY_SYMBOLS,
+} from './currency';
 
 describe('currency utils', () => {
   describe('convertCurrency', () => {
@@ -92,4 +98,3 @@ describe('currency utils', () => {
     });
   });
 });
-

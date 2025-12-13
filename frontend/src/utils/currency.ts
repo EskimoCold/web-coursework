@@ -4,7 +4,7 @@
 export const EXCHANGE_RATES: Record<string, number> = {
   RUB: 1.0,
   USD: 0.011, // 1 RUB = 0.011 USD (approximately 90 RUB per USD)
-  EUR: 0.010, // 1 RUB = 0.010 EUR (approximately 100 RUB per EUR)
+  EUR: 0.01, // 1 RUB = 0.010 EUR (approximately 100 RUB per EUR)
   CNY: 0.079, // 1 RUB = 0.079 CNY (approximately 12.6 RUB per CNY)
 };
 
@@ -70,4 +70,3 @@ export function formatCurrencyAmount(amount: number, currency: Currency): string
   });
   return `${formatted} ${symbol}`;
 }
-

@@ -1,10 +1,11 @@
 // src/components/SettingsPage.test.tsx
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { SettingsPage } from './SettingsPage';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
+
+import { SettingsPage } from './SettingsPage';
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(<CurrencyProvider>{component}</CurrencyProvider>);

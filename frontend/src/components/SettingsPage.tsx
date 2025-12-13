@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+
 import './settings.css';
 import { useCurrency } from '../contexts/CurrencyContext';
+
 import type { Currency } from '../utils/currency';
 
 function SecuritySection() {
@@ -173,7 +175,10 @@ function AboutSection() {
                 ×
               </button>
             </div>
-            <div className="modal-body" style={{ padding: '20px', maxHeight: '70vh', overflowY: 'auto' }}>
+            <div
+              className="modal-body"
+              style={{ padding: '20px', maxHeight: '70vh', overflowY: 'auto' }}
+            >
               <h3>1. Общие положения</h3>
               <p>
                 Настоящая Политика конфиденциальности определяет порядок обработки и защиты
@@ -212,9 +217,7 @@ function AboutSection() {
               </ul>
 
               <h3>6. Контакты</h3>
-              <p>
-                По вопросам конфиденциальности обращайтесь: support@fintrack.ru
-              </p>
+              <p>По вопросам конфиденциальности обращайтесь: support@fintrack.ru</p>
 
               <p style={{ marginTop: '20px', fontSize: '12px', color: '#666' }}>
                 Последнее обновление: {new Date().toLocaleDateString('ru-RU')}
