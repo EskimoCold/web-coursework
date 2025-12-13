@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
 import { Currency, convertCurrency, formatCurrency, formatCurrencyAmount } from '../utils/currency';
 
 interface CurrencyContextType {
@@ -68,4 +69,3 @@ export const CurrencyProvider: React.FC<CurrencyProviderProps> = ({ children }) 
     </CurrencyContext.Provider>
   );
 };
-

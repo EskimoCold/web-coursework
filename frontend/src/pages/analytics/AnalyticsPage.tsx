@@ -23,7 +23,7 @@ import { useCurrency } from '../../contexts/CurrencyContext';
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 
 export const AnalyticsPage: React.FC = () => {
-  const { convert, formatAmount, currency } = useCurrency();
+  const { convert, formatAmount } = useCurrency();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filter, setFilter] = useState<string>('all');
@@ -220,7 +220,7 @@ export const AnalyticsPage: React.FC = () => {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip
-                formatter={(value, name) => [
+                formatter={(value: unknown, name: unknown) => [
                   formatAmount(Number(value)),
                   name === 'income' ? 'Доход' : 'Расход',
                 ]}
@@ -258,7 +258,10 @@ export const AnalyticsPage: React.FC = () => {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${formatAmount(value)}`}
+                  label={({ name, value }: { name?: string; value?: number }) =>
+                    // eslint-disable-next-line react/prop-types
+                    `${name ?? ''}: ${formatAmount(value ?? 0)}`
+                  }
                 >
                   {expenseByCategory.map((_, index) => (
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />

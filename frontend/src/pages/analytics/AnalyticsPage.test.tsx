@@ -191,7 +191,6 @@ describe('AnalyticsPage', () => {
   it('should calculate correct balance', async () => {
     renderComponent();
     await waitFor(() => {
-      const totalBalance = 1000 + 1500 - 500 - 200;
       // Balance should be displayed with currency formatting
       const balanceElement = screen.getByText('Общий баланс').nextElementSibling;
       expect(balanceElement).toBeInTheDocument();
@@ -202,8 +201,6 @@ describe('AnalyticsPage', () => {
   it('should calculate correct incomes and expenses', async () => {
     renderComponent();
     await waitFor(() => {
-      const totalIncomes = 1000 + 1500;
-      const totalExpenses = 500 + 200;
       // Amounts should be displayed with currency formatting
       const incomeElement = screen.getByText('Доходы').nextElementSibling;
       const expenseElement = screen.getByText('Расходы').nextElementSibling;

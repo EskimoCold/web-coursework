@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+
 import { CurrencyProvider, useCurrency } from './CurrencyContext';
-import type { Currency } from '../utils/currency';
 
 const TestComponent = () => {
   const { currency, setCurrency, convert, format, formatAmount } = useCurrency();
@@ -129,4 +129,3 @@ describe('CurrencyContext', () => {
     expect(screen.getByTestId('currency')).toHaveTextContent('RUB');
   });
 });
-

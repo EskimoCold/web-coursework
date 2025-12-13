@@ -1,8 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { HomePage } from './HomePage';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
+
+import { HomePage } from './HomePage';
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(<CurrencyProvider>{component}</CurrencyProvider>);
