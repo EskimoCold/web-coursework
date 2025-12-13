@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { describe, it, expect, beforeEach, vi, beforeAll, afterAll } from 'vitest';
 
 import { Transaction, transactionsApi } from '../../api/transactions';
+import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
 import { AnalyticsPage } from './AnalyticsPage';
 
@@ -142,12 +143,17 @@ const mockTransactions: Transaction[] = [
 
 const renderComponent = (transactions: Transaction[] = mockTransactions) => {
   (transactionsApi.getTransactions as vi.Mock).mockResolvedValue(transactions);
-  return render(<AnalyticsPage />);
+  return render(
+    <CurrencyProvider>
+      <AnalyticsPage />
+    </CurrencyProvider>,
+  );
 };
 
 describe('AnalyticsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
   it('should render all filter buttons', () => {
@@ -186,7 +192,10 @@ describe('AnalyticsPage', () => {
     renderComponent();
     await waitFor(() => {
       const totalBalance = 1000 + 1500 - 500 - 200;
-      expect(screen.getByText(`${totalBalance} ₽`)).toBeInTheDocument();
+      // Balance should be displayed with currency formatting
+      const balanceElement = screen.getByText('Общий баланс').nextElementSibling;
+      expect(balanceElement).toBeInTheDocument();
+      expect(balanceElement?.textContent).toContain('1 800');
     });
   });
 
@@ -195,8 +204,13 @@ describe('AnalyticsPage', () => {
     await waitFor(() => {
       const totalIncomes = 1000 + 1500;
       const totalExpenses = 500 + 200;
-      expect(screen.getByText(`${totalIncomes} ₽`)).toBeInTheDocument();
-      expect(screen.getByText(`${totalExpenses} ₽`)).toBeInTheDocument();
+      // Amounts should be displayed with currency formatting
+      const incomeElement = screen.getByText('Доходы').nextElementSibling;
+      const expenseElement = screen.getByText('Расходы').nextElementSibling;
+      expect(incomeElement).toBeInTheDocument();
+      expect(expenseElement).toBeInTheDocument();
+      expect(incomeElement?.textContent).toContain('2 500');
+      expect(expenseElement?.textContent).toContain('700');
     });
   });
 

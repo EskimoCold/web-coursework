@@ -38,7 +38,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
 ];
 
 export function HomePage() {
-  const { convertAmount, formatAmount, getCurrencySymbol } = useCurrency();
+  const { convert, formatAmount, currency } = useCurrency();
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -198,11 +198,11 @@ export function HomePage() {
   const getSummary = (): TransactionSummary => {
     const totalIncome = transactions
       .filter((t) => t.transaction_type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + convert(t.amount), 0);
 
     const totalExpenses = transactions
       .filter((t) => t.transaction_type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + convert(t.amount), 0);
 
     const balance = totalIncome - totalExpenses;
 
@@ -237,23 +237,17 @@ export function HomePage() {
         <div className="summary-cards">
           <div className="summary-card balance">
             <h3>Общий баланс</h3>
-            <div className="amount">
-              {formatAmount(summary.balance)} {getCurrencySymbol()}
-            </div>
+            <div className="amount">{formatAmount(summary.balance)}</div>
           </div>
 
           <div className="summary-card income">
             <h3>Доходы</h3>
-            <div className="amount">
-              +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
-            </div>
+            <div className="amount">+{formatAmount(summary.totalIncome)}</div>
           </div>
 
           <div className="summary-card expense">
             <h3>Расходы</h3>
-            <div className="amount">
-              -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
-            </div>
+            <div className="amount">-{formatAmount(summary.totalExpenses)}</div>
           </div>
         </div>
       </div>
@@ -308,7 +302,7 @@ export function HomePage() {
                 <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
                 <td className={`amount-cell ${transaction.transaction_type}`}>
                   {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {formatAmount(transaction.amount)} {getCurrencySymbol()}
+                  {formatAmount(convert(transaction.amount))}
                 </td>
                 <td className="description-cell">{transaction.description}</td>
                 <td>

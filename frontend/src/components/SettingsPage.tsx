@@ -1,8 +1,7 @@
-import { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import './settings.css';
-import { useCurrency, Currency } from '../contexts/CurrencyContext';
-import { transactionsApi, Transaction, Category } from '../api/transactions';
-import { categoriesApi } from '../api/categories';
+import { useCurrency } from '../contexts/CurrencyContext';
+import type { Currency } from '../utils/currency';
 
 function SecuritySection() {
   return (
@@ -31,242 +30,28 @@ function SecuritySection() {
   );
 }
 
-interface ExportData {
-  transactions: Transaction[];
-  categories: Category[];
-  exportDate: string;
-  version: string;
-}
-
 function DataManagementSection() {
-  const [isExporting, setIsExporting] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
-  const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleExport = async () => {
-    try {
-      setIsExporting(true);
-      setImportMessage(null);
-
-      // Получаем все данные
-      const [transactions, categories] = await Promise.all([
-        transactionsApi.getTransactions(),
-        categoriesApi.getCategories(),
-      ]);
-
-      // Формируем объект для экспорта
-      const exportData: ExportData = {
-        transactions,
-        categories,
-        exportDate: new Date().toISOString(),
-        version: '1.0',
-      };
-
-      // Создаем JSON строку
-      const jsonString = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-
-      // Создаем временную ссылку для скачивания
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `fintrack-export-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-
-      // Очищаем
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      setImportMessage({ type: 'success', text: 'Данные успешно экспортированы' });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      setImportMessage({ type: 'error', text: `Ошибка экспорта: ${errorMessage}` });
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setIsImporting(true);
-      setImportMessage(null);
-
-      // Читаем файл
-      const text = await file.text();
-      const importData: ExportData = JSON.parse(text);
-
-      // Валидация структуры данных
-      if (!importData.transactions || !importData.categories) {
-        throw new Error('Неверный формат файла. Ожидается объект с полями transactions и categories.');
-      }
-
-      if (!Array.isArray(importData.transactions) || !Array.isArray(importData.categories)) {
-        throw new Error('Неверный формат данных. Поля transactions и categories должны быть массивами.');
-      }
-
-      // Импортируем категории (сначала категории, так как транзакции могут ссылаться на них)
-      const categoryMap = new Map<number, number>(); // старое ID -> новое ID
-      let importedCategories = 0;
-      let importedTransactions = 0;
-      let skippedCategories = 0;
-      let skippedTransactions = 0;
-
-      for (const category of importData.categories) {
-        try {
-          // Проверяем, существует ли категория с таким именем
-          const existingCategories = await categoriesApi.getCategories();
-          const existing = existingCategories.find((c: Category) => c.name === category.name);
-
-          if (existing) {
-            // Используем существующую категорию
-            categoryMap.set(category.id, existing.id);
-            skippedCategories++;
-          } else {
-            // Создаем новую категорию
-            const newCategory = await categoriesApi.addCategory(
-              category.name,
-              category.description || '',
-            );
-            categoryMap.set(category.id, newCategory.id);
-            importedCategories++;
-          }
-        } catch (error) {
-          console.error(`Ошибка импорта категории ${category.name}:`, error);
-          skippedCategories++;
-        }
-      }
-
-      // Импортируем транзакции
-      for (const transaction of importData.transactions) {
-        try {
-          // Валидация транзакции
-          if (
-            !transaction.amount ||
-            !transaction.transaction_type ||
-            !transaction.transaction_date ||
-            !transaction.description
-          ) {
-            skippedTransactions++;
-            continue;
-          }
-
-          // Преобразуем category_id если есть
-          let newCategoryId: number | null = null;
-          if (transaction.category_id && categoryMap.has(transaction.category_id)) {
-            newCategoryId = categoryMap.get(transaction.category_id)!;
-          }
-
-          // Создаем транзакцию
-          await transactionsApi.createTransaction({
-            amount: transaction.amount,
-            description: transaction.description,
-            transaction_type: transaction.transaction_type,
-            category_id: newCategoryId,
-            transaction_date: transaction.transaction_date,
-          });
-
-          importedTransactions++;
-        } catch (error) {
-          console.error(`Ошибка импорта транзакции:`, error);
-          skippedTransactions++;
-        }
-      }
-
-      // Формируем сообщение о результате
-      const messages = [];
-      if (importedCategories > 0) messages.push(`Импортировано категорий: ${importedCategories}`);
-      if (importedTransactions > 0) messages.push(`Импортировано транзакций: ${importedTransactions}`);
-      if (skippedCategories > 0) messages.push(`Пропущено категорий: ${skippedCategories}`);
-      if (skippedTransactions > 0) messages.push(`Пропущено транзакций: ${skippedTransactions}`);
-
-      if (importedCategories === 0 && importedTransactions === 0) {
-        setImportMessage({
-          type: 'error',
-          text: 'Не удалось импортировать данные. Проверьте формат файла.',
-        });
-      } else {
-        setImportMessage({
-          type: 'success',
-          text: messages.join('. ') || 'Импорт завершен',
-        });
-      }
-
-      // Очищаем input для возможности повторного выбора того же файла
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      setImportMessage({ type: 'error', text: `Ошибка импорта: ${errorMessage}` });
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } finally {
-      setIsImporting(false);
-    }
-  };
-
   return (
     <div className="settings-section">
       <h2 className="settings-section-title">Управление данными</h2>
       <p className="settings-section-description">Экспорт, импорт и резервное копирование</p>
 
-      {importMessage && (
-        <div
-          className={`import-message ${importMessage.type === 'success' ? 'success' : 'error'}`}
-          role="alert"
-        >
-          {importMessage.text}
+      <div className="settings-item">
+        <div className="settings-item-content">
+          <h3 className="settings-item-title">Экспорт данных</h3>
+          <p className="settings-item-description">Выгрузить все данные в файл</p>
         </div>
-      )}
+        <div className="settings-button-group">
+          <button className="settings-button secondary">JSON</button>
+        </div>
+      </div>
 
-      <div className="settings-items">
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Экспорт данных</h3>
-            <p className="settings-item-description">Выгрузить все данные в файл</p>
-          </div>
-          <div className="settings-button-group">
-            <button
-              className="settings-button secondary"
-              onClick={handleExport}
-              disabled={isExporting}
-            >
-              {isExporting ? 'Экспорт...' : 'JSON'}
-            </button>
-          </div>
+      <div className="settings-item">
+        <div className="settings-item-content">
+          <h3 className="settings-item-title">Импорт данных</h3>
+          <p className="settings-item-description">Загрузить данные из файла</p>
         </div>
-
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Импорт данных</h3>
-            <p className="settings-item-description">Загрузить данные из файла</p>
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json,application/json"
-            onChange={handleFileChange}
-            style={{ display: 'none' }}
-            data-testid="import-file-input"
-          />
-          <button
-            className="settings-button primary"
-            onClick={handleImportClick}
-            disabled={isImporting}
-          >
-            {isImporting ? 'Импорт...' : 'Выбрать файл'}
-          </button>
-        </div>
+        <button className="settings-button primary">Выбрать файл</button>
       </div>
     </div>
   );
@@ -322,7 +107,7 @@ function AppearanceSection() {
 function AboutSection() {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
-  const handleOpenPrivacyPolicy = () => {
+  const handlePrivacyClick = () => {
     setShowPrivacyModal(true);
   };
 
@@ -364,7 +149,7 @@ function AboutSection() {
               <h3 className="settings-item-title">Политика конфиденциальности</h3>
               <p className="settings-item-description">Как мы защищаем ваши данные</p>
             </div>
-            <button className="settings-button secondary" onClick={handleOpenPrivacyPolicy}>
+            <button className="settings-button secondary" onClick={handlePrivacyClick}>
               Открыть
             </button>
           </div>
@@ -388,48 +173,54 @@ function AboutSection() {
                 ×
               </button>
             </div>
-            <div className="modal-body">
-              <h3>1. Сбор информации</h3>
+            <div className="modal-body" style={{ padding: '20px', maxHeight: '70vh', overflowY: 'auto' }}>
+              <h3>1. Общие положения</h3>
               <p>
-                Мы собираем информацию, которую вы предоставляете при регистрации и использовании
-                приложения, включая данные о транзакциях и категориях.
+                Настоящая Политика конфиденциальности определяет порядок обработки и защиты
+                персональных данных пользователей приложения FinTrack.
               </p>
 
-              <h3>2. Использование информации</h3>
+              <h3>2. Собираемые данные</h3>
+              <p>Мы собираем следующие типы данных:</p>
+              <ul>
+                <li>Персональные данные: имя пользователя, email</li>
+                <li>Финансовые данные: транзакции, категории, суммы</li>
+                <li>Технические данные: IP-адрес, тип браузера, устройство</li>
+              </ul>
+
+              <h3>3. Использование данных</h3>
+              <p>Собранные данные используются для:</p>
+              <ul>
+                <li>Предоставления функционала приложения</li>
+                <li>Улучшения качества сервиса</li>
+                <li>Обеспечения безопасности</li>
+              </ul>
+
+              <h3>4. Защита данных</h3>
               <p>
-                Ваши данные используются исключительно для предоставления функционала приложения и
-                улучшения качества сервиса.
+                Мы применяем современные методы защиты данных, включая шифрование и безопасное
+                хранение информации.
               </p>
 
-              <h3>3. Защита данных</h3>
+              <h3>5. Права пользователей</h3>
+              <p>Вы имеете право:</p>
+              <ul>
+                <li>Получать доступ к своим данным</li>
+                <li>Исправлять неточные данные</li>
+                <li>Удалять свои данные</li>
+                <li>Отозвать согласие на обработку данных</li>
+              </ul>
+
+              <h3>6. Контакты</h3>
               <p>
-                Мы применяем современные методы шифрования и защиты данных для обеспечения
-                безопасности вашей информации.
+                По вопросам конфиденциальности обращайтесь: support@fintrack.ru
               </p>
 
-              <h3>4. Передача данных третьим лицам</h3>
-              <p>
-                Мы не передаем ваши персональные данные третьим лицам без вашего явного согласия,
-                за исключением случаев, предусмотренных законодательством.
-              </p>
-
-              <h3>5. Ваши права</h3>
-              <p>
-                Вы имеете право на доступ, исправление и удаление ваших персональных данных в любой
-                момент.
-              </p>
-
-              <h3>6. Изменения в политике</h3>
-              <p>
-                Мы оставляем за собой право вносить изменения в настоящую политику
-                конфиденциальности. О существенных изменениях мы уведомим вас через приложение.
-              </p>
-
-              <p className="modal-footer-text">
+              <p style={{ marginTop: '20px', fontSize: '12px', color: '#666' }}>
                 Последнее обновление: {new Date().toLocaleDateString('ru-RU')}
               </p>
             </div>
-            <div className="modal-actions">
+            <div className="modal-footer" style={{ padding: '20px', borderTop: '1px solid #eee' }}>
               <button className="settings-button primary" onClick={handleClosePrivacyModal}>
                 Закрыть
               </button>

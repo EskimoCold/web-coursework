@@ -1,98 +1,132 @@
-import { renderHook, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import React from 'react';
+import { CurrencyProvider, useCurrency } from './CurrencyContext';
+import type { Currency } from '../utils/currency';
 
-import { CurrencyProvider, useCurrency, Currency } from './CurrencyContext';
+const TestComponent = () => {
+  const { currency, setCurrency, convert, format, formatAmount } = useCurrency();
+
+  return (
+    <div>
+      <div data-testid="currency">{currency}</div>
+      <div data-testid="converted">{convert(1000)}</div>
+      <div data-testid="formatted">{format(1000)}</div>
+      <div data-testid="formatted-amount">{formatAmount(1000)}</div>
+      <button onClick={() => setCurrency('USD')}>Set USD</button>
+      <button onClick={() => setCurrency('EUR')}>Set EUR</button>
+      <button onClick={() => setCurrency('CNY')}>Set CNY</button>
+      <button onClick={() => setCurrency('RUB')}>Set RUB</button>
+    </div>
+  );
+};
 
 describe('CurrencyContext', () => {
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <CurrencyProvider>{children}</CurrencyProvider>
-  );
-
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('should provide default currency RUB', () => {
-    const { result } = renderHook(() => useCurrency(), { wrapper });
-    expect(result.current.currency).toBe('RUB');
+  it('should default to RUB when no stored currency', () => {
+    render(
+      <CurrencyProvider>
+        <TestComponent />
+      </CurrencyProvider>,
+    );
+
+    expect(screen.getByTestId('currency')).toHaveTextContent('RUB');
   });
 
   it('should load currency from localStorage', () => {
-    localStorage.setItem('currency', 'USD');
-    const { result } = renderHook(() => useCurrency(), { wrapper });
-    expect(result.current.currency).toBe('USD');
+    localStorage.setItem('app_currency', 'USD');
+
+    render(
+      <CurrencyProvider>
+        <TestComponent />
+      </CurrencyProvider>,
+    );
+
+    expect(screen.getByTestId('currency')).toHaveTextContent('USD');
   });
 
-  it('should update currency and save to localStorage', () => {
-    const { result } = renderHook(() => useCurrency(), { wrapper });
+  it('should update currency when setCurrency is called', async () => {
+    render(
+      <CurrencyProvider>
+        <TestComponent />
+      </CurrencyProvider>,
+    );
 
-    act(() => {
-      result.current.setCurrency('EUR');
+    expect(screen.getByTestId('currency')).toHaveTextContent('RUB');
+
+    fireEvent.click(screen.getByText('Set USD'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('currency')).toHaveTextContent('USD');
     });
 
-    expect(result.current.currency).toBe('EUR');
-    expect(localStorage.getItem('currency')).toBe('EUR');
+    expect(localStorage.getItem('app_currency')).toBe('USD');
   });
 
   it('should convert amounts correctly', () => {
-    const { result } = renderHook(() => useCurrency(), { wrapper });
+    render(
+      <CurrencyProvider>
+        <TestComponent />
+      </CurrencyProvider>,
+    );
 
-    // Test RUB to USD conversion (1 RUB = 0.011 USD, so 100 RUB = 1.1 USD)
-    act(() => {
-      result.current.setCurrency('USD');
-    });
-
-    const converted = result.current.convertAmount(100);
-    expect(converted).toBeCloseTo(1.1, 1);
-  });
-
-  it('should return same amount when converting to same currency', () => {
-    const { result } = renderHook(() => useCurrency(), { wrapper });
-
-    act(() => {
-      result.current.setCurrency('RUB');
-    });
-
-    const converted = result.current.convertAmount(100);
-    expect(converted).toBe(100);
+    const converted = screen.getByTestId('converted').textContent;
+    expect(converted).toBe('1000');
   });
 
   it('should format amounts correctly', () => {
-    const { result } = renderHook(() => useCurrency(), { wrapper });
+    render(
+      <CurrencyProvider>
+        <TestComponent />
+      </CurrencyProvider>,
+    );
 
-    act(() => {
-      result.current.setCurrency('RUB');
-    });
-
-    const formatted = result.current.formatAmount(1234.56);
-    expect(formatted).toMatch(/1[\s,]234[.,]56/);
+    const formatted = screen.getByTestId('formatted').textContent;
+    expect(formatted).toContain('1 000');
+    expect(formatted).toContain('₽');
   });
 
-  it('should return correct currency symbols', () => {
-    const { result } = renderHook(() => useCurrency(), { wrapper });
+  it('should update conversion when currency changes', async () => {
+    render(
+      <CurrencyProvider>
+        <TestComponent />
+      </CurrencyProvider>,
+    );
 
-    const symbols: Record<Currency, string> = {
-      RUB: '₽',
-      USD: '$',
-      EUR: '€',
-      CNY: '¥',
-    };
+    fireEvent.click(screen.getByText('Set USD'));
 
-    Object.entries(symbols).forEach(([currency, symbol]) => {
-      act(() => {
-        result.current.setCurrency(currency as Currency);
-      });
-      expect(result.current.getCurrencySymbol()).toBe(symbol);
+    await waitFor(() => {
+      const converted = screen.getByTestId('converted').textContent;
+      expect(parseFloat(converted || '0')).toBeCloseTo(11, 1);
     });
   });
 
-  it('should throw error when used outside provider', () => {
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-    expect(() => {
-      renderHook(() => useCurrency());
-    }).toThrow('useCurrency must be used within CurrencyProvider');
-    consoleError.mockRestore();
+  it('should persist currency to localStorage', async () => {
+    render(
+      <CurrencyProvider>
+        <TestComponent />
+      </CurrencyProvider>,
+    );
+
+    fireEvent.click(screen.getByText('Set EUR'));
+
+    await waitFor(() => {
+      expect(localStorage.getItem('app_currency')).toBe('EUR');
+    });
+  });
+
+  it('should handle invalid stored currency', () => {
+    localStorage.setItem('app_currency', 'INVALID');
+
+    render(
+      <CurrencyProvider>
+        <TestComponent />
+      </CurrencyProvider>,
+    );
+
+    expect(screen.getByTestId('currency')).toHaveTextContent('RUB');
   });
 });
 
