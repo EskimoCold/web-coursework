@@ -8,6 +8,7 @@ import { SettingsPage } from '../components/SettingsPage';
 import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
+import { CurrencyProvider } from '../contexts/CurrencyContext';
 import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { Login } from '../pages/Login';
@@ -43,7 +44,8 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <CategoryProvider>
-          <Routes>
+          <CurrencyProvider>
+            <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route
@@ -56,6 +58,7 @@ export default function App() {
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </CurrencyProvider>
         </CategoryProvider>
       </AuthProvider>
     </BrowserRouter>

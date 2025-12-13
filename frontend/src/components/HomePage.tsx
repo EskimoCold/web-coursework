@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import { transactionsApi, Transaction, Category, TransactionCreate } from '../api/transactions';
+import { useCurrency } from '../contexts/CurrencyContext';
 import './home.css';
 
 interface TransactionSummary {
@@ -37,6 +38,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
 ];
 
 export function HomePage() {
+  const { convertAmount, formatAmount, getCurrencySymbol } = useCurrency();
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -235,17 +237,23 @@ export function HomePage() {
         <div className="summary-cards">
           <div className="summary-card balance">
             <h3>Общий баланс</h3>
-            <div className="amount">{summary.balance.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">
+              {formatAmount(summary.balance)} {getCurrencySymbol()}
+            </div>
           </div>
 
           <div className="summary-card income">
             <h3>Доходы</h3>
-            <div className="amount">+{summary.totalIncome.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">
+              +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+            </div>
           </div>
 
           <div className="summary-card expense">
             <h3>Расходы</h3>
-            <div className="amount">-{summary.totalExpenses.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">
+              -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+            </div>
           </div>
         </div>
       </div>
@@ -300,7 +308,7 @@ export function HomePage() {
                 <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
                 <td className={`amount-cell ${transaction.transaction_type}`}>
                   {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {transaction.amount.toLocaleString('ru-RU')} ₽
+                  {formatAmount(transaction.amount)} {getCurrencySymbol()}
                 </td>
                 <td className="description-cell">{transaction.description}</td>
                 <td>

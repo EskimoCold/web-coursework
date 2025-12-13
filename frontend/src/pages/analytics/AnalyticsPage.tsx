@@ -18,10 +18,12 @@ import './analytics.css';
 import { categoriesApi } from '../../api/categories';
 import { Transaction, transactionsApi } from '../../api/transactions';
 import { Category } from '../../contexts/CategoriesContext';
+import { useCurrency } from '../../contexts/CurrencyContext';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 
 export const AnalyticsPage: React.FC = () => {
+  const { convertAmount, formatAmount, getCurrencySymbol } = useCurrency();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filter, setFilter] = useState<string>('all');
@@ -193,15 +195,21 @@ export const AnalyticsPage: React.FC = () => {
       <div className="anal-info-grid">
         <div>
           <p className="anal-label">Общий баланс</p>
-          <p className="anal-value total">{incomes - expenses} ₽</p>
+          <p className="anal-value total">
+            {formatAmount(incomes - expenses)} {getCurrencySymbol()}
+          </p>
         </div>
         <div>
           <p className="anal-label">Доходы</p>
-          <p className="anal-value income">{incomes} ₽</p>
+          <p className="anal-value income">
+            {formatAmount(incomes)} {getCurrencySymbol()}
+          </p>
         </div>
         <div>
           <p className="anal-label">Расходы</p>
-          <p className="anal-value expense">{expenses} ₽</p>
+          <p className="anal-value expense">
+            {formatAmount(expenses)} {getCurrencySymbol()}
+          </p>
         </div>
         <div>
           <p className="anal-label">Всего операций</p>
@@ -218,7 +226,10 @@ export const AnalyticsPage: React.FC = () => {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip
-                formatter={(value, name) => [`${value} ₽`, name === 'income' ? 'Доход' : 'Расход']}
+                formatter={(value, name) => [
+                  `${formatAmount(Number(value))} ${getCurrencySymbol()}`,
+                  name === 'income' ? 'Доход' : 'Расход',
+                ]}
               />
               <Area
                 type="monotone"
@@ -253,7 +264,9 @@ export const AnalyticsPage: React.FC = () => {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value} ₽`}
+                  label={({ name, value }) =>
+                    `${name}: ${formatAmount(Number(value))} ${getCurrencySymbol()}`
+                  }
                 >
                   {expenseByCategory.map((_, index) => (
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
