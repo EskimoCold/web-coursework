@@ -98,4 +98,23 @@ export const authApi = {
       body: JSON.stringify({ refresh_token: refreshToken }),
     });
   },
+
+  async changePassword(
+    data: { old_password: string; new_password: string },
+    accessToken: string,
+  ): Promise<void> {
+    const response = await fetch(`${API_URL}/users/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to change password');
+    }
+  },
 };
