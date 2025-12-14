@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  accessToken: string | null;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
@@ -28,17 +29,20 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
     const initAuth = async () => {
-      const accessToken = localStorage.getItem('access_token');
-      if (accessToken) {
+      const token = localStorage.getItem('access_token');
+      setAccessToken(token);
+      if (token) {
         try {
-          const userData = await authApi.getCurrentUser(accessToken);
+          const userData = await authApi.getCurrentUser(token);
           setUser(userData);
         } catch {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
+          setAccessToken(null);
         }
       }
       setIsLoading(false);
@@ -51,6 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const response = await authApi.login(data);
     localStorage.setItem('access_token', response.access_token);
     localStorage.setItem('refresh_token', response.refresh_token);
+    setAccessToken(response.access_token);
     const userData = await authApi.getCurrentUser(response.access_token);
     setUser(userData);
   };
@@ -68,6 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     setUser(null);
+    setAccessToken(null);
   };
 
   return (
@@ -76,6 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated: !!user,
         isLoading,
+        accessToken,
         login,
         register,
         logout,
