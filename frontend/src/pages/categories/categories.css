@@ -170,19 +170,12 @@ input:focus {
 
 .cat-card-icon {
   margin: 0 var(--spacing-lg) 0 var(--spacing-lg);
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
+  border: 1px solid var(--stroke);
+  border-radius: 1.2rem;
+  padding: 0.7rem;
   display: grid;
   place-items: center;
-  background: #00fff0;
   flex-shrink: 0;
-}
-
-.cat-card-icon img {
-  width: 1.5rem;
-  height: 1.5rem;
-  display: block;
 }
 
 .cat-filters {
@@ -258,14 +251,12 @@ input:focus {
 
 .cat-grid-icon-item {
   cursor: pointer;
-  width: 2rem;
-  height: 2rem;
   border: 1px solid var(--stroke);
-  border-radius: 50%;
+  border-radius: 0.5rem;
+  padding: 0.2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #00fff0;
   transition: all 0.2s ease;
 }
 
@@ -446,17 +437,6 @@ input:focus {
     padding: var(--spacing-sm) var(--spacing-md);
   }
 
-  .cat-card-icon {
-    width: 2rem;
-    height: 2rem;
-    margin: 0 var(--base-unit) 0 var(--spacing-md);
-  }
-
-  .cat-card-icon img {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
   .cat-form {
     padding: var(--spacing-md);
   }
@@ -536,17 +516,6 @@ input:focus {
     min-height: 3.5rem;
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-size-sm);
-  }
-
-  .cat-card-icon {
-    width: 1.75rem;
-    height: 1.75rem;
-    margin: 0 var(--base-unit) 0 var(--spacing-sm);
-  }
-
-  .cat-card-icon img {
-    width: 1.125rem;
-    height: 1.125rem;
   }
 
   .cat-form {
