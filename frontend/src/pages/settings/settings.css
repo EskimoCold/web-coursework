@@ -220,7 +220,6 @@ input:checked + .settings-toggle-slider::before {
   flex-direction: column;
 }
 
-
 /* Modal Styles for ChangePasswordModal and DeleteAccountModal */
 
 .settings-modal {
@@ -245,8 +244,6 @@ input:checked + .settings-toggle-slider::before {
   backdrop-filter: blur(2px);
   z-index: 1001;
 }
-
-
 
 .settings-form {
   display: flex;
@@ -285,7 +282,6 @@ input:checked + .settings-toggle-slider::before {
   gap: 12px;
   margin-top: 8px;
 }
-
 
 /* Modal Styles for Privacy Policy and Terms (from g5) */
 
@@ -453,15 +449,11 @@ input:checked + .settings-toggle-slider::before {
   }
 }
 
-
 /* Modal Styles */
 .settings-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: rgb(0 0 0 / 50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -477,7 +469,9 @@ input:checked + .settings-toggle-slider::before {
   max-height: 80vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 10%),
+    0 10px 10px -5px rgb(0 0 0 / 4%);
 }
 
 .settings-modal-header {
@@ -585,4 +579,3 @@ input:checked + .settings-toggle-slider::before {
     padding: 20px;
   }
 }
-

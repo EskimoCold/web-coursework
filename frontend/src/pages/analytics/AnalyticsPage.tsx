@@ -26,7 +26,7 @@ const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 type NormalizedTransaction = Omit<Transaction, 'transaction_date'> & { transaction_date: Date };
 
 export const AnalyticsPage: React.FC = () => {
-  const { convert, formatAmount, currency } = useCurrency();
+  const { convert, formatAmount } = useCurrency();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filter, setFilter] = useState<string>('all');
@@ -122,7 +122,7 @@ export const AnalyticsPage: React.FC = () => {
         0,
       ),
     ],
-    [filteredTransactions, convert, currency],
+    [filteredTransactions, convert],
   );
 
   const dailyIncomeExpense = useMemo(() => {
@@ -149,7 +149,7 @@ export const AnalyticsPage: React.FC = () => {
         income: values.income,
         expense: values.expense,
       }));
-  }, [filteredTransactions, convert, currency]);
+  }, [filteredTransactions, convert]);
 
   const incomeByCategory = useMemo(() => {
     const imp = new Map<string, number>();
@@ -161,7 +161,7 @@ export const AnalyticsPage: React.FC = () => {
       });
 
     return Array.from(imp, ([name, value]) => ({ name, value }));
-  }, [filteredTransactions, categoryNameById, convert, currency]);
+  }, [filteredTransactions, categoryNameById, convert]);
 
   const expenseByCategory = useMemo(() => {
     const imp = new Map<string, number>();
@@ -173,7 +173,7 @@ export const AnalyticsPage: React.FC = () => {
       });
 
     return Array.from(imp, ([name, value]) => ({ name, value }));
-  }, [filteredTransactions, categoryNameById, convert, currency]);
+  }, [filteredTransactions, categoryNameById, convert]);
 
   useEffect(() => {
     let cancelled = false;

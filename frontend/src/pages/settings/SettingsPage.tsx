@@ -1,11 +1,11 @@
-
 import { useState, useRef } from 'react';
+
 import './settings.css';
-import { transactionsApi } from '../../api/transactions';
-import { categoriesApi } from '../../api/categories';
-import { useCurrency, Currency } from '../../contexts/CurrencyContext';
 import { authApi } from '../../api/auth';
+import { categoriesApi } from '../../api/categories';
+import { transactionsApi } from '../../api/transactions';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCurrency, Currency } from '../../contexts/CurrencyContext';
 
 import { DeleteAccountModal } from './DeleteAccountModal';
 
@@ -173,7 +173,6 @@ function SecuritySection() {
 }
 
 function DataManagementSection() {
-
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importMessage, setImportMessage] = useState<string | null>(null);
@@ -239,7 +238,8 @@ function DataManagementSection() {
             description: transaction.description || '',
             transaction_type: transaction.transaction_type,
             category_id: transaction.category_id || null,
-            transaction_date: transaction.transaction_date || new Date().toISOString().split('T')[0],
+            transaction_date:
+              transaction.transaction_date || new Date().toISOString().split('T')[0],
           });
           importedCount++;
         } catch (error) {
@@ -249,7 +249,9 @@ function DataManagementSection() {
       }
 
       if (importedCount > 0) {
-        setImportMessage(`Успешно импортировано: ${importedCount} транзакций${errorCount > 0 ? `. Ошибок: ${errorCount}` : ''}`);
+        setImportMessage(
+          `Успешно импортировано: ${importedCount} транзакций${errorCount > 0 ? `. Ошибок: ${errorCount}` : ''}`,
+        );
         setTimeout(() => {
           window.location.reload();
         }, 2000);
@@ -259,7 +261,9 @@ function DataManagementSection() {
     } catch (error) {
       console.error('Ошибка импорта:', error);
       setImportMessage(
-        error instanceof Error ? error.message : 'Ошибка при импорте данных. Проверьте формат файла.',
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при импорте данных. Проверьте формат файла.',
       );
     } finally {
       setIsImporting(false);
@@ -268,7 +272,6 @@ function DataManagementSection() {
       }
     }
   };
-
 
   return (
     <div className="settings-section">
@@ -281,7 +284,6 @@ function DataManagementSection() {
           <p className="settings-item-description">Выгрузить все данные в файл</p>
         </div>
         <div className="settings-button-group">
-
           <button
             className="settings-button secondary"
             onClick={handleExport}
@@ -289,7 +291,6 @@ function DataManagementSection() {
           >
             {isExporting ? 'Экспорт...' : 'JSON'}
           </button>
-
         </div>
       </div>
 
@@ -324,7 +325,6 @@ function DataManagementSection() {
         >
           {isImporting ? 'Импорт...' : 'Выбрать файл'}
         </button>
-
       </div>
     </div>
   );
@@ -334,7 +334,6 @@ function AppearanceSection() {
   const [theme, setTheme] = useState('light');
 
   const { currency, setCurrency } = useCurrency();
-
 
   return (
     <div className="settings-section">
@@ -366,9 +365,7 @@ function AppearanceSection() {
           <select
             className="settings-select"
             value={currency}
-
             onChange={(e) => setCurrency(e.target.value as Currency)}
-
           >
             <option value="RUB">Рубли (RUB)</option>
             <option value="USD">Доллары (USD)</option>
@@ -382,7 +379,6 @@ function AppearanceSection() {
 }
 
 function AboutSection() {
-
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
@@ -425,10 +421,7 @@ function AboutSection() {
               <h3 className="settings-item-title">Политика конфиденциальности</h3>
               <p className="settings-item-description">Как мы защищаем ваши данные</p>
             </div>
-            <button
-              className="settings-button secondary"
-              onClick={() => setShowPrivacyModal(true)}
-            >
+            <button className="settings-button secondary" onClick={() => setShowPrivacyModal(true)}>
               Открыть
             </button>
           </div>
@@ -438,10 +431,7 @@ function AboutSection() {
               <h3 className="settings-item-title">Условия использования</h3>
               <p className="settings-item-description">Правила работы с приложением</p>
             </div>
-            <button
-              className="settings-button secondary"
-              onClick={() => setShowTermsModal(true)}
-            >
+            <button className="settings-button secondary" onClick={() => setShowTermsModal(true)}>
               Открыть
             </button>
           </div>
@@ -453,10 +443,7 @@ function AboutSection() {
           <div className="settings-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="settings-modal-header">
               <h2>Политика конфиденциальности</h2>
-              <button
-                className="settings-modal-close"
-                onClick={() => setShowPrivacyModal(false)}
-              >
+              <button className="settings-modal-close" onClick={() => setShowPrivacyModal(false)}>
                 ×
               </button>
             </div>
@@ -522,18 +509,14 @@ function AboutSection() {
           <div className="settings-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="settings-modal-header">
               <h2>Условия использования</h2>
-              <button
-                className="settings-modal-close"
-                onClick={() => setShowTermsModal(false)}
-              >
+              <button className="settings-modal-close" onClick={() => setShowTermsModal(false)}>
                 ×
               </button>
             </div>
             <div className="settings-modal-body">
               <h3>1. Принятие условий</h3>
               <p>
-                Используя приложение FinTrack, вы соглашаетесь с настоящими Условиями
-                использования.
+                Используя приложение FinTrack, вы соглашаетесь с настоящими Условиями использования.
               </p>
 
               <h3>2. Использование сервиса</h3>
@@ -552,8 +535,8 @@ function AboutSection() {
 
               <h3>4. Ответственность</h3>
               <p>
-                Приложение предоставляется "как есть". Мы не гарантируем бесперебойную работу
-                сервиса и не несем ответственности за возможные потери данных.
+                Приложение предоставляется &quot;как есть&quot;. Мы не гарантируем бесперебойную
+                работу сервиса и не несем ответственности за возможные потери данных.
               </p>
 
               <h3>5. Изменения условий</h3>
@@ -567,10 +550,7 @@ function AboutSection() {
               </p>
             </div>
             <div className="settings-modal-footer">
-              <button
-                className="settings-button primary"
-                onClick={() => setShowTermsModal(false)}
-              >
+              <button className="settings-button primary" onClick={() => setShowTermsModal(false)}>
                 Закрыть
               </button>
             </div>
@@ -578,7 +558,6 @@ function AboutSection() {
         </div>
       )}
     </>
-
   );
 }
 
@@ -628,6 +607,3 @@ export function SettingsPage() {
     </div>
   );
 }
-
-
-

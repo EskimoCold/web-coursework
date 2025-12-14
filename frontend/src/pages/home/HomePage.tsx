@@ -38,7 +38,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
 ];
 
 export function HomePage() {
-  const { convert, formatAmount, currency } = useCurrency();
+  const { convert, formatAmount } = useCurrency();
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
@@ -79,7 +79,7 @@ export function HomePage() {
     const balance = totalIncome - totalExpenses;
 
     return { totalIncome, totalExpenses, balance };
-  }, [allTransactions, convert, currency]);
+  }, [allTransactions, convert]);
 
   // Пагинация
   const paginatedTransactions = useMemo(() => {
