@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
 import './settings.css';
-import { transactionsApi } from '../api/transactions';
-import { categoriesApi } from '../api/categories';
-import { useCurrency, Currency } from '../contexts/CurrencyContext';
+import { transactionsApi } from '../../api/transactions';
+import { categoriesApi } from '../../api/categories';
+import { useCurrency, Currency } from '../../contexts/CurrencyContext';
 
 function SecuritySection() {
   return (
@@ -475,3 +475,4 @@ export function SettingsPage() {
     </div>
   );
 }
+
