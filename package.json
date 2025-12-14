@@ -1,0 +1,21 @@
+{
+  "name": "web-coursework-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "dev:e2e": "cd frontend && npm run dev:e2e",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview",
+    "test": "cd frontend && npm run test",
+    "test:watch": "cd frontend && npm run test:watch",
+    "e2e": "cd frontend && npm run e2e",
+    "lint": "cd frontend && npm run lint",
+    "format": "cd frontend && npm run format",
+    "format:check": "cd frontend && npm run format:check",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && pip install -r requirements.txt"
+  },
+  "description": "Root package.json for web-coursework project"
+}
+
