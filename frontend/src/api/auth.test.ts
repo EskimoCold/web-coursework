@@ -13,7 +13,6 @@ describe('authApi', () => {
     it('should successfully login with valid credentials', async () => {
       const mockResponse = {
         access_token: 'test_access_token',
-        refresh_token: 'test_refresh_token',
         token_type: 'bearer',
       };
 
@@ -32,6 +31,7 @@ describe('authApi', () => {
         expect.stringContaining('/auth/login'),
         expect.objectContaining({
           method: 'POST',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: 'testuser', password: 'password123' }),
         }),
@@ -142,7 +142,6 @@ describe('authApi', () => {
     it('should successfully refresh token', async () => {
       const mockResponse = {
         access_token: 'new_access_token',
-        refresh_token: 'new_refresh_token',
         token_type: 'bearer',
       };
 
@@ -151,14 +150,14 @@ describe('authApi', () => {
         json: async (): Promise<typeof mockResponse> => mockResponse,
       });
 
-      const result = await authApi.refreshToken('old_refresh_token');
+      const result = await authApi.refreshToken();
 
       expect(result).toEqual(mockResponse);
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/auth/refresh'),
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ refresh_token: 'old_refresh_token' }),
+          credentials: 'include',
         }),
       );
     });
@@ -168,7 +167,7 @@ describe('authApi', () => {
         ok: false,
       });
 
-      await expect(authApi.refreshToken('invalid_token')).rejects.toThrow('Token refresh failed');
+      await expect(authApi.refreshToken()).rejects.toThrow('Token refresh failed');
     });
   });
 
@@ -178,13 +177,13 @@ describe('authApi', () => {
         ok: true,
       });
 
-      await expect(authApi.logout('refresh_token')).resolves.toBeUndefined();
+      await expect(authApi.logout()).resolves.toBeUndefined();
 
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/auth/logout'),
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ refresh_token: 'refresh_token' }),
+          credentials: 'include',
         }),
       );
     });
