@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { transactionsApi, Transaction, Category, TransactionCreate } from '../api/transactions';
+import { useCurrency } from '../contexts/CurrencyContext';
 import './home.css';
 
 interface TransactionSummary {
@@ -37,6 +38,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
 ];
 
 export function HomePage() {
+  const { convert, formatAmount, currency } = useCurrency();
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -193,25 +195,23 @@ export function HomePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const getSummary = (): TransactionSummary => {
+  const summary = useMemo((): TransactionSummary => {
     const totalIncome = transactions
       .filter((t) => t.transaction_type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + convert(t.amount), 0);
 
     const totalExpenses = transactions
       .filter((t) => t.transaction_type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + convert(t.amount), 0);
 
     const balance = totalIncome - totalExpenses;
 
     return { totalIncome, totalExpenses, balance };
-  };
+  }, [transactions, convert, currency]);
 
   const totalPages = Math.ceil(transactions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTransactions = transactions.slice(startIndex, startIndex + itemsPerPage);
-
-  const summary = getSummary();
 
   if (loading) {
     return (
@@ -235,17 +235,17 @@ export function HomePage() {
         <div className="summary-cards">
           <div className="summary-card balance">
             <h3>Общий баланс</h3>
-            <div className="amount">{summary.balance.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">{formatAmount(summary.balance)}</div>
           </div>
 
           <div className="summary-card income">
             <h3>Доходы</h3>
-            <div className="amount">+{summary.totalIncome.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">+{formatAmount(summary.totalIncome)}</div>
           </div>
 
           <div className="summary-card expense">
             <h3>Расходы</h3>
-            <div className="amount">-{summary.totalExpenses.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">-{formatAmount(summary.totalExpenses)}</div>
           </div>
         </div>
       </div>
@@ -300,7 +300,7 @@ export function HomePage() {
                 <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
                 <td className={`amount-cell ${transaction.transaction_type}`}>
                   {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {transaction.amount.toLocaleString('ru-RU')} ₽
+                  {formatAmount(convert(transaction.amount))}
                 </td>
                 <td className="description-cell">{transaction.description}</td>
                 <td>

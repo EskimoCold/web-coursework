@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 
 export type Currency = 'RUB' | 'USD' | 'EUR' | 'CNY';
 
@@ -52,22 +52,33 @@ export const CurrencyProvider: React.FC<CurrencyProviderProps> = ({ children }) 
     setCurrencyState(newCurrency);
   };
 
-  const convert = (amount: number): number => {
-    // Конвертируем из RUB в выбранную валюту
-    return amount * EXCHANGE_RATES[currency];
-  };
+  const convert = useMemo(
+    () => (amount: number): number => {
+      // Конвертируем из RUB в выбранную валюту
+      return amount * EXCHANGE_RATES[currency];
+    },
+    [currency],
+  );
 
-  const formatAmount = (amount: number): string => {
-    const converted = convert(amount);
-    const formatted = new Intl.NumberFormat('ru-RU', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(converted);
-    return `${formatted} ${CURRENCY_SYMBOLS[currency]}`;
-  };
+  const formatAmount = useMemo(
+    () => (amount: number): string => {
+      const converted = amount * EXCHANGE_RATES[currency];
+      const formatted = new Intl.NumberFormat('ru-RU', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(converted);
+      return `${formatted} ${CURRENCY_SYMBOLS[currency]}`;
+    },
+    [currency],
+  );
+
+  const contextValue = useMemo(
+    () => ({ currency, setCurrency, convert, formatAmount }),
+    [currency, convert, formatAmount],
+  );
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, convert, formatAmount }}>
+    <CurrencyContext.Provider value={contextValue}>
       {children}
     </CurrencyContext.Provider>
   );
