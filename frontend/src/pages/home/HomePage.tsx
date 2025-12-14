@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-import { transactionsApi, Transaction, Category, TransactionCreate } from '../api/transactions';
-import { useCurrency } from '../contexts/CurrencyContext';
+import { transactionsApi, Transaction, Category, TransactionCreate } from '../../api/transactions';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import './home.css';
 
 interface TransactionSummary {
@@ -41,7 +41,7 @@ export function HomePage() {
   const { convert, formatAmount, currency } = useCurrency();
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [useBackend, setUseBackend] = useState(true);
@@ -58,23 +58,40 @@ export function HomePage() {
 
   const itemsPerPage = 5;
 
-  const applyData = useCallback(
-    (transactionsData: Transaction[], categoriesData: Category[], fromBackend: boolean) => {
-      const filteredTransactions =
-        filter === 'all'
-          ? transactionsData
-          : transactionsData.filter((t) => t.transaction_type === filter);
+  // Фильтрация транзакций на клиенте
+  const filteredTransactions = useMemo(() => {
+    if (filter === 'all') {
+      return allTransactions;
+    }
+    return allTransactions.filter((t) => t.transaction_type === filter);
+  }, [allTransactions, filter]);
 
-      setTransactions(filteredTransactions);
-      setCategories(categoriesData);
+  // Вычисление summary с конвертацией валют
+  const summary = useMemo((): TransactionSummary => {
+    const totalIncome = allTransactions
+      .filter((t) => t.transaction_type === 'income')
+      .reduce((sum, t) => sum + convert(t.amount), 0);
 
-      if (fromBackend) {
-        setBackendError(null);
-      }
-    },
-    [filter],
-  );
+    const totalExpenses = allTransactions
+      .filter((t) => t.transaction_type === 'expense')
+      .reduce((sum, t) => sum + convert(t.amount), 0);
 
+    const balance = totalIncome - totalExpenses;
+
+    return { totalIncome, totalExpenses, balance };
+  }, [allTransactions, convert, currency]);
+
+  // Пагинация
+  const paginatedTransactions = useMemo(() => {
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return {
+      transactions: filteredTransactions.slice(startIndex, startIndex + itemsPerPage),
+      totalPages,
+    };
+  }, [filteredTransactions, currentPage, itemsPerPage]);
+
+  // Загрузка данных один раз при монтировании
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -86,28 +103,35 @@ export function HomePage() {
             transactionsApi.getTransactions(),
             transactionsApi.getCategories(),
           ]);
-          applyData(transactionsData, categoriesData, true);
+          setAllTransactions(transactionsData);
+          setCategories(categoriesData);
+          setBackendError(null);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
           setBackendError(`Бэкенд недоступен: ${errorMessage}`);
           setUseBackend(false);
-          applyData(MOCK_TRANSACTIONS, [], false);
+          // Переключаемся на моки
+          setAllTransactions(MOCK_TRANSACTIONS);
+          setCategories([]);
         }
       } else {
-        applyData(MOCK_TRANSACTIONS, [], false);
+        setAllTransactions(MOCK_TRANSACTIONS);
+        setCategories([]);
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка';
       setBackendError(`Ошибка: ${errorMessage}`);
-      applyData(MOCK_TRANSACTIONS, [], false);
+      setAllTransactions(MOCK_TRANSACTIONS);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
-  }, [useBackend, applyData]);
+  }, [useBackend]);
 
+  // Загружаем данные только при монтировании и смене useBackend
   useEffect(() => {
     loadData();
-  }, [filter, loadData]);
+  }, [loadData]);
 
   const handleAddTransaction = () => {
     setShowAddModal(true);
@@ -160,17 +184,19 @@ export function HomePage() {
 
       if (useBackend) {
         await transactionsApi.createTransaction(submitData);
+        // После успешного создания перезагружаем данные
+        await loadData();
       } else {
         const { category_id, ...transactionData } = submitData;
         const newTransaction: Transaction = {
-          id: Math.max(0, ...transactions.map((t) => t.id)) + 1,
+          id: Math.max(0, ...allTransactions.map((t) => t.id)) + 1,
           ...transactionData,
           category: categories.find((c) => c.id === category_id),
         };
-        setTransactions((prev) => [newTransaction, ...prev]);
+        // Добавляем транзакцию локально
+        setAllTransactions((prev) => [newTransaction, ...prev]);
       }
       handleCloseModal();
-      await loadData();
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes('Category not found')) {
@@ -195,24 +221,10 @@ export function HomePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const summary = useMemo((): TransactionSummary => {
-    const totalIncome = transactions
-      .filter((t) => t.transaction_type === 'income')
-      .reduce((sum, t) => sum + convert(t.amount), 0);
-
-    const totalExpenses = transactions
-      .filter((t) => t.transaction_type === 'expense')
-      .reduce((sum, t) => sum + convert(t.amount), 0);
-
-    const balance = totalIncome - totalExpenses;
-
-    return { totalIncome, totalExpenses, balance };
-  }, [transactions, convert, currency]);
-
-  const totalPages = Math.ceil(transactions.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedTransactions = transactions.slice(startIndex, startIndex + itemsPerPage);
-
+  const handleFilterChange = (newFilter: 'all' | 'income' | 'expense') => {
+    setFilter(newFilter);
+    setCurrentPage(1); // Сбрасываем на первую страницу при смене фильтра
+  };
   if (loading) {
     return (
       <div className="home-page">
@@ -254,26 +266,27 @@ export function HomePage() {
         <div className="filters">
           <button
             className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-            onClick={() => setFilter('all')}
+            onClick={() => handleFilterChange('all')}
           >
             Все
           </button>
           <button
             className={`filter-btn ${filter === 'income' ? 'active' : ''}`}
-            onClick={() => setFilter('income')}
+            onClick={() => handleFilterChange('income')}
           >
             Доходы
           </button>
           <button
             className={`filter-btn ${filter === 'expense' ? 'active' : ''}`}
-            onClick={() => setFilter('expense')}
+            onClick={() => handleFilterChange('expense')}
           >
             Расходы
           </button>
         </div>
 
         <div className="table-info">
-          Показано {paginatedTransactions.length} из {transactions.length} операций
+          Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length}{' '}
+          операций
         </div>
       </div>
 
@@ -289,7 +302,7 @@ export function HomePage() {
             </tr>
           </thead>
           <tbody>
-            {paginatedTransactions.map((transaction) => (
+            {paginatedTransactions.transactions.map((transaction) => (
               <tr key={transaction.id}>
                 <td className="category-cell">
                   <span className="category-badge">
@@ -313,12 +326,40 @@ export function HomePage() {
           </tbody>
         </table>
 
-        {transactions.length === 0 && (
+        {/* Мобильное отображение */}
+        <div className="mobile-transactions">
+          {paginatedTransactions.transactions.map((transaction) => (
+            <div
+              key={transaction.id}
+              className={`mobile-transaction-card ${transaction.transaction_type}`}
+            >
+              <div className="mobile-card-header">
+                <div className="mobile-card-category">
+                  {categories?.find((c) => Number(c.id) === Number(transaction.category_id))
+                    ?.name ?? 'Без категории'}
+                </div>
+                <div className={`mobile-card-amount ${transaction.transaction_type}`}>
+                  {transaction.transaction_type === 'income' ? '+' : '-'}
+                  {formatAmount(convert(transaction.amount))}
+                </div>
+              </div>
+              <div className="mobile-card-description">{transaction.description}</div>
+              <div className="mobile-card-footer">
+                <span>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</span>
+                <span className={`type-badge ${transaction.transaction_type}`}>
+                  {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredTransactions.length === 0 && (
           <div className="empty-state">Нет транзакций для отображения</div>
         )}
       </div>
 
-      {totalPages > 1 && (
+      {paginatedTransactions.totalPages > 1 && (
         <div className="pagination">
           <button
             className="pagination-btn"
@@ -329,20 +370,22 @@ export function HomePage() {
           </button>
 
           <div className="pagination-numbers">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                className={`pagination-number ${currentPage === page ? 'active' : ''}`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
+            {Array.from({ length: paginatedTransactions.totalPages }, (_, i) => i + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  className={`pagination-number ${currentPage === page ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ),
+            )}
           </div>
 
           <button
             className="pagination-btn"
-            disabled={currentPage === totalPages}
+            disabled={currentPage === paginatedTransactions.totalPages}
             onClick={() => setCurrentPage(currentPage + 1)}
           >
             Вперед

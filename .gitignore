@@ -55,6 +55,7 @@ node_modules/
 *.tsbuildinfo
 dist/
 build/
+dev-dist/
 .next/
 
 # --- IDEs/Editors ---

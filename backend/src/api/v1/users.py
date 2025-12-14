@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
 from src.core.dependencies import get_current_user
-from src.core.security import get_password_hash
+from src.core.security import get_password_hash, verify_password
+from src.models.refresh_token import RefreshToken
 from src.models.user import User
-from src.schemas.user import UserResponse, UserUpdate
+from src.schemas.user import UserPasswordUpdate, UserResponse, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -37,6 +38,8 @@ async def update_current_user(
                 detail="Username already in use",
             )
 
+    # Deprecated: Password update should use /me/password endpoint
+    # Keeping this logic for now but it should ideally be removed or restricted
     if "password" in update_data:
         update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
 
@@ -49,10 +52,31 @@ async def update_current_user(
     return current_user
 
 
+@router.post("/me/password", status_code=status.HTTP_200_OK)
+async def change_password(
+    password_data: UserPasswordUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(password_data.old_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect old password",
+        )
+
+    current_user.hashed_password = get_password_hash(password_data.new_password)
+
+    db.add(current_user)
+    await db.commit()
+
+    return {"message": "Password updated successfully"}
+
+
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_current_user(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    await db.execute(delete(RefreshToken).where(RefreshToken.user_id == current_user.id))
     await db.delete(current_user)
     await db.commit()

@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import './settings.css';
 import { transactionsApi } from '../../api/transactions';
@@ -5,6 +6,7 @@ import { categoriesApi } from '../../api/categories';
 import { useCurrency, Currency } from '../../contexts/CurrencyContext';
 import { authApi } from '../../api/auth';
 import { useAuth } from '../../contexts/AuthContext';
+
 import { DeleteAccountModal } from './DeleteAccountModal';
 
 type ChangePasswordModalProps = {
@@ -171,6 +173,7 @@ function SecuritySection() {
 }
 
 function DataManagementSection() {
+
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importMessage, setImportMessage] = useState<string | null>(null);
@@ -266,6 +269,7 @@ function DataManagementSection() {
     }
   };
 
+
   return (
     <div className="settings-section">
       <h2 className="settings-section-title">Управление данными</h2>
@@ -277,6 +281,7 @@ function DataManagementSection() {
           <p className="settings-item-description">Выгрузить все данные в файл</p>
         </div>
         <div className="settings-button-group">
+
           <button
             className="settings-button secondary"
             onClick={handleExport}
@@ -284,6 +289,7 @@ function DataManagementSection() {
           >
             {isExporting ? 'Экспорт...' : 'JSON'}
           </button>
+
         </div>
       </div>
 
@@ -291,6 +297,7 @@ function DataManagementSection() {
         <div className="settings-item-content">
           <h3 className="settings-item-title">Импорт данных</h3>
           <p className="settings-item-description">Загрузить данные из файла</p>
+
           {importMessage && (
             <p
               style={{
@@ -317,6 +324,7 @@ function DataManagementSection() {
         >
           {isImporting ? 'Импорт...' : 'Выбрать файл'}
         </button>
+
       </div>
     </div>
   );
@@ -324,7 +332,9 @@ function DataManagementSection() {
 
 function AppearanceSection() {
   const [theme, setTheme] = useState('light');
+
   const { currency, setCurrency } = useCurrency();
+
 
   return (
     <div className="settings-section">
@@ -356,7 +366,9 @@ function AppearanceSection() {
           <select
             className="settings-select"
             value={currency}
+
             onChange={(e) => setCurrency(e.target.value as Currency)}
+
           >
             <option value="RUB">Рубли (RUB)</option>
             <option value="USD">Доллары (USD)</option>
@@ -370,6 +382,7 @@ function AppearanceSection() {
 }
 
 function AboutSection() {
+
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
@@ -565,6 +578,7 @@ function AboutSection() {
         </div>
       )}
     </>
+
   );
 }
 
@@ -614,4 +628,6 @@ export function SettingsPage() {
     </div>
   );
 }
+
+
 
