@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { describe, it, expect, beforeEach, vi, beforeAll, afterAll } from 'vitest';
 
 import { Transaction, transactionsApi } from '../../api/transactions';
+import { predictExpenses } from '../../ml/expensePredictor';
 
 import { AnalyticsPage } from './AnalyticsPage';
 
@@ -35,6 +36,13 @@ vi.mock('../../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(),
   },
+}));
+
+vi.mock('../../ml/expensePredictor', () => ({
+  predictExpenses: vi.fn().mockResolvedValue([
+    { date: new Date('2024-02-01'), predictedExpense: 250 },
+    { date: new Date('2024-02-02'), predictedExpense: 275 },
+  ]),
 }));
 
 /** (optional) if any helper reads a token, provide a fake one */
@@ -71,6 +79,7 @@ vi.mock('recharts', () => ({
   ),
   Area: ({ dataKey }: { dataKey: string }) => <div data-testid={`area-${dataKey}`} />,
   Bar: ({ dataKey }: { dataKey: string }) => <div data-testid={`bar-${dataKey}`} />,
+  Line: ({ dataKey }: { dataKey: string }) => <div data-testid={`line-${dataKey}`} />,
   Cell: ({ fill }: { fill: string }) => <div data-testid="cell" data-fill={fill} />,
   XAxis: ({ dataKey }: { dataKey: string }) => <div data-testid={`xaxis-${dataKey}`} />,
   YAxis: () => <div data-testid="yaxis" />,
@@ -216,6 +225,22 @@ describe('AnalyticsPage', () => {
     });
   });
 
+  it('should show predicted expenses line on the chart', async () => {
+    (predictExpenses as vi.Mock).mockResolvedValueOnce([
+      { date: new Date('2024-02-01'), predictedExpense: 500 },
+    ]);
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('line-predictedExpense')).toBeInTheDocument();
+      const chartData = screen.getByTestId('area-chart').getAttribute('data-data') || '[]';
+      expect(JSON.parse(chartData)).toEqual(
+        expect.arrayContaining([expect.objectContaining({ predictedExpense: 500 })]),
+      );
+    });
+  });
+
   it('should filter transactions by week', async () => {
     const recentTransaction: Transaction[] = [
       {
@@ -267,6 +292,50 @@ describe('AnalyticsPage', () => {
       expect(screen.getByText('Всего операций').nextElementSibling).toHaveClass(
         'anal-value operations',
       );
+    });
+  });
+
+  it('should not run forecast when there are no transactions', async () => {
+    renderComponent([]);
+    await waitFor(() => {
+      expect(predictExpenses).not.toHaveBeenCalled();
+    });
+  });
+
+  it('shows forecast error when predictor fails', async () => {
+    (predictExpenses as vi.Mock).mockRejectedValueOnce(new Error('boom'));
+    renderComponent(mockTransactions);
+
+    await waitFor(() => {
+      expect(screen.getByText('Не удалось построить прогноз расходов')).toBeInTheDocument();
+    });
+  });
+
+  it('uses fallback category name when missing', async () => {
+    const missingCategoryTx: Transaction[] = [
+      {
+        id: 5,
+        amount: 300,
+        transaction_type: 'expense',
+        transaction_date: '2024-01-20',
+        category: undefined,
+        description: 'Unknown category expense',
+      } as unknown as Transaction,
+    ];
+
+    renderComponent(missingCategoryTx);
+
+    await waitFor(() => {
+      const pie = screen.getByTestId('pie');
+      const data = JSON.parse(pie.getAttribute('data-data') || '[]');
+      expect(data[0]).toMatchObject({ name: 'Без категории', value: 300 });
+    });
+  });
+
+  it('passes tooltip formatter to chart', async () => {
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getByTestId('tooltip').getAttribute('data-formatter')).toBe('true');
     });
   });
 });

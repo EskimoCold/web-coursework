@@ -4,6 +4,7 @@ node_modules
 public/mockServiceWorker.js
 dist
 build
+dev-dist
 coverage
 .playwright
 playwright-report

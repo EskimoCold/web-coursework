@@ -1,10 +1,11 @@
 import { Category } from '../contexts/CategoriesContext';
 
+import { tokenStore } from './tokenStore';
+
 const API_URL = import.meta.env.BACKEND_API || 'http://localhost:8000/api/v1';
 
 const getAuthToken = (): string | null => {
-  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-  return token;
+  return tokenStore.getAccessToken();
 };
 
 export const categoriesApi = {
@@ -17,6 +18,7 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -27,7 +29,7 @@ export const categoriesApi = {
     return response.json();
   },
 
-  async addCategory(name: string, description: string) {
+  async addCategory(name: string, description: string, icon: string) {
     const token = getAuthToken();
     if (!token) throw new Error('Authorization failed');
 
@@ -37,7 +39,8 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ name, description }),
+      credentials: 'include',
+      body: JSON.stringify({ name, description, icon }),
     });
 
     if (!response.ok) {
@@ -58,9 +61,11 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
       body: JSON.stringify({
         name: category.name,
         description: category.description,
+        icon: category.icon,
       }),
     });
 
@@ -82,6 +87,7 @@ export const categoriesApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -89,7 +95,6 @@ export const categoriesApi = {
       throw new Error(error.detail || `Cannot delete category ${id}`);
     }
 
-    // Some backends return 204 No Content for DELETE:
     try {
       return await response.json();
     } catch {
