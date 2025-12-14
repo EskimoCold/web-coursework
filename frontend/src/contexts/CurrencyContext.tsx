@@ -53,22 +53,24 @@ export const CurrencyProvider: React.FC<CurrencyProviderProps> = ({ children }) 
   };
 
   const convert = useMemo(
-    () => (amount: number): number => {
-      // Конвертируем из RUB в выбранную валюту
-      return amount * EXCHANGE_RATES[currency];
-    },
+    () =>
+      (amount: number): number => {
+        // Конвертируем из RUB в выбранную валюту
+        return amount * EXCHANGE_RATES[currency];
+      },
     [currency],
   );
 
   const formatAmount = useMemo(
-    () => (amount: number): string => {
-      const converted = amount * EXCHANGE_RATES[currency];
-      const formatted = new Intl.NumberFormat('ru-RU', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(converted);
-      return `${formatted} ${CURRENCY_SYMBOLS[currency]}`;
-    },
+    () =>
+      (amount: number): string => {
+        const converted = amount * EXCHANGE_RATES[currency];
+        const formatted = new Intl.NumberFormat('ru-RU', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(converted);
+        return `${formatted} ${CURRENCY_SYMBOLS[currency]}`;
+      },
     [currency],
   );
 
@@ -77,10 +79,5 @@ export const CurrencyProvider: React.FC<CurrencyProviderProps> = ({ children }) 
     [currency, convert, formatAmount],
   );
 
-  return (
-    <CurrencyContext.Provider value={contextValue}>
-      {children}
-    </CurrencyContext.Provider>
-  );
+  return <CurrencyContext.Provider value={contextValue}>{children}</CurrencyContext.Provider>;
 };
-

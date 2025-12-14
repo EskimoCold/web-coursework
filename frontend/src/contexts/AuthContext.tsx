@@ -38,7 +38,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const updateAccessToken = useCallback((token: string | null) => {
     setAccessToken(token);
@@ -47,7 +46,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-
       const token = localStorage.getItem('access_token');
       setAccessToken(token);
       if (token) {
@@ -59,13 +57,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.removeItem('refresh_token');
           setAccessToken(null);
         }
-
       }
       setIsLoading(false);
     };
 
     initAuth();
-  }, [updateAccessToken]);
+  }, []);
 
   const login = async (data: LoginRequest) => {
     const response = await authApi.login(data);

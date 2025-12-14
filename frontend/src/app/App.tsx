@@ -1,9 +1,6 @@
-
 import { useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-
-import { initAnalytics, trackPageview } from '../analytics/googleAnalytics';
 import { Layout } from '../components/Layout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { Sidebar } from '../components/Sidebar';
@@ -14,11 +11,8 @@ import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
 import { Login } from '../pages/auth/Login';
 import { Register } from '../pages/auth/Register';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
-
-import { Login } from '../pages/Login';
-import { Register } from '../pages/Register';
+import { HomePage } from '../pages/home/HomePage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
-
 
 function MainApp() {
   const [active, setActive] = useState('Главная');
@@ -51,7 +45,6 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-
         <CategoryProvider>
           <CurrencyProvider>
             <Routes>
@@ -69,7 +62,6 @@ export default function App() {
             </Routes>
           </CurrencyProvider>
         </CategoryProvider>
-
       </AuthProvider>
     </BrowserRouter>
   );
