@@ -1,10 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import { HomePage } from '../components/HomePage';
 import { Layout } from '../components/Layout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
-import { SettingsPage } from '../components/SettingsPage';
 import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
@@ -13,6 +12,7 @@ import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { Login } from '../pages/Login';
 import { Register } from '../pages/Register';
+import { SettingsPage } from '../pages/settings/SettingsPage';
 
 function MainApp() {
   const [active, setActive] = useState('Главная');
@@ -32,10 +32,12 @@ function MainApp() {
     pages.get(active) || <div aria-label="content-placeholder" className="content-placeholder" />;
 
   return (
-    <div className="app-root">
-      <Sidebar active={active} onSelect={setActive} />
-      <Layout title={active}>{renderContent()}</Layout>
-    </div>
+    <CategoryProvider>
+      <div className="app-root">
+        <Sidebar active={active} onSelect={setActive} />
+        <Layout title={active}>{renderContent()}</Layout>
+      </div>
+    </CategoryProvider>
   );
 }
 
