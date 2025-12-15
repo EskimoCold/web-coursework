@@ -1,12 +1,11 @@
+from contextlib import asynccontextmanager
 import logging
 import os
 import sys
 
-from contextlib import asynccontextmanager
-
-import sentry_sdk
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -20,8 +19,6 @@ from src.api.v1 import (
 from src.core.config import settings
 from src.core.database import Base, engine
 from src.models import Category, RefreshToken, Transaction, User  # noqa: F401
-
-
 
 logging.basicConfig(
     level=logging.INFO,

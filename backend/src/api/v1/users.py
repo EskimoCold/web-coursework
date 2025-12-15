@@ -1,7 +1,6 @@
-import json
-
 from contextlib import suppress
 from datetime import UTC, datetime
+import json
 
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from sqlalchemy import delete, select
@@ -15,8 +14,6 @@ from src.models.refresh_token import RefreshToken
 from src.models.transaction import Transaction
 from src.models.user import User
 from src.schemas.user import UserPasswordUpdate, UserResponse, UserUpdate
-
-
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
