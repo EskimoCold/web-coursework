@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { transactionsApi, Transaction, Category, TransactionCreate } from '../../api/transactions';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import './home.css';
 
 interface TransactionSummary {
@@ -37,6 +38,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
 ];
 
 export function HomePage() {
+  const { convertAmount, getCurrencySymbol, currency, rates } = useCurrency();
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
@@ -64,20 +66,20 @@ export function HomePage() {
     return allTransactions.filter((t) => t.transaction_type === filter);
   }, [allTransactions, filter]);
 
-  // Вычисление summary
+  // Вычисление summary с пересчетом валюты
   const summary = useMemo((): TransactionSummary => {
     const totalIncome = allTransactions
       .filter((t) => t.transaction_type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + convertAmount(t.amount), 0);
 
     const totalExpenses = allTransactions
       .filter((t) => t.transaction_type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + convertAmount(t.amount), 0);
 
     const balance = totalIncome - totalExpenses;
 
     return { totalIncome, totalExpenses, balance };
-  }, [allTransactions]);
+  }, [allTransactions, convertAmount, currency, rates]);
 
   // Пагинация
   const paginatedTransactions = useMemo(() => {
@@ -246,17 +248,23 @@ export function HomePage() {
         <div className="summary-cards">
           <div className="summary-card balance">
             <h3>Общий баланс</h3>
-            <div className="amount">{summary.balance.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">
+              {summary.balance.toLocaleString('ru-RU')} {getCurrencySymbol()}
+            </div>
           </div>
 
           <div className="summary-card income">
             <h3>Доходы</h3>
-            <div className="amount">+{summary.totalIncome.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">
+              +{summary.totalIncome.toLocaleString('ru-RU')} {getCurrencySymbol()}
+            </div>
           </div>
 
           <div className="summary-card expense">
             <h3>Расходы</h3>
-            <div className="amount">-{summary.totalExpenses.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">
+              -{summary.totalExpenses.toLocaleString('ru-RU')} {getCurrencySymbol()}
+            </div>
           </div>
         </div>
       </div>
@@ -312,7 +320,7 @@ export function HomePage() {
                 <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
                 <td className={`amount-cell ${transaction.transaction_type}`}>
                   {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {transaction.amount.toLocaleString('ru-RU')} ₽
+                  {convertAmount(transaction.amount).toLocaleString('ru-RU')} {getCurrencySymbol()}
                 </td>
                 <td className="description-cell">{transaction.description}</td>
                 <td>
@@ -339,7 +347,7 @@ export function HomePage() {
                 </div>
                 <div className={`mobile-card-amount ${transaction.transaction_type}`}>
                   {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {transaction.amount.toLocaleString('ru-RU')} ₽
+                  {convertAmount(transaction.amount).toLocaleString('ru-RU')} {getCurrencySymbol()}
                 </div>
               </div>
               <div className="mobile-card-description">{transaction.description}</div>

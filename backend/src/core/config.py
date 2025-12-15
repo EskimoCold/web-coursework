@@ -1,4 +1,10 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+# Определяем путь к .env файлу относительно расположения этого файла
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+ENV_FILE = BASE_DIR / ".env"
 
 
 class Settings(BaseSettings):
@@ -13,7 +19,14 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:5173,http://localhost:3000,http://158.160.205.61,http://158.160.205.61:5173"
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
+    model_config = SettingsConfigDict(
+        env_file=str(ENV_FILE) if ENV_FILE.exists() else ".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+        # Важно: env_ignore_empty=True позволяет игнорировать пустые значения
+        # и env_nested_delimiter для вложенных переменных
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:
@@ -21,3 +34,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Логирование для отладки (можно удалить после проверки)
+if __debug__:
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Loading .env from: {ENV_FILE}")
+    logger.info(f"DATABASE_URL loaded: {settings.database_url[:30]}..." if len(settings.database_url) > 30 else f"DATABASE_URL loaded: {settings.database_url}")
