@@ -26,7 +26,7 @@ const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 type NormalizedTransaction = Omit<Transaction, 'transaction_date'> & { transaction_date: Date };
 
 export const AnalyticsPage: React.FC = () => {
-  const { convertAmount, getCurrencySymbol, currency, rates } = useCurrency();
+  const { convertAmount, getCurrencySymbol } = useCurrency();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filter, setFilter] = useState<string>('all');
@@ -124,7 +124,7 @@ export const AnalyticsPage: React.FC = () => {
         0,
       ),
     ],
-    [filteredTransactions, convertAmount, currency, rates],
+    [filteredTransactions, convertAmount],
   );
 
   const dailyIncomeExpense = useMemo(() => {
@@ -151,7 +151,7 @@ export const AnalyticsPage: React.FC = () => {
         income: values.income,
         expense: values.expense,
       }));
-  }, [filteredTransactions, convertAmount, currency, rates]);
+  }, [filteredTransactions, convertAmount]);
 
   const incomeByCategory = useMemo(() => {
     const imp = new Map<string, number>();
@@ -163,7 +163,7 @@ export const AnalyticsPage: React.FC = () => {
       });
 
     return Array.from(imp, ([name, value]) => ({ name, value }));
-  }, [filteredTransactions, categoryNameById, convertAmount, currency, rates]);
+  }, [filteredTransactions, categoryNameById, convertAmount]);
 
   const expenseByCategory = useMemo(() => {
     const imp = new Map<string, number>();
@@ -175,7 +175,7 @@ export const AnalyticsPage: React.FC = () => {
       });
 
     return Array.from(imp, ([name, value]) => ({ name, value }));
-  }, [filteredTransactions, categoryNameById, convertAmount, currency, rates]);
+  }, [filteredTransactions, categoryNameById, convertAmount]);
 
   useEffect(() => {
     let cancelled = false;
@@ -253,7 +253,7 @@ export const AnalyticsPage: React.FC = () => {
     return Array.from(byDate.entries())
       .sort((a, b) => a[0] - b[0])
       .map(([, value]) => value);
-  }, [dailyIncomeExpense, expenseForecast, formatDate, convertAmount, currency, rates]);
+  }, [dailyIncomeExpense, expenseForecast, formatDate, convertAmount]);
 
   const tooltipFormatter = useCallback(
     (value: number, name: string) => {

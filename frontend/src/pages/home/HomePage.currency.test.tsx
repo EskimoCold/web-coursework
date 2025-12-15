@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { HomePage } from './HomePage';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { currencyApi } from '../../api/currency';
 import { transactionsApi } from '../../api/transactions';
 import { CurrencyProvider } from '../../contexts/CurrencyContext';
-import { currencyApi } from '../../api/currency';
+
+import { HomePage } from './HomePage';
 
 // Моки
 vi.mock('../../api/transactions');

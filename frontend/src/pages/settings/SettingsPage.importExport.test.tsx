@@ -1,10 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SettingsPage } from './SettingsPage';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { usersApi } from '../../api/users';
 import { AuthProvider } from '../../contexts/AuthContext';
 import { CurrencyProvider } from '../../contexts/CurrencyContext';
+
+import { SettingsPage } from './SettingsPage';
 
 // Моки
 vi.mock('../../api/users');
@@ -38,9 +40,7 @@ describe('DataManagementSection - Export/Import', () => {
     mockUsersApi.exportData.mockResolvedValue(mockBlob);
 
     // Моки для создания ссылки и клика
-    const createElementSpy = vi.spyOn(document, 'createElement');
-    const appendChildSpy = vi.spyOn(document.body, 'appendChild');
-    const removeChildSpy = vi.spyOn(document.body, 'removeChild');
+    vi.spyOn(document, 'createElement');
 
     renderWithProviders(<SettingsPage />);
 
