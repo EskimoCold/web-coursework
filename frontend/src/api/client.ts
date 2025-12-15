@@ -109,13 +109,13 @@ async function request<T>(config: ApiRequestConfig): Promise<T> {
       const status = err.response?.status;
       const data = err.response?.data as unknown;
 
-      if (status === 401) {
-        throw new Error('Authentication required');
-      }
-
       if (data && typeof data === 'object' && 'detail' in (data as Record<string, unknown>)) {
         const detail = (data as { detail?: unknown }).detail;
         if (typeof detail === 'string' && detail.trim().length > 0) throw new Error(detail);
+      }
+
+      if (status === 401) {
+        throw new Error('Authentication required');
       }
 
       if (typeof data === 'string' && status) {
