@@ -20,7 +20,7 @@ const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <AuthProvider>
       <CurrencyProvider>{component}</CurrencyProvider>
-    </AuthProvider>
+    </AuthProvider>,
   );
 };
 
@@ -152,4 +152,3 @@ describe('DataManagementSection - Export/Import', () => {
     });
   });
 });
-

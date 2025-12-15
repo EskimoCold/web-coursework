@@ -56,8 +56,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         rates: {
           RUB: 1.0,
           USD: 0.011, // Примерный курс: 1 RUB = 0.011 USD (примерно 90 RUB за 1 USD)
-          EUR: 0.01,  // Примерный курс: 1 RUB = 0.01 EUR (примерно 100 RUB за 1 EUR)
-          CNY: 0.08,  // Примерный курс: 1 RUB = 0.08 CNY (примерно 12.5 RUB за 1 CNY)
+          EUR: 0.01, // Примерный курс: 1 RUB = 0.01 EUR (примерно 100 RUB за 1 EUR)
+          CNY: 0.08, // Примерный курс: 1 RUB = 0.08 CNY (примерно 12.5 RUB за 1 CNY)
         },
       });
     } finally {
@@ -80,7 +80,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     // Например, если rates["USD"] = 0.011, то 1 RUB = 0.011 USD
     // Для конвертации из RUB в USD: amount * rates["USD"]
     // Для конвертации из USD в RUB: amount / rates["USD"]
-    
+
     if (fromCurrency === 'RUB') {
       // Конвертируем из RUB в другую валюту
       return amount * rates.rates[currency];
@@ -125,4 +125,3 @@ export function useCurrency() {
   }
   return context;
 }
-

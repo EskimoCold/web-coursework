@@ -41,7 +41,7 @@ describe('CurrencyContext', () => {
     render(
       <CurrencyProvider>
         <TestComponent />
-      </CurrencyProvider>
+      </CurrencyProvider>,
     );
 
     expect(screen.getByTestId('currency')).toHaveTextContent('RUB');
@@ -59,7 +59,7 @@ describe('CurrencyContext', () => {
     render(
       <CurrencyProvider>
         <TestComponent />
-      </CurrencyProvider>
+      </CurrencyProvider>,
     );
 
     await waitFor(() => {
@@ -83,7 +83,7 @@ describe('CurrencyContext', () => {
     render(
       <CurrencyProvider>
         <TestComponent />
-      </CurrencyProvider>
+      </CurrencyProvider>,
     );
 
     await waitFor(() => {
@@ -105,7 +105,7 @@ describe('CurrencyContext', () => {
     render(
       <CurrencyProvider>
         <TestComponent />
-      </CurrencyProvider>
+      </CurrencyProvider>,
     );
 
     expect(screen.getByTestId('symbol')).toHaveTextContent('₽');
@@ -122,7 +122,7 @@ describe('CurrencyContext', () => {
     render(
       <CurrencyProvider>
         <TestComponent />
-      </CurrencyProvider>
+      </CurrencyProvider>,
     );
 
     await waitFor(() => {
@@ -135,4 +135,3 @@ describe('CurrencyContext', () => {
     expect(Storage.prototype.setItem).toHaveBeenCalledWith('fintrack_currency', 'USD');
   });
 });
-

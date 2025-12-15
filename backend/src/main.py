@@ -1,15 +1,21 @@
-from contextlib import asynccontextmanager
-import os
 import logging
+import os
 import sys
+from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
-from src.api.v1 import auth_router, categories_router, currency_router, transactions_router, users_router
+from src.api.v1 import (
+    auth_router,
+    categories_router,
+    currency_router,
+    transactions_router,
+    users_router,
+)
 from src.core.config import settings
 from src.core.database import Base, engine
 from src.models import Category, RefreshToken, Transaction, User  # noqa: F401
@@ -23,11 +29,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Логирование загруженных настроек (для отладки)
-logger.info("=" * 60)
+LOG_SEPARATOR_LENGTH = 60
+DB_URL_PREVIEW_LENGTH = 50
+logger.info("=" * LOG_SEPARATOR_LENGTH)
 logger.info("Application Configuration:")
-logger.info(f"  DATABASE_URL: {settings.database_url[:50]}..." if len(settings.database_url) > 50 else f"  DATABASE_URL: {settings.database_url}")
+db_url_preview = (
+    f"{settings.database_url[:DB_URL_PREVIEW_LENGTH]}..."
+    if len(settings.database_url) > DB_URL_PREVIEW_LENGTH
+    else settings.database_url
+)
+logger.info(f"  DATABASE_URL: {db_url_preview}")
 logger.info(f"  Debug mode: {settings.debug}")
-logger.info("=" * 60)
+logger.info("=" * LOG_SEPARATOR_LENGTH)
 
 
 @asynccontextmanager
@@ -42,7 +55,8 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         error_msg = str(e)
         # Выводим предупреждение, но не завершаем приложение
-        print("\n" + "=" * 60, file=sys.stderr)
+        separator = "=" * LOG_SEPARATOR_LENGTH
+        print(f"\n{separator}", file=sys.stderr)
         print("WARNING: Cannot connect to PostgreSQL database!", file=sys.stderr)
         print(f"Database URL: {settings.database_url}", file=sys.stderr)
         print("", file=sys.stderr)
@@ -51,7 +65,7 @@ async def lifespan(app: FastAPI):
         print("  1. Start PostgreSQL locally", file=sys.stderr)
         print("  2. Run: docker-compose up db -d", file=sys.stderr)
         print("  3. Check DATABASE_URL in .env file", file=sys.stderr)
-        print("=" * 60, file=sys.stderr)
+        print(separator, file=sys.stderr)
         print("Application will start, but database operations will fail.\n", file=sys.stderr)
         logger.warning(f"Database connection failed: {error_msg}")
     

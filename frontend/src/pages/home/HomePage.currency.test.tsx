@@ -49,9 +49,7 @@ describe('HomePage - Currency Conversion', () => {
       },
     ]);
 
-    mockTransactionsApi.getCategories.mockResolvedValue([
-      { id: 1, name: 'Test Category' },
-    ]);
+    mockTransactionsApi.getCategories.mockResolvedValue([{ id: 1, name: 'Test Category' }]);
   });
 
   it('should display amounts in selected currency', async () => {
@@ -91,4 +89,3 @@ describe('HomePage - Currency Conversion', () => {
     expect(transactionRow).toBeInTheDocument();
   });
 });
-

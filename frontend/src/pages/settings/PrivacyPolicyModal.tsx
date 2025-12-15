@@ -11,8 +11,18 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
   return (
     <div className="settings-modal">
       <div className="settings-modal-bg" onClick={onClose} />
-      <div className="settings-modal-content" style={{ maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div
+        className="settings-modal-content"
+        style={{ maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto' }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '20px',
+          }}
+        >
           <h3 className="settings-section-title" style={{ fontSize: '20px', margin: 0 }}>
             Политика конфиденциальности
           </h3>
@@ -26,7 +36,9 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
         </div>
 
         <div style={{ fontSize: '14px', lineHeight: '1.6', color: '#374151' }}>
-          <h4 style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}>
+          <h4
+            style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}
+          >
             1. Сбор информации
           </h4>
           <p>
@@ -35,7 +47,9 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             без вашего согласия.
           </p>
 
-          <h4 style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}>
+          <h4
+            style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}
+          >
             2. Использование данных
           </h4>
           <p>
@@ -44,30 +58,36 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             согласия.
           </p>
 
-          <h4 style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}>
+          <h4
+            style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}
+          >
             3. Защита данных
           </h4>
           <p>
-            Мы используем современные методы шифрования и защиты данных. Все соединения
-            защищены протоколом HTTPS. Ваши пароли хранятся в зашифрованном виде и не могут
-            быть восстановлены даже администраторами системы.
+            Мы используем современные методы шифрования и защиты данных. Все соединения защищены
+            протоколом HTTPS. Ваши пароли хранятся в зашифрованном виде и не могут быть
+            восстановлены даже администраторами системы.
           </p>
 
-          <h4 style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}>
+          <h4
+            style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}
+          >
             4. Права пользователя
           </h4>
           <p>
-            Вы имеете право в любой момент запросить экспорт ваших данных, изменить или удалить
-            их. Вы можете удалить свой аккаунт в настройках приложения, что приведет к
-            безвозвратному удалению всех ваших данных.
+            Вы имеете право в любой момент запросить экспорт ваших данных, изменить или удалить их.
+            Вы можете удалить свой аккаунт в настройках приложения, что приведет к безвозвратному
+            удалению всех ваших данных.
           </p>
 
-          <h4 style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}>
+          <h4
+            style={{ marginTop: '20px', marginBottom: '10px', fontSize: '16px', fontWeight: 600 }}
+          >
             5. Изменения в политике
           </h4>
           <p>
-            Мы оставляем за собой право вносить изменения в данную политику конфиденциальности.
-            О существенных изменениях мы уведомим пользователей через приложение.
+            Мы оставляем за собой право вносить изменения в данную политику конфиденциальности. О
+            существенных изменениях мы уведомим пользователей через приложение.
           </p>
 
           <p style={{ marginTop: '30px', fontSize: '12px', color: '#6b7280' }}>
@@ -84,4 +104,3 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
     </div>
   );
 }
-
