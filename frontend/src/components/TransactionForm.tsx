@@ -1,34 +1,21 @@
 // src/components/TransactionForm.tsx
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { transactionsApi, TransactionCreate, Category } from '../api/transactions';
+import { transactionsApi, TransactionCreate } from '../api/transactions';
+
 import './transaction-form.css';
+import { useTransactionFormStore } from './transactionFormStore';
 
 export function TransactionForm() {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<TransactionCreate>({
-    amount: 0,
-    description: '',
-    transaction_type: 'expense',
-    category_id: null,
-    transaction_date: new Date().toISOString().split('T')[0],
-  });
+  const { categories, loading, formData, loadCategories, setLoading, setFormField, reset } =
+    useTransactionFormStore();
 
   useEffect(() => {
     loadCategories();
-  }, []);
-
-  const loadCategories = async () => {
-    try {
-      const categoriesData = await transactionsApi.getCategories();
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error('Ошибка загрузки категорий:', error);
-    }
-  };
+    return () => reset();
+  }, [loadCategories, reset]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,11 +38,11 @@ export function TransactionForm() {
     const { name, value } = e.target;
 
     if (name === 'amount') {
-      setFormData((prev) => ({ ...prev, [name]: parseFloat(value) || 0 }));
+      setFormField('amount', parseFloat(value) || 0);
     } else if (name === 'category_id') {
-      setFormData((prev) => ({ ...prev, [name]: value ? parseInt(value) : null }));
+      setFormField('category_id', value ? parseInt(value) : null);
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormField(name as keyof TransactionCreate, value);
     }
   };
 

@@ -6,6 +6,7 @@ import { Transaction, transactionsApi } from '../../api/transactions';
 import { predictExpenses } from '../../ml/expensePredictor';
 
 import { AnalyticsPage } from './AnalyticsPage';
+import { resetAnalyticsStore } from './analyticsStore';
 
 /** 🔧 NEW: silence console noise from React effects during tests (optional) */
 let errSpy: ReturnType<typeof vi.spyOn>;
@@ -157,6 +158,7 @@ const renderComponent = (transactions: Transaction[] = mockTransactions) => {
 describe('AnalyticsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAnalyticsStore();
   });
 
   it('should render all filter buttons', () => {
