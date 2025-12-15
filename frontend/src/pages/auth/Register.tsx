@@ -1,41 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/AuthContext';
+import { useAuthFormStore } from '../../stores/authFormStore';
+import { useShallow } from 'zustand/react/shallow';
 import './auth.css';
 
 export const Register: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    register: { username, password, confirmPassword, error, isLoading },
+    setRegisterField,
+    setRegisterError,
+    setRegisterLoading,
+    resetRegister,
+  } = useAuthFormStore(
+    useShallow((state) => ({
+      register: state.register,
+      setRegisterField: state.setRegisterField,
+      setRegisterError: state.setRegisterError,
+      setRegisterLoading: state.setRegisterLoading,
+      resetRegister: state.resetRegister,
+    })),
+  );
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    resetRegister();
+  }, [resetRegister]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setRegisterError('');
 
     if (password !== confirmPassword) {
-      setError('Пароли не совпадают');
+      setRegisterError('Пароли не совпадают');
       return;
     }
 
     if (password.length < 6) {
-      setError('Пароль должен содержать минимум 6 символов');
+      setRegisterError('Пароль должен содержать минимум 6 символов');
       return;
     }
 
-    setIsLoading(true);
+    setRegisterLoading(true);
 
     try {
       await register({ username, password });
       navigate('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка регистрации');
+      setRegisterError(err instanceof Error ? err.message : 'Ошибка регистрации');
     } finally {
-      setIsLoading(false);
+      setRegisterLoading(false);
     }
   };
 
@@ -53,7 +69,7 @@ export const Register: React.FC = () => {
             type="text"
             placeholder="Логин"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setRegisterField('username', e.target.value)}
             className="auth-input"
             required
             autoComplete="username"
@@ -63,7 +79,7 @@ export const Register: React.FC = () => {
             type="password"
             placeholder="Пароль"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setRegisterField('password', e.target.value)}
             className="auth-input"
             required
             autoComplete="new-password"
@@ -73,7 +89,7 @@ export const Register: React.FC = () => {
             type="password"
             placeholder="Подтвердите пароль"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => setRegisterField('confirmPassword', e.target.value)}
             className="auth-input"
             required
             autoComplete="new-password"

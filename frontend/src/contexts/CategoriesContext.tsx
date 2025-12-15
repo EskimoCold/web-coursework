@@ -1,45 +1,34 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 
-import { categoriesApi } from '../api/categories';
-import { tokenStore } from '../api/tokenStore';
+import {
+  CategoryStoreState,
+  resetCategoryStore,
+  useCategoryStore,
+} from '../stores/categoryStore';
+import { useAuthStore } from '../stores/authStore';
+import { Category } from '../types/category';
 
-export type Category = {
-  id: number;
-  name: string;
-  icon: string;
-  description: string;
-};
-
-type CategoryContextType = {
-  categories: Category[];
-  setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
-  icons: string[];
+type CategoryContextType = Pick<CategoryStoreState, 'categories' | 'setCategories' | 'icons'> & {
+  fetchCategories: () => Promise<void>;
 };
 
 const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
 
 export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [icons] = useState(Array.from({ length: 18 }, (_, i) => `icons/categories/${i + 1}.svg`));
+  const categories = useCategoryStore((state) => state.categories);
+  const setCategories = useCategoryStore((state) => state.setCategories);
+  const icons = useCategoryStore((state) => state.icons);
+  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
+  const accessToken = useAuthStore((state) => state.accessToken);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const token = tokenStore.getAccessToken();
-        if (!token) return;
-
-        const data = await categoriesApi.getCategories();
-        setCategories(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchCategories();
-  }, []);
+    if (accessToken) {
+      fetchCategories();
+    }
+  }, [accessToken, fetchCategories]);
 
   return (
-    <CategoryContext.Provider value={{ categories, setCategories, icons }}>
+    <CategoryContext.Provider value={{ categories, setCategories, icons, fetchCategories }}>
       {children}
     </CategoryContext.Provider>
   );
@@ -50,3 +39,6 @@ export const useCategories = () => {
   if (!context) throw new Error('useCategories must be used within CategoryProvider');
   return context;
 };
+
+export type { Category };
+export { resetCategoryStore };
