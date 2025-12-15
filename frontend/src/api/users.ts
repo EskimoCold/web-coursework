@@ -1,4 +1,4 @@
-import { api, BASE_URL } from './client';
+import { BASE_URL } from './client';
 import { tokenStore } from './tokenStore';
 
 const getAuthToken = (): string | null => {

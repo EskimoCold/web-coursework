@@ -1,8 +1,8 @@
-import json
-from contextlib import suppress
-from datetime import UTC, datetime
+import json  # noqa: I001
+from contextlib import suppress  # noqa: I001
+from datetime import UTC, datetime  # noqa: I001
 
-from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Response, status, UploadFile
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
