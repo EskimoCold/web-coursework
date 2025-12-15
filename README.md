@@ -50,15 +50,17 @@ API документация: http://localhost:8000/docs
 1. **Запустите PostgreSQL:**
 
    **Вариант A: Только PostgreSQL через Docker (рекомендуется)**
+
    ```bash
    docker-compose up db -d
    ```
+
    Это запустит только базу данных в фоновом режиме.
 
    **Вариант B: Установите PostgreSQL локально**
-   
+
    **Подробная инструкция:** См. файл [POSTGRESQL_SETUP.md](POSTGRESQL_SETUP.md)
-   
+
    Кратко:
    1. Скачайте и установите PostgreSQL с https://www.postgresql.org/download/windows/
    2. Запомните пароль, который вы зададите для пользователя `postgres`
@@ -82,11 +84,13 @@ python -m venv venv
 3. Активируйте виртуальное окружение:
 
 **Windows:**
+
 ```bash
 venv\Scripts\activate
 ```
 
 **Linux/Mac:**
+
 ```bash
 source venv/bin/activate
 ```
@@ -136,6 +140,7 @@ npm run dev
 ```
 
 **Или используйте готовый скрипт:**
+
 - Для CMD: `run.bat`
 - Для PowerShell: `.\run.ps1`
 
