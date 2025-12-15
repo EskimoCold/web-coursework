@@ -18,7 +18,6 @@ from src.schemas.user import UserPasswordUpdate, UserResponse, UserUpdate
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-
 async def _import_categories(
     categories_data: list,
     db: AsyncSession,
@@ -30,9 +29,7 @@ async def _import_categories(
     existing_categories = await db.execute(
         select(Category).filter(Category.user_id == current_user.id)
     )
-    existing_category_names = {
-        cat.name: cat.id for cat in existing_categories.scalars().all()
-    }
+    existing_category_names = {cat.name: cat.id for cat in existing_categories.scalars().all()}
 
     for cat_data in categories_data:
         try:
@@ -51,9 +48,7 @@ async def _import_categories(
             db.add(new_category)
             imported_count += 1
         except Exception as err:
-            errors.append(
-                f"Error importing category {cat_data.get('name', 'unknown')}: {err}"
-            )
+            errors.append(f"Error importing category {cat_data.get('name', 'unknown')}: {err}")
 
     return imported_count, errors
 
@@ -66,9 +61,7 @@ async def _import_transactions(
     imported_count = 0
     errors = []
 
-    all_categories = await db.execute(
-        select(Category).filter(Category.user_id == current_user.id)
-    )
+    all_categories = await db.execute(select(Category).filter(Category.user_id == current_user.id))
     categories = all_categories.scalars().all()
     category_id_map = {cat.id: cat.id for cat in categories}
     category_name_map = {cat.name: cat.id for cat in categories}
@@ -117,14 +110,16 @@ async def export_user_data(
     current_user: User = Depends(get_current_user),
 ):
     transactions = (
-        await db.execute(
-            select(Transaction).filter(Transaction.user_id == current_user.id)
-        )
-    ).scalars().all()
+        (await db.execute(select(Transaction).filter(Transaction.user_id == current_user.id)))
+        .scalars()
+        .all()
+    )
 
     categories = (
-        await db.execute(select(Category).filter(Category.user_id == current_user.id))
-    ).scalars().all()
+        (await db.execute(select(Category).filter(Category.user_id == current_user.id)))
+        .scalars()
+        .all()
+    )
 
     export_data = {
         "version": "1.0",
@@ -133,9 +128,7 @@ async def export_user_data(
             "id": current_user.id,
             "username": current_user.username,
             "created_at": (
-                current_user.created_at.isoformat()
-                if current_user.created_at
-                else None
+                current_user.created_at.isoformat() if current_user.created_at else None
             ),
         },
         "categories": [
@@ -156,9 +149,7 @@ async def export_user_data(
                 "transaction_type": txn.transaction_type,
                 "category_id": txn.category_id,
                 "transaction_date": (
-                    txn.transaction_date.isoformat()
-                    if txn.transaction_date
-                    else None
+                    txn.transaction_date.isoformat() if txn.transaction_date else None
                 ),
                 "created_at": txn.created_at.isoformat() if txn.created_at else None,
             }
@@ -272,9 +263,7 @@ async def change_password(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if not verify_password(
-        password_data.old_password, current_user.hashed_password
-    ):
+    if not verify_password(password_data.old_password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect old password",
