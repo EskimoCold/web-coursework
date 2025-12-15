@@ -1,4 +1,4 @@
-import { Category } from '../contexts/CategoriesContext';
+import { Category } from '../types/category';
 
 import { api } from './client';
 import { tokenStore } from './tokenStore';

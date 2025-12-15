@@ -1,24 +1,43 @@
-import { useState } from 'react';
+import React from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { authApi } from '../../api/auth';
 import { useAuth } from '../../contexts/AuthContext';
 
-type Props = {
+import { useSettingsStore } from './settingsStore';
+
+export type Props = {
   isOpen: boolean;
   onClose: () => void;
 };
 
 export const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose }: Props) => {
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    deleteState: { error, isLoading },
+    setDeleteError,
+    setDeleteLoading,
+    resetDeleteState,
+  } = useSettingsStore(
+    useShallow((state) => ({
+      deleteState: state.deleteState,
+      setDeleteError: state.setDeleteError,
+      setDeleteLoading: state.setDeleteLoading,
+      resetDeleteState: state.resetDeleteState,
+    })),
+  );
   const { logout, accessToken } = useAuth();
 
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    resetDeleteState();
+    onClose();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    setDeleteError('');
+    setDeleteLoading(true);
 
     try {
       if (!accessToken) throw new Error('Не авторизован');
@@ -27,18 +46,18 @@ export const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose }: Props) 
 
       setTimeout(() => {
         logout();
-        onClose();
+        handleClose();
       }, 1000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Ошибка при удалении аккаунта');
+      setDeleteError(err instanceof Error ? err.message : 'Ошибка при удалении аккаунта');
     } finally {
-      setIsLoading(false);
+      setDeleteLoading(false);
     }
   };
 
   return (
     <div className="settings-modal">
-      <div className="settings-modal-bg" onClick={onClose} />
+      <div className="settings-modal-bg" onClick={handleClose} />
       <div className="settings-modal-content">
         <h3 className="settings-section-title" style={{ fontSize: '20px' }}>
           Вы уверены? Отменить или остановить действие будет невозможно
@@ -49,7 +68,7 @@ export const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose }: Props) 
             <button
               type="button"
               className="settings-button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isLoading}
             >
               Отмена

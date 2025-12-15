@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as authApi from '../api/auth';
 import { tokenStore } from '../api/tokenStore';
 
-import { AuthProvider, useAuth } from './AuthContext';
+import { AuthProvider, useAuth, resetAuthStore } from './AuthContext';
 
 vi.mock('../api/auth');
 
@@ -28,6 +28,7 @@ describe('AuthContext', () => {
   beforeEach(() => {
     tokenStore.clearAccessToken();
     vi.clearAllMocks();
+    resetAuthStore();
     // Default: refresh fails (no session)
     vi.mocked(authApi.authApi.refreshToken).mockRejectedValue(new Error('No refresh token'));
   });

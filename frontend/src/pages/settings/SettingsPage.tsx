@@ -1,11 +1,12 @@
-import { useState } from 'react';
-
-import './settings.css';
+import React from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { authApi } from '../../api/auth';
 import { useAuth } from '../../contexts/AuthContext';
 
 import { DeleteAccountModal } from './DeleteAccountModal';
+import './settings.css';
+import { useSettingsStore } from './settingsStore';
 
 type ChangePasswordModalProps = {
   isOpen: boolean;
@@ -14,31 +15,42 @@ type ChangePasswordModalProps = {
 };
 
 function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordModalProps) {
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    passwordForm: { oldPassword, newPassword, confirmPassword, error, success, isLoading },
+    updatePasswordField,
+    setPasswordError,
+    setPasswordSuccess,
+    setPasswordLoading,
+    resetPasswordForm,
+  } = useSettingsStore(
+    useShallow((state) => ({
+      passwordForm: state.passwordForm,
+      updatePasswordField: state.updatePasswordField,
+      setPasswordError: state.setPasswordError,
+      setPasswordSuccess: state.setPasswordSuccess,
+      setPasswordLoading: state.setPasswordLoading,
+      resetPasswordForm: state.resetPasswordForm,
+    })),
+  );
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setPasswordError('');
+    setPasswordSuccess('');
 
     if (newPassword !== confirmPassword) {
-      setError('Новые пароли не совпадают');
+      setPasswordError('Новые пароли не совпадают');
       return;
     }
 
     if (newPassword.length < 6) {
-      setError('Пароль должен содержать минимум 6 символов');
+      setPasswordError('Пароль должен содержать минимум 6 символов');
       return;
     }
 
-    setIsLoading(true);
+    setPasswordLoading(true);
     try {
       if (!accessToken) throw new Error('Не авторизован');
 
@@ -46,24 +58,29 @@ function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordMod
         { old_password: oldPassword, new_password: newPassword },
         accessToken,
       );
-      setSuccess('Пароль успешно изменен');
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      setPasswordSuccess('Пароль успешно изменен');
+      updatePasswordField('oldPassword', '');
+      updatePasswordField('newPassword', '');
+      updatePasswordField('confirmPassword', '');
       setTimeout(() => {
         onClose();
-        setSuccess('');
+        setPasswordSuccess('');
       }, 2000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Ошибка при смене пароля');
+      setPasswordError(err instanceof Error ? err.message : 'Ошибка при смене пароля');
     } finally {
-      setIsLoading(false);
+      setPasswordLoading(false);
     }
+  };
+
+  const handleClose = () => {
+    resetPasswordForm();
+    onClose();
   };
 
   return (
     <div className="settings-modal">
-      <div className="settings-modal-bg" onClick={onClose} />
+      <div className="settings-modal-bg" onClick={handleClose} />
       <div className="settings-modal-content">
         <h3 className="settings-section-title" style={{ fontSize: '20px' }}>
           Смена пароля
@@ -75,7 +92,7 @@ function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordMod
               type="password"
               className="settings-form-input"
               value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
+              onChange={(e) => updatePasswordField('oldPassword', e.target.value)}
               required
             />
           </div>
@@ -85,7 +102,7 @@ function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordMod
               type="password"
               className="settings-form-input"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={(e) => updatePasswordField('newPassword', e.target.value)}
               required
             />
           </div>
@@ -95,7 +112,7 @@ function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordMod
               type="password"
               className="settings-form-input"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => updatePasswordField('confirmPassword', e.target.value)}
               required
             />
           </div>
@@ -107,7 +124,7 @@ function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordMod
             <button
               type="button"
               className="settings-button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isLoading}
             >
               Отмена
@@ -123,9 +140,23 @@ function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordMod
 }
 
 function SecuritySection() {
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
   const { accessToken } = useAuth();
+  const isPasswordModalOpen = useSettingsStore((state) => state.isPasswordModalOpen);
+  const isDeleteAccountModalOpen = useSettingsStore((state) => state.isDeleteAccountModalOpen);
+  const setPasswordModalOpen = useSettingsStore((state) => state.setPasswordModalOpen);
+  const setDeleteAccountModalOpen = useSettingsStore((state) => state.setDeleteModalOpen);
+  const resetPasswordForm = useSettingsStore((state) => state.resetPasswordForm);
+  const resetDeleteState = useSettingsStore((state) => state.resetDeleteState);
+
+  const closePasswordModal = () => {
+    resetPasswordForm();
+    setPasswordModalOpen(false);
+  };
+
+  const closeDeleteModal = () => {
+    resetDeleteState();
+    setDeleteAccountModalOpen(false);
+  };
 
   return (
     <div className="settings-section">
@@ -138,7 +169,7 @@ function SecuritySection() {
             <h3 className="settings-item-title">Смена пароля</h3>
             <p className="settings-item-description">Обновите ваш пароль для защиты аккаунта</p>
           </div>
-          <button className="settings-button primary" onClick={() => setIsPasswordModalOpen(true)}>
+          <button className="settings-button primary" onClick={() => setPasswordModalOpen(true)}>
             Сменить пароль
           </button>
         </div>
@@ -150,7 +181,7 @@ function SecuritySection() {
           </div>
           <button
             className="settings-button danger"
-            onClick={() => setIsDeleteAccountModalOpen(true)}
+            onClick={() => setDeleteAccountModalOpen(true)}
           >
             Удалить аккаунт
           </button>
@@ -159,13 +190,10 @@ function SecuritySection() {
 
       <ChangePasswordModal
         isOpen={isPasswordModalOpen}
-        onClose={() => setIsPasswordModalOpen(false)}
+        onClose={closePasswordModal}
         accessToken={accessToken}
       />
-      <DeleteAccountModal
-        isOpen={isDeleteAccountModalOpen}
-        onClose={() => setIsDeleteAccountModalOpen(false)}
-      />
+      <DeleteAccountModal isOpen={isDeleteAccountModalOpen} onClose={closeDeleteModal} />
     </div>
   );
 }
@@ -198,8 +226,10 @@ function DataManagementSection() {
 }
 
 function AppearanceSection() {
-  const [theme, setTheme] = useState('light');
-  const [currency, setCurrency] = useState('RUB');
+  const theme = useSettingsStore((state) => state.theme);
+  const currency = useSettingsStore((state) => state.currency);
+  const setTheme = useSettingsStore((state) => state.setTheme);
+  const setCurrency = useSettingsStore((state) => state.setCurrency);
 
   return (
     <div className="settings-section">
@@ -219,24 +249,23 @@ function AppearanceSection() {
           >
             <option value="light">Светлая</option>
             <option value="dark">Темная</option>
-            <option value="auto">Системная</option>
+            <option value="system">Системная</option>
           </select>
         </div>
 
         <div className="settings-item">
           <div className="settings-item-content">
             <h3 className="settings-item-title">Валюта</h3>
-            <p className="settings-item-description">Основная валюта для отображения сумм</p>
+            <p className="settings-item-description">Единица отображения сумм</p>
           </div>
           <select
             className="settings-select"
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
           >
-            <option value="RUB">Рубли (RUB)</option>
-            <option value="USD">Доллары (USD)</option>
-            <option value="EUR">Евро (EUR)</option>
-            <option value="CNY">Юани (CNY)</option>
+            <option value="RUB">RUB (₽)</option>
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
           </select>
         </div>
       </div>
@@ -244,97 +273,56 @@ function AppearanceSection() {
   );
 }
 
-function AboutSection() {
-  return (
-    <div className="settings-section">
-      <h2 className="settings-section-title">О приложении</h2>
-      <p className="settings-section-description">Информация и поддержка</p>
-
-      <div className="settings-items">
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Версия приложения</h3>
-            <p className="settings-item-description">FinTrack v1.0.0</p>
-          </div>
-        </div>
-
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Лицензия</h3>
-            <p className="settings-item-description">MIT License</p>
-          </div>
-        </div>
-
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Поддержка</h3>
-            <p className="settings-item-description">support@fintrack.ru</p>
-          </div>
-          <button className="settings-button secondary">Написать</button>
-        </div>
-
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Политика конфиденциальности</h3>
-            <p className="settings-item-description">Как мы защищаем ваши данные</p>
-          </div>
-          <button className="settings-button secondary">Открыть</button>
-        </div>
-
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Условия использования</h3>
-            <p className="settings-item-description">Правила работы с приложением</p>
-          </div>
-          <button className="settings-button secondary">Открыть</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-type Section = 'security' | 'data' | 'appearance' | 'about';
-
 export function SettingsPage() {
-  const [activeSection, setActiveSection] = useState<Section>('security');
+  const activeSection = useSettingsStore((state) => state.activeSection);
+  const setActiveSection = useSettingsStore((state) => state.setActiveSection);
 
-  const sections = [
-    {
-      id: 'security' as Section,
-      label: 'Безопасность',
-      description: 'Настройки входа и защиты данных',
-    },
-    {
-      id: 'data' as Section,
-      label: 'Управление данными',
-      description: 'Экспорт, импорт и резервное копирование',
-    },
-    { id: 'appearance' as Section, label: 'Внешний вид', description: 'Тема, язык и валюта' },
-    { id: 'about' as Section, label: 'О приложении', description: 'Информация и поддержка' },
-  ];
+  const renderSection = () => {
+    switch (activeSection) {
+      case 'security':
+        return <SecuritySection />;
+      case 'data':
+        return <DataManagementSection />;
+      case 'appearance':
+      default:
+        return <AppearanceSection />;
+    }
+  };
 
   return (
     <div className="settings-page">
-      <div className="settings-sidebar">
-        {sections.map((section) => (
-          <button
-            key={section.id}
-            className={`settings-nav-item ${activeSection === section.id ? 'active' : ''}`}
-            onClick={() => setActiveSection(section.id)}
-          >
-            <div className="settings-nav-content">
-              <span className="settings-nav-label">{section.label}</span>
-              <span className="settings-nav-description">{section.description}</span>
-            </div>
-          </button>
-        ))}
-      </div>
+      <div className="settings-card">
+        <div className="settings-header">
+          <div>
+            <h1 className="settings-title">Настройки</h1>
+            <p className="settings-subtitle">Управление аккаунтом и предпочтениями</p>
+          </div>
+        </div>
 
-      <div className="settings-content">
-        {activeSection === 'security' && <SecuritySection />}
-        {activeSection === 'data' && <DataManagementSection />}
-        {activeSection === 'appearance' && <AppearanceSection />}
-        {activeSection === 'about' && <AboutSection />}
+        <div className="settings-content">
+          <div className="settings-nav">
+            <button
+              className={`settings-nav-button ${activeSection === 'security' ? 'active' : ''}`}
+              onClick={() => setActiveSection('security')}
+            >
+              Безопасность
+            </button>
+            <button
+              className={`settings-nav-button ${activeSection === 'data' ? 'active' : ''}`}
+              onClick={() => setActiveSection('data')}
+            >
+              Данные
+            </button>
+            <button
+              className={`settings-nav-button ${activeSection === 'appearance' ? 'active' : ''}`}
+              onClick={() => setActiveSection('appearance')}
+            >
+              Внешний вид
+            </button>
+          </div>
+
+          <div className="settings-section-container">{renderSection()}</div>
+        </div>
       </div>
     </div>
   );
