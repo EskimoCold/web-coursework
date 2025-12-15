@@ -1,8 +1,9 @@
-from contextlib import suppress
-from datetime import UTC, datetime
 import json
 
-from fastapi import APIRouter, Depends, File, HTTPException, Response, status, UploadFile
+from contextlib import suppress
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +15,7 @@ from src.models.refresh_token import RefreshToken
 from src.models.transaction import Transaction
 from src.models.user import User
 from src.schemas.user import UserPasswordUpdate, UserResponse, UserUpdate
+
 
 
 router = APIRouter(prefix="/users", tags=["Users"])
