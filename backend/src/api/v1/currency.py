@@ -1,4 +1,5 @@
 """API для получения курсов валют"""
+
 from fastapi import APIRouter, HTTPException, status
 import httpx
 
@@ -69,7 +70,7 @@ async def convert_currency(amount: float, from_currency: str, to_currency: str):
         # Например, если rates["USD"] = 0.011, то 1 RUB = 0.011 USD
         # Для конвертации из RUB в USD: amount * rates["USD"]
         # Для конвертации из USD в RUB: amount / rates["USD"]
-        
+
         if from_currency == "RUB":
             # Конвертируем из RUB в другую валюту
             converted = amount * rates[to_currency]
@@ -97,4 +98,3 @@ async def convert_currency(amount: float, from_currency: str, to_currency: str):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error converting currency: {error_msg}",
         ) from err
-
