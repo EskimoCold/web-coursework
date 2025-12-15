@@ -46,23 +46,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      try {
-        const response = await authApi.refreshToken();
-        updateAccessToken(response.access_token);
-        const userData = await authApi.getCurrentUser(response.access_token);
-        setUser(userData);
-      } catch {
-        updateAccessToken(null);
+      const token = localStorage.getItem('access_token');
+      setAccessToken(token);
+      if (token) {
+        try {
+          const userData = await authApi.getCurrentUser(token);
+          setUser(userData);
+        } catch {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          setAccessToken(null);
+        }
       }
       setIsLoading(false);
     };
 
     initAuth();
-  }, [updateAccessToken]);
+  }, []);
 
   const login = async (data: LoginRequest) => {
     const response = await authApi.login(data);
-    updateAccessToken(response.access_token);
+
+    localStorage.setItem('access_token', response.access_token);
+    localStorage.setItem('refresh_token', response.refresh_token);
+    setAccessToken(response.access_token);
+
     const userData = await authApi.getCurrentUser(response.access_token);
     setUser(userData);
   };
@@ -76,6 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     authApi.logout().catch(() => {});
     updateAccessToken(null);
     setUser(null);
+    setAccessToken(null);
   };
 
   return (
