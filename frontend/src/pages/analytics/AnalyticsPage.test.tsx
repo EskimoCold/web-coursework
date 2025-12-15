@@ -1,8 +1,10 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
-import { describe, it, expect, beforeEach, vi, beforeAll, afterAll } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { currencyApi } from '../../api/currency';
 import { Transaction, transactionsApi } from '../../api/transactions';
+import { CurrencyProvider } from '../../contexts/CurrencyContext';
 import { predictExpenses } from '../../ml/expensePredictor';
 
 import { AnalyticsPage } from './AnalyticsPage';
@@ -18,6 +20,18 @@ afterAll(() => {
   errSpy?.mockRestore();
   warnSpy?.mockRestore();
 });
+
+/** Mock currency API */
+vi.mock('../../api/currency', () => ({
+  currencyApi: {
+    getRates: vi.fn().mockResolvedValue({
+      base: 'RUB',
+      date: '2024-01-01',
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+    }),
+    convert: vi.fn(),
+  },
+}));
 
 /** 🔧 NEW: mock categories API so it never throws for missing token */
 vi.mock('../../api/categories', () => ({
@@ -151,7 +165,16 @@ const mockTransactions: Transaction[] = [
 
 const renderComponent = (transactions: Transaction[] = mockTransactions) => {
   (transactionsApi.getTransactions as vi.Mock).mockResolvedValue(transactions);
-  return render(<AnalyticsPage />);
+  (currencyApi.getRates as vi.Mock).mockResolvedValue({
+    base: 'RUB',
+    date: '2024-01-01',
+    rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+  });
+  return render(
+    <CurrencyProvider>
+      <AnalyticsPage />
+    </CurrencyProvider>,
+  );
 };
 
 describe('AnalyticsPage', () => {

@@ -1,6 +1,6 @@
-from pathlib import Path  # noqa: I001
+from pathlib import Path
 
-from pydantic_settings import BaseSettings, SettingsConfigDict  # noqa: I001
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 # Определяем путь к .env файлу относительно расположения этого файла
@@ -38,7 +38,7 @@ settings = Settings()
 
 # Логирование для отладки (можно удалить после проверки)
 if __debug__:
-    import logging  # noqa: I001
+    import logging
 
     logger = logging.getLogger(__name__)
     logger.info(f"Loading .env from: {ENV_FILE}")
