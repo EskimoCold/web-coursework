@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+import { api } from './client';
 
 export interface LoginRequest {
   username: string;
@@ -30,104 +30,48 @@ export interface PasswordChangeRequest {
 
 export const authApi = {
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
+    return api.post<AuthResponse>('/auth/login', data, {
+      headers: { 'X-Skip-Auth': '1' },
+      skipAuth: true,
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Login failed');
-    }
-
-    return response.json();
   },
 
   async register(data: RegisterRequest): Promise<User> {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+    return api.post<User>('/auth/register', data, {
+      headers: { 'X-Skip-Auth': '1' },
+      skipAuth: true,
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Registration failed');
-    }
-
-    return response.json();
   },
 
   async getCurrentUser(token: string): Promise<User> {
-    const response = await fetch(`${API_URL}/users/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: 'include',
+    return api.get<User>('/users/me', {
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to get user');
-    }
-
-    return response.json();
   },
 
   async changePassword(data: PasswordChangeRequest, token: string): Promise<void> {
-    const response = await fetch(`${API_URL}/users/me/password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
+    await api.post<void>('/users/me/password', data, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Password change failed');
-    }
   },
 
   async refreshToken(): Promise<AuthResponse> {
-    const response = await fetch(`${API_URL}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
+    return api.post<AuthResponse>('/auth/refresh', undefined, {
+      headers: { 'X-Skip-Auth': '1' },
+      skipAuth: true,
     });
-
-    if (!response.ok) {
-      throw new Error('Token refresh failed');
-    }
-
-    return response.json();
   },
 
   async logout(): Promise<void> {
-    await fetch(`${API_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
+    await api.post<void>('/auth/logout', undefined, {
+      headers: { 'X-Skip-Auth': '1' },
+      skipAuth: true,
     });
   },
 
   async deleteAccount(accessToken: string): Promise<void> {
-    const deleteResponse = await fetch(`${API_URL}/users/me`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      credentials: 'include',
+    await api.delete<void>('/users/me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
-
-    if (!deleteResponse.ok) {
-      const error = await deleteResponse.json();
-      throw new Error(error.detail || 'Delete user failed');
-    }
   },
 };
