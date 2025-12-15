@@ -1,4 +1,4 @@
-import { api, BASE_URL } from './client';
+import { api } from './client';
 import { tokenStore } from './tokenStore';
 
 export interface Transaction {
@@ -42,26 +42,8 @@ export const transactionsApi = {
       throw new Error('No authentication token found');
     }
 
-    return fetch(BASE_URL + '/transactions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    }).then((response) => {
-      if (!response.ok) {
-        return response
-          .json()
-          .then((errorData) => {
-            throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-          })
-          .catch(() => {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          });
-      }
-      return response.json();
+    return api.post<Transaction>('/transactions', data, {
+      headers: { Authorization: `Bearer ${token}` },
     });
   },
 };
