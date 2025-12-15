@@ -1,8 +1,8 @@
-import json
 from contextlib import suppress
 from datetime import UTC, datetime
+import json
 
-from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Response, status, UploadFile
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,7 +15,9 @@ from src.models.transaction import Transaction
 from src.models.user import User
 from src.schemas.user import UserPasswordUpdate, UserResponse, UserUpdate
 
+
 router = APIRouter(prefix="/users", tags=["Users"])
+
 
 
 async def _import_categories(
