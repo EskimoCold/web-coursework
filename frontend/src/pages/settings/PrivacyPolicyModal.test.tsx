@@ -59,4 +59,3 @@ describe('PrivacyPolicyModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
-

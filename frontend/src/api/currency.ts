@@ -26,4 +26,3 @@ export const currencyApi = {
       params: { amount, from_currency: from, to_currency: to },
     }),
 };
-

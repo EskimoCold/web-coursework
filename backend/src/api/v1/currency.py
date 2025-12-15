@@ -1,12 +1,13 @@
 """API для получения курсов валют"""
-import httpx
 from fastapi import APIRouter, HTTPException, status
+import httpx
 
 router = APIRouter(prefix="/currency", tags=["Currency"])
 
 # Используем бесплатный API exchangerate-api.com
 # Можно также использовать: https://api.exchangerate-api.com/v4/latest/RUB
 EXCHANGE_RATE_API = "https://api.exchangerate-api.com/v4/latest/RUB"
+HTTP_OK = 200
 
 
 @router.get("/rates")
@@ -15,7 +16,7 @@ async def get_currency_rates():
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(EXCHANGE_RATE_API)
-            if response.status_code != 200:
+            if response.status_code != HTTP_OK:
                 raise HTTPException(
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                     detail="Currency service unavailable",
@@ -35,16 +36,17 @@ async def get_currency_rates():
                     "CNY": rates.get("CNY", 0),
                 },
             }
-    except httpx.TimeoutException:
+    except httpx.TimeoutException as err:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             detail="Currency service timeout",
-        )
-    except Exception as e:
+        ) from err
+    except Exception as err:
+        error_msg = str(err)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching currency rates: {str(e)}",
-        )
+            detail=f"Error fetching currency rates: {error_msg}",
+        ) from err
 
 
 @router.get("/convert")
@@ -89,9 +91,10 @@ async def convert_currency(amount: float, from_currency: str, to_currency: str):
         }
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception as err:
+        error_msg = str(err)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error converting currency: {str(e)}",
-        )
+            detail=f"Error converting currency: {error_msg}",
+        ) from err
 

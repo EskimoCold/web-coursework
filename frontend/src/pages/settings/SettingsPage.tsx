@@ -176,7 +176,10 @@ function SecuritySection() {
 function DataManagementSection() {
   const [exportLoading, setExportLoading] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
-  const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [importMessage, setImportMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
@@ -194,7 +197,9 @@ function DataManagementSection() {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
       console.error('Export error:', error);
-      alert(`Ошибка при экспорте данных: ${errorMessage}\n\nУбедитесь, что:\n- Вы авторизованы в системе\n- Бэкенд запущен и доступен\n- Эндпоинт /api/v1/users/me/export доступен`);
+      alert(
+        `Ошибка при экспорте данных: ${errorMessage}\n\nУбедитесь, что:\n- Вы авторизованы в системе\n- Бэкенд запущен и доступен\n- Эндпоинт /api/v1/users/me/export доступен`,
+      );
     } finally {
       setExportLoading(false);
     }
@@ -227,7 +232,8 @@ function DataManagementSection() {
     } catch (error) {
       setImportMessage({
         type: 'error',
-        text: 'Ошибка при импорте: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'),
+        text:
+          'Ошибка при импорте: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'),
       });
     } finally {
       setImportLoading(false);
@@ -381,10 +387,7 @@ function AboutSection() {
             <h3 className="settings-item-title">Политика конфиденциальности</h3>
             <p className="settings-item-description">Как мы защищаем ваши данные</p>
           </div>
-          <button
-            className="settings-button secondary"
-            onClick={() => setIsPrivacyModalOpen(true)}
-          >
+          <button className="settings-button secondary" onClick={() => setIsPrivacyModalOpen(true)}>
             Открыть
           </button>
         </div>

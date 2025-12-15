@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -38,6 +39,13 @@ settings = Settings()
 # Логирование для отладки (можно удалить после проверки)
 if __debug__:
     import logging
+
     logger = logging.getLogger(__name__)
     logger.info(f"Loading .env from: {ENV_FILE}")
-    logger.info(f"DATABASE_URL loaded: {settings.database_url[:30]}..." if len(settings.database_url) > 30 else f"DATABASE_URL loaded: {settings.database_url}")
+    DB_URL_PREVIEW_LENGTH = 30
+    db_url_preview = (
+        f"{settings.database_url[:DB_URL_PREVIEW_LENGTH]}..."
+        if len(settings.database_url) > DB_URL_PREVIEW_LENGTH
+        else settings.database_url
+    )
+    logger.info(f"DATABASE_URL loaded: {db_url_preview}")

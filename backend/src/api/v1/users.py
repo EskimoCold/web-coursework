@@ -1,4 +1,5 @@
 import json
+from contextlib import suppress
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
@@ -19,6 +20,107 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 # Важно: более специфичные маршруты должны быть определены ПЕРЕД общими
 # Например, /me/export должен быть ПЕРЕД /me
+
+
+async def _import_categories(
+    categories_data: list,
+    db: AsyncSession,
+    current_user: User,
+) -> tuple[int, list[str]]:
+    """Импорт категорий из данных."""
+    imported_count = 0
+    errors = []
+
+    existing_categories = await db.execute(
+        select(Category).filter(Category.user_id == current_user.id)
+    )
+    existing_category_names = {
+        cat.name: cat.id for cat in existing_categories.scalars().all()
+    }
+
+    for cat_data in categories_data:
+        try:
+            if not isinstance(cat_data, dict) or "name" not in cat_data:
+                continue
+
+            if cat_data["name"] in existing_category_names:
+                continue  # Skip existing categories
+
+            new_category = Category(
+                name=cat_data["name"],
+                description=cat_data.get("description"),
+                icon=cat_data.get("icon", "1"),
+                user_id=current_user.id,
+            )
+            db.add(new_category)
+            imported_count += 1
+        except Exception as err:
+            cat_name = cat_data.get("name", "unknown")
+            error_msg = str(err)
+            errors.append(f"Error importing category {cat_name}: {error_msg}")
+
+    return imported_count, errors
+
+
+async def _import_transactions(
+    transactions_data: list,
+    db: AsyncSession,
+    current_user: User,
+) -> tuple[int, list[str]]:
+    """Импорт транзакций из данных."""
+    imported_count = 0
+    errors = []
+
+    all_categories = await db.execute(
+        select(Category).filter(Category.user_id == current_user.id)
+    )
+    category_map = {cat.id: cat.id for cat in all_categories.scalars().all()}
+    category_name_map = {
+        cat.name: cat.id for cat in all_categories.scalars().all()
+    }
+
+    for txn_data in transactions_data:
+        try:
+            if not isinstance(txn_data, dict):
+                continue
+
+            if "amount" not in txn_data or "transaction_type" not in txn_data:
+                continue
+
+            category_id = None
+            if (
+                txn_data.get("category_id")
+                and txn_data["category_id"] in category_map
+            ):
+                category_id = category_map[txn_data["category_id"]]
+            elif (
+                txn_data.get("category_name")
+                and txn_data["category_name"] in category_name_map
+            ):
+                category_id = category_name_map[txn_data["category_name"]]
+
+            transaction_date = datetime.now(UTC)
+            if txn_data.get("transaction_date"):
+                with suppress(ValueError, AttributeError):
+                    transaction_date = datetime.fromisoformat(
+                        txn_data["transaction_date"].replace("Z", "+00:00")
+                    )
+
+            new_transaction = Transaction(
+                amount=float(txn_data["amount"]),
+                description=txn_data.get("description"),
+                transaction_type=txn_data["transaction_type"],
+                category_id=category_id,
+                transaction_date=transaction_date,
+                user_id=current_user.id,
+            )
+            db.add(new_transaction)
+            imported_count += 1
+        except Exception as err:
+            error_msg = str(err)
+            errors.append(f"Error importing transaction: {error_msg}")
+
+    return imported_count, errors
 
 
 @router.get("/me/export")
@@ -46,7 +148,11 @@ async def export_user_data(
         "user": {
             "id": current_user.id,
             "username": current_user.username,
-            "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+            "created_at": (
+                current_user.created_at.isoformat()
+                if current_user.created_at
+                else None
+            ),
         },
         "categories": [
             {
@@ -65,8 +171,14 @@ async def export_user_data(
                 "description": txn.description,
                 "transaction_type": txn.transaction_type,
                 "category_id": txn.category_id,
-                "transaction_date": txn.transaction_date.isoformat() if txn.transaction_date else None,
-                "created_at": txn.created_at.isoformat() if txn.created_at else None,
+                "transaction_date": (
+                    txn.transaction_date.isoformat()
+                    if txn.transaction_date
+                    else None
+                ),
+                "created_at": (
+                    txn.created_at.isoformat() if txn.created_at else None
+                ),
             }
             for txn in transactions
         ],
@@ -95,11 +207,12 @@ async def import_user_data(
         content = await file.read()
         try:
             import_data = json.loads(content.decode("utf-8"))
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError as err:
+            error_msg = str(err)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid JSON file: {str(e)}",
-            )
+                detail=f"Invalid JSON file: {error_msg}",
+            ) from err
         # Валидация структуры данных
         if "version" not in import_data:
             raise HTTPException(
@@ -107,88 +220,25 @@ async def import_user_data(
                 detail="Invalid import file format: missing version",
             )
 
-        imported_categories = 0
-        imported_transactions = 0
         errors = []
 
         # Импорт категорий
-        if "categories" in import_data and isinstance(import_data["categories"], list):
-            existing_categories = await db.execute(
-                select(Category).filter(Category.user_id == current_user.id)
+        imported_categories = 0
+        if isinstance(import_data.get("categories"), list):
+            cat_count, cat_errors = await _import_categories(
+                import_data["categories"], db, current_user
             )
-            existing_category_names = {cat.name: cat.id for cat in existing_categories.scalars().all()}
-
-            for cat_data in import_data["categories"]:
-                try:
-                    if not isinstance(cat_data, dict) or "name" not in cat_data:
-                        continue
-
-                    # Проверяем, существует ли категория с таким именем
-                    if cat_data["name"] in existing_category_names:
-                        continue  # Пропускаем существующие категории
-
-                    new_category = Category(
-                        name=cat_data["name"],
-                        description=cat_data.get("description"),
-                        icon=cat_data.get("icon", "1"),
-                        user_id=current_user.id,
-                    )
-                    db.add(new_category)
-                    imported_categories += 1
-                except Exception as e:
-                    errors.append(f"Error importing category {cat_data.get('name', 'unknown')}: {str(e)}")
+            imported_categories = cat_count
+            errors.extend(cat_errors)
 
         # Импорт транзакций
-        if "transactions" in import_data and isinstance(import_data["transactions"], list):
-            # Получаем все категории пользователя для маппинга
-            all_categories = await db.execute(
-                select(Category).filter(Category.user_id == current_user.id)
+        imported_transactions = 0
+        if isinstance(import_data.get("transactions"), list):
+            txn_count, txn_errors = await _import_transactions(
+                import_data["transactions"], db, current_user
             )
-            category_map = {cat.id: cat.id for cat in all_categories.scalars().all()}
-            category_name_map = {cat.name: cat.id for cat in all_categories.scalars().all()}
-
-            for txn_data in import_data["transactions"]:
-                try:
-                    if not isinstance(txn_data, dict):
-                        continue
-
-                    # Валидация обязательных полей
-                    if "amount" not in txn_data or "transaction_type" not in txn_data:
-                        continue
-
-                    # Обработка category_id
-                    category_id = None
-                    if "category_id" in txn_data and txn_data["category_id"]:
-                        # Если category_id есть в мапе, используем его
-                        if txn_data["category_id"] in category_map:
-                            category_id = category_map[txn_data["category_id"]]
-                    elif "category_name" in txn_data and txn_data["category_name"]:
-                        # Пытаемся найти по имени
-                        if txn_data["category_name"] in category_name_map:
-                            category_id = category_name_map[txn_data["category_name"]]
-
-                    # Парсинг даты
-                    transaction_date = datetime.now(UTC)
-                    if "transaction_date" in txn_data and txn_data["transaction_date"]:
-                        try:
-                            transaction_date = datetime.fromisoformat(
-                                txn_data["transaction_date"].replace("Z", "+00:00")
-                            )
-                        except (ValueError, AttributeError):
-                            pass
-
-                    new_transaction = Transaction(
-                        amount=float(txn_data["amount"]),
-                        description=txn_data.get("description"),
-                        transaction_type=txn_data["transaction_type"],
-                        category_id=category_id,
-                        transaction_date=transaction_date,
-                        user_id=current_user.id,
-                    )
-                    db.add(new_transaction)
-                    imported_transactions += 1
-                except Exception as e:
-                    errors.append(f"Error importing transaction: {str(e)}")
+            imported_transactions = txn_count
+            errors.extend(txn_errors)
 
         await db.commit()
 
@@ -200,12 +250,13 @@ async def import_user_data(
         }
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception as err:
         await db.rollback()
+        error_msg = str(err)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Error importing data: {str(e)}",
-        )
+            detail=f"Error importing data: {error_msg}",
+        ) from err
 
 
 @router.get("/me", response_model=UserResponse)
@@ -254,7 +305,9 @@ async def change_password(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if not verify_password(password_data.old_password, current_user.hashed_password):
+    if not verify_password(
+        password_data.old_password, current_user.hashed_password
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect old password",

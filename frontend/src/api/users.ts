@@ -89,4 +89,3 @@ export const usersApi = {
     return response.json();
   },
 };
-

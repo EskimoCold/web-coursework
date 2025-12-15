@@ -114,11 +114,13 @@ export const AnalyticsPage: React.FC = () => {
   const [incomes, expenses] = useMemo(
     () => [
       filteredTransactions.reduce(
-        (acc, curVal) => acc + (curVal.transaction_type === 'income' ? convertAmount(curVal.amount) : 0),
+        (acc, curVal) =>
+          acc + (curVal.transaction_type === 'income' ? convertAmount(curVal.amount) : 0),
         0,
       ),
       filteredTransactions.reduce(
-        (acc, curVal) => acc + (curVal.transaction_type === 'expense' ? convertAmount(curVal.amount) : 0),
+        (acc, curVal) =>
+          acc + (curVal.transaction_type === 'expense' ? convertAmount(curVal.amount) : 0),
         0,
       ),
     ],
@@ -239,7 +241,12 @@ export const AnalyticsPage: React.FC = () => {
       if (existing) {
         byDate.set(ts, { ...existing, predictedExpense: convertedPredicted });
       } else {
-        byDate.set(ts, { date: label, income: 0, expense: 0, predictedExpense: convertedPredicted });
+        byDate.set(ts, {
+          date: label,
+          income: 0,
+          expense: 0,
+          predictedExpense: convertedPredicted,
+        });
       }
     });
 
@@ -248,13 +255,17 @@ export const AnalyticsPage: React.FC = () => {
       .map(([, value]) => value);
   }, [dailyIncomeExpense, expenseForecast, formatDate, convertAmount, currency, rates]);
 
-  const tooltipFormatter = useCallback((value: number, name: string) => {
-    const symbol = getCurrencySymbol();
-    if (name === 'income') return [`${value.toLocaleString('ru-RU')} ${symbol}`, 'Доход'];
-    if (name === 'expense') return [`${value.toLocaleString('ru-RU')} ${symbol}`, 'Расход'];
-    if (name === 'predictedExpense') return [`${value.toLocaleString('ru-RU')} ${symbol}`, 'Прогноз расхода'];
-    return [`${value.toLocaleString('ru-RU')} ${symbol}`, name];
-  }, [getCurrencySymbol]);
+  const tooltipFormatter = useCallback(
+    (value: number, name: string) => {
+      const symbol = getCurrencySymbol();
+      if (name === 'income') return [`${value.toLocaleString('ru-RU')} ${symbol}`, 'Доход'];
+      if (name === 'expense') return [`${value.toLocaleString('ru-RU')} ${symbol}`, 'Расход'];
+      if (name === 'predictedExpense')
+        return [`${value.toLocaleString('ru-RU')} ${symbol}`, 'Прогноз расхода'];
+      return [`${value.toLocaleString('ru-RU')} ${symbol}`, name];
+    },
+    [getCurrencySymbol],
+  );
 
   return (
     <div className="anal-main">
@@ -348,7 +359,9 @@ export const AnalyticsPage: React.FC = () => {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value.toLocaleString('ru-RU')} ${getCurrencySymbol()}`}
+                  label={({ name, value }) =>
+                    `${name}: ${value.toLocaleString('ru-RU')} ${getCurrencySymbol()}`
+                  }
                 >
                   {expenseByCategory.map((_, index) => (
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
