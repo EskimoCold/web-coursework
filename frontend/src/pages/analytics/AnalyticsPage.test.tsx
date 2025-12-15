@@ -218,7 +218,12 @@ describe('AnalyticsPage', () => {
     renderComponent();
     await waitFor(() => {
       const totalBalance = 1000 + 1500 - 500 - 200;
-      expect(screen.getByText(`${totalBalance} ₽`)).toBeInTheDocument();
+      const formattedBalance = totalBalance.toLocaleString('ru-RU');
+      // Текст разбит на несколько элементов, ищем по классу
+      const balanceElement = document.querySelector('.anal-value.total');
+      expect(balanceElement).toBeInTheDocument();
+      expect(balanceElement?.textContent).toContain(formattedBalance);
+      expect(balanceElement?.textContent).toContain('₽');
     });
   });
 
@@ -227,8 +232,17 @@ describe('AnalyticsPage', () => {
     await waitFor(() => {
       const totalIncomes = 1000 + 1500;
       const totalExpenses = 500 + 200;
-      expect(screen.getByText(`${totalIncomes} ₽`)).toBeInTheDocument();
-      expect(screen.getByText(`${totalExpenses} ₽`)).toBeInTheDocument();
+      const formattedIncomes = totalIncomes.toLocaleString('ru-RU');
+      const formattedExpenses = totalExpenses.toLocaleString('ru-RU');
+      // Текст разбит на несколько элементов, ищем по классу
+      const incomeElement = document.querySelector('.anal-value.income');
+      const expenseElement = document.querySelector('.anal-value.expense');
+      expect(incomeElement).toBeInTheDocument();
+      expect(expenseElement).toBeInTheDocument();
+      expect(incomeElement?.textContent).toContain(formattedIncomes);
+      expect(incomeElement?.textContent).toContain('₽');
+      expect(expenseElement?.textContent).toContain(formattedExpenses);
+      expect(expenseElement?.textContent).toContain('₽');
     });
   });
 
