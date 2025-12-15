@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { Category, useCategories } from '../../contexts/CategoriesContext';
+import { resetCategoriesPageStore } from './categoriesPageStore';
 
 import { CategoriesPage } from './CategoriesPage';
 
@@ -71,6 +72,7 @@ const renderComponent = (categories: Category[] = mockCategories, icons: string[
 describe('Categories', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCategoriesPageStore();
   });
 
   it('should render all categories by default', () => {

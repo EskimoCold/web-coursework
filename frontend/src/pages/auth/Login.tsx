@@ -1,29 +1,46 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/AuthContext';
+import { useAuthFormStore } from '../../stores/authFormStore';
+import { useShallow } from 'zustand/react/shallow';
 import './auth.css';
 
 export const Login: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    login: { username, password, error, isLoading },
+    setLoginField,
+    setLoginError,
+    setLoginLoading,
+    resetLogin,
+  } = useAuthFormStore(
+    useShallow((state) => ({
+      login: state.login,
+      setLoginField: state.setLoginField,
+      setLoginError: state.setLoginError,
+      setLoginLoading: state.setLoginLoading,
+      resetLogin: state.resetLogin,
+    })),
+  );
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    resetLogin();
+  }, [resetLogin]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    setLoginError('');
+    setLoginLoading(true);
 
     try {
       await login({ username, password });
       navigate('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка входа');
+      setLoginError(err instanceof Error ? err.message : 'Ошибка входа');
     } finally {
-      setIsLoading(false);
+      setLoginLoading(false);
     }
   };
 
@@ -40,7 +57,7 @@ export const Login: React.FC = () => {
             type="text"
             placeholder="Логин"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setLoginField('username', e.target.value)}
             className="auth-input"
             required
             autoComplete="username"
@@ -50,7 +67,7 @@ export const Login: React.FC = () => {
             type="password"
             placeholder="Пароль"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setLoginField('password', e.target.value)}
             className="auth-input"
             required
             autoComplete="current-password"

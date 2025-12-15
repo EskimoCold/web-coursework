@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { Category } from '../../contexts/CategoriesContext';
 import './categories.css';
 
@@ -5,7 +7,7 @@ import { CategoryForm } from './CategoryForm';
 
 type Props = {
   cat: Category;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpen: (open: boolean) => void;
 };
 
 export const CategoryWindow: React.FC<Props> = ({ cat, setOpen }: Props) => {
