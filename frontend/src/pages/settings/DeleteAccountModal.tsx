@@ -1,9 +1,10 @@
 import React from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { authApi } from '../../api/auth';
 import { useAuth } from '../../contexts/AuthContext';
+
 import { useSettingsStore } from './settingsStore';
-import { useShallow } from 'zustand/react/shallow';
 
 export type Props = {
   isOpen: boolean;
@@ -64,7 +65,12 @@ export const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose }: Props) 
         <form onSubmit={handleSubmit} className="settings-form">
           {error && <div style={{ color: '#dc2626', fontSize: '14px' }}>{error}</div>}
           <div className="settings-form-actions">
-            <button type="button" className="settings-button" onClick={handleClose} disabled={isLoading}>
+            <button
+              type="button"
+              className="settings-button"
+              onClick={handleClose}
+              disabled={isLoading}
+            >
               Отмена
             </button>
             <button type="submit" className="settings-button danger" disabled={isLoading}>

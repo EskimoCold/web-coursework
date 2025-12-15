@@ -8,7 +8,10 @@ type TransactionFormState = {
   formData: TransactionCreate;
   loadCategories: () => Promise<void>;
   setLoading: (loading: boolean) => void;
-  setFormField: (field: keyof TransactionCreate, value: TransactionCreate[keyof TransactionCreate]) => void;
+  setFormField: (
+    field: keyof TransactionCreate,
+    value: TransactionCreate[keyof TransactionCreate],
+  ) => void;
   reset: () => void;
 };
 

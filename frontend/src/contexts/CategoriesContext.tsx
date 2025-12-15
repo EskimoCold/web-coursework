@@ -1,11 +1,7 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 
-import {
-  CategoryStoreState,
-  resetCategoryStore,
-  useCategoryStore,
-} from '../stores/categoryStore';
 import { useAuthStore } from '../stores/authStore';
+import { CategoryStoreState, resetCategoryStore, useCategoryStore } from '../stores/categoryStore';
 import { Category } from '../types/category';
 
 type CategoryContextType = Pick<CategoryStoreState, 'categories' | 'setCategories' | 'icons'> & {
