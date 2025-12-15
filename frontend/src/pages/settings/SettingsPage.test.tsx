@@ -1,16 +1,43 @@
 // src/components/SettingsPage.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { currencyApi } from '../../api/currency';
 import { AuthProvider } from '../../contexts/AuthContext';
+import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
 import { SettingsPage } from './SettingsPage';
 
+// Моки
+vi.mock('../../api/currency', () => ({
+  currencyApi: {
+    getRates: vi.fn().mockResolvedValue({
+      base: 'RUB',
+      date: '2024-01-01',
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+    }),
+    convert: vi.fn(),
+  },
+}));
+
+const mockCurrencyApi = vi.mocked(currencyApi);
+
 describe('SettingsPage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCurrencyApi.getRates.mockResolvedValue({
+      base: 'RUB',
+      date: '2024-01-01',
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+    });
+  });
+
   it('renders all settings navigation items', () => {
     render(
       <AuthProvider>
-        <SettingsPage />
+        <CurrencyProvider>
+          <SettingsPage />
+        </CurrencyProvider>
       </AuthProvider>,
     );
 
@@ -30,7 +57,9 @@ describe('SettingsPage', () => {
   it('renders security section content by default', () => {
     render(
       <AuthProvider>
-        <SettingsPage />
+        <CurrencyProvider>
+          <SettingsPage />
+        </CurrencyProvider>
       </AuthProvider>,
     );
 
@@ -41,7 +70,9 @@ describe('SettingsPage', () => {
   it('switches between sections correctly', () => {
     render(
       <AuthProvider>
-        <SettingsPage />
+        <CurrencyProvider>
+          <SettingsPage />
+        </CurrencyProvider>
       </AuthProvider>,
     );
 
