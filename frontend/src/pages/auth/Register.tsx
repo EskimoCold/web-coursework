@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useAuthFormStore } from '../../stores/authFormStore';
-import { useShallow } from 'zustand/react/shallow';
 import './auth.css';
 
 export const Register: React.FC = () => {

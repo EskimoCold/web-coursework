@@ -2,9 +2,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { Category, useCategories } from '../../contexts/CategoriesContext';
-import { resetCategoriesPageStore } from './categoriesPageStore';
 
 import { CategoriesPage } from './CategoriesPage';
+import { resetCategoriesPageStore } from './categoriesPageStore';
 
 vi.mock('./CategoryCard', () => ({
   CategoryCard: ({ cat, handleClick }: { cat: Category; handleClick: () => void }) => (

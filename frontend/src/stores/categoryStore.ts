@@ -36,12 +36,18 @@ export const useCategoryStore = create<CategoryState>((set) => ({
       set({ categories: data, isLoading: false });
     } catch (err) {
       console.error(err);
-      set({ error: err instanceof Error ? err.message : 'Не удалось загрузить категории', isLoading: false });
+      set({
+        error: err instanceof Error ? err.message : 'Не удалось загрузить категории',
+        isLoading: false,
+      });
     }
   },
   setCategories: (updater) =>
     set((state) => ({
-      categories: typeof updater === 'function' ? (updater as (prev: Category[]) => Category[])(state.categories) : updater,
+      categories:
+        typeof updater === 'function'
+          ? (updater as (prev: Category[]) => Category[])(state.categories)
+          : updater,
     })),
   addCategory: (category) => set((state) => ({ categories: [...state.categories, category] })),
   updateCategory: (category) =>

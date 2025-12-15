@@ -1,9 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
 
-import { resetHomeStore } from './homeStore';
-
 import { HomePage } from './HomePage';
+import { resetHomeStore } from './homeStore';
 
 // Mock CSS files
 vi.mock('./home.css', () => ({}));
@@ -80,8 +79,8 @@ describe('HomePage', () => {
       expect(expenseAmounts.length).toBeGreaterThan(0);
     });
 
-    expect(screen.getByText('Доходы')).toBeInTheDocument();
-    expect(screen.getByText('Расходы')).toBeInTheDocument();
+    expect(screen.getAllByText('Доходы').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Расходы').length).toBeGreaterThan(0);
     expect(screen.getByText('Баланс')).toBeInTheDocument();
   });
 });

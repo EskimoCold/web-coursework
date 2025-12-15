@@ -3,9 +3,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import * as AuthContext from '../../contexts/AuthContext';
-import { resetSettingsStore } from './settingsStore';
 
 import { SettingsPage } from './SettingsPage';
+import { resetSettingsStore } from './settingsStore';
 
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(),

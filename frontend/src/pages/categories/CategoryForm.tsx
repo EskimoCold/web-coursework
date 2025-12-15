@@ -4,6 +4,7 @@ import './categories.css';
 import { categoriesApi } from '../../api/categories';
 import { Icon } from '../../components/Icon';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
+
 import { createCategoryFormStore } from './categoryFormStore';
 
 type Props = {

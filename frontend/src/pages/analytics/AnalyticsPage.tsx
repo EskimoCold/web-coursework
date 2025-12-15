@@ -17,6 +17,7 @@ import {
 
 import './analytics.css';
 import { Transaction } from '../../api/transactions';
+
 import { useAnalyticsStore, FilterOption } from './analyticsStore';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];

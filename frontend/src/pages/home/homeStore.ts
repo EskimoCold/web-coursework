@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { transactionsApi, Transaction, Category, TransactionCreate } from '../../api/transactions';
+import { transactionsApi, Transaction, Category } from '../../api/transactions';
 
 const MOCK_TRANSACTIONS: Transaction[] = [
   {
@@ -59,9 +59,7 @@ type HomeState = {
   resetForm: () => void;
   setUseBackend: (value: boolean) => void;
   setBackendError: (message: string | null) => void;
-  setAllTransactions: (
-    updater: Transaction[] | ((prev: Transaction[]) => Transaction[]),
-  ) => void;
+  setAllTransactions: (updater: Transaction[] | ((prev: Transaction[]) => Transaction[])) => void;
   setCategories: (updater: Category[] | ((prev: Category[]) => Category[])) => void;
   addLocalTransaction: (transaction: Transaction) => void;
   reset: () => void;
@@ -134,7 +132,10 @@ export const useHomeStore = create<HomeState>((set, get) => ({
   setFormLoading: (loading) => set({ formLoading: loading }),
   setFormData: (updater) =>
     set((state) => ({
-      formData: typeof updater === 'function' ? (updater as (prev: HomeFormState) => HomeFormState)(state.formData) : updater,
+      formData:
+        typeof updater === 'function'
+          ? (updater as (prev: HomeFormState) => HomeFormState)(state.formData)
+          : updater,
     })),
   resetForm: () => set({ formData: getBaseForm() }),
   setUseBackend: (value) => set({ useBackend: value }),

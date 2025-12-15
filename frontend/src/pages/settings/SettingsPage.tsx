@@ -1,13 +1,12 @@
 import React from 'react';
-
-import './settings.css';
+import { useShallow } from 'zustand/react/shallow';
 
 import { authApi } from '../../api/auth';
 import { useAuth } from '../../contexts/AuthContext';
 
 import { DeleteAccountModal } from './DeleteAccountModal';
-import { useSettingsStore, SettingsSection } from './settingsStore';
-import { useShallow } from 'zustand/react/shallow';
+import './settings.css';
+import { useSettingsStore } from './settingsStore';
 
 type ChangePasswordModalProps = {
   isOpen: boolean;
@@ -122,7 +121,12 @@ function ChangePasswordModal({ isOpen, onClose, accessToken }: ChangePasswordMod
           {success && <div style={{ color: '#059669', fontSize: '14px' }}>{success}</div>}
 
           <div className="settings-form-actions">
-            <button type="button" className="settings-button" onClick={handleClose} disabled={isLoading}>
+            <button
+              type="button"
+              className="settings-button"
+              onClick={handleClose}
+              disabled={isLoading}
+            >
               Отмена
             </button>
             <button type="submit" className="settings-button primary" disabled={isLoading}>

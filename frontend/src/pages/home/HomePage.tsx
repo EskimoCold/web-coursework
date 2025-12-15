@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 
 import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
+
 import './home.css';
 import { useHomeStore } from './homeStore';
 
@@ -95,7 +96,9 @@ export function HomePage() {
     try {
       let categoryId: number | null = null;
       if (formData.category_id && useBackend) {
-        const selectedCategory = categories.find((cat) => cat.id.toString() === formData.category_id);
+        const selectedCategory = categories.find(
+          (cat) => cat.id.toString() === formData.category_id,
+        );
         if (selectedCategory) {
           categoryId = selectedCategory.id;
         }
@@ -307,7 +310,11 @@ export function HomePage() {
 
               <div className="form-group">
                 <label>Категория</label>
-                <select name="category_id" value={formData.category_id} onChange={handleInputChange}>
+                <select
+                  name="category_id"
+                  value={formData.category_id}
+                  onChange={handleInputChange}
+                >
                   <option value="">Без категории</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
