@@ -130,7 +130,6 @@ async function request<T>(config: ApiRequestConfig): Promise<T> {
 }
 
 export const api = {
-
   get: <T>(path: string, options?: { params?: Record<string, string | number> }) => {
     let url = path;
     if (options?.params) {
