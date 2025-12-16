@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { currencyApi } from '../../api/currency';
 import { Transaction, transactionsApi } from '../../api/transactions';
+import { Category } from '../../contexts/CategoriesContext';
 import { CurrencyProvider } from '../../contexts/CurrencyContext';
 import { predictExpenses } from '../../ml/expensePredictor';
 
@@ -52,6 +53,11 @@ vi.mock('../../api/transactions', () => ({
     getTransactions: vi.fn(),
   },
 }));
+
+// Глобальные переменные для передачи данных в компонент через мокированный useState
+let testTransactions: Transaction[] = [];
+let testCategories: Category[] = [];
+let emptyArrayCallIndex = 0;
 
 vi.mock('../../ml/expensePredictor', () => ({
   predictExpenses: vi.fn().mockResolvedValue([
@@ -172,34 +178,33 @@ const renderComponent = (transactions: Transaction[] = mockTransactions) => {
     rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
   });
 
-  const mockCategories = [
+  // Устанавливаем данные для мокированного useState
+  testTransactions = transactions;
+  testCategories = [
     { id: 1, name: 'Salary', type: 1, icon: 'salary', description: '' },
     { id: 2, name: 'Food', type: 0, icon: 'food', description: '' },
     { id: 3, name: 'Entertainment', type: 0, icon: 'entertainment', description: '' },
     { id: 4, name: 'Freelance', type: 1, icon: 'freelance', description: '' },
   ];
+  emptyArrayCallIndex = 0;
 
-  // Мокируем useState для AnalyticsPage, чтобы передать транзакции и категории
+  // Мокируем useState для AnalyticsPage
   const useStateSpy = vi.spyOn(React, 'useState');
   const originalUseState = React.useState;
-
-  // Отслеживаем вызовы useState с пустыми массивами
-  let emptyArrayCallCount = 0;
 
   useStateSpy.mockImplementation((initial) => {
     const result = originalUseState(initial);
 
     // Мокируем только вызовы с пустым массивом
-    // CurrencyProvider не использует пустые массивы, поэтому первые два - из AnalyticsPage
     if (Array.isArray(initial) && initial.length === 0) {
-      emptyArrayCallCount++;
+      emptyArrayCallIndex++;
 
-      if (emptyArrayCallCount === 1) {
+      if (emptyArrayCallIndex === 1) {
         // Первый пустой массив - transactions
-        return [transactions, result[1]];
-      } else if (emptyArrayCallCount === 2) {
+        return [testTransactions, result[1]];
+      } else if (emptyArrayCallIndex === 2) {
         // Второй пустой массив - categories
-        return [mockCategories, result[1]];
+        return [testCategories, result[1]];
       }
     }
 
@@ -221,6 +226,10 @@ describe('AnalyticsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetAnalyticsStore();
+    // Сбрасываем счетчик и данные для каждого теста
+    emptyArrayCallIndex = 0;
+    testTransactions = [];
+    testCategories = [];
   });
 
   it('should render all filter buttons', () => {
@@ -257,34 +266,41 @@ describe('AnalyticsPage', () => {
 
   it('should calculate correct balance', async () => {
     renderComponent();
-    await waitFor(() => {
-      const totalBalance = 1000 + 1500 - 500 - 200;
-      const formattedBalance = totalBalance.toLocaleString('ru-RU');
-      // Текст разбит на несколько элементов, ищем по классу
-      const balanceElement = document.querySelector('.anal-value.total');
-      expect(balanceElement).toBeInTheDocument();
-      expect(balanceElement?.textContent).toContain(formattedBalance);
-      expect(balanceElement?.textContent).toContain('₽');
-    });
+
+    // Ждем, пока данные загрузятся и баланс отобразится
+    await waitFor(
+      () => {
+        const totalBalance = 1000 + 1500 - 500 - 200; // 1800
+        const formattedBalance = totalBalance.toLocaleString('ru-RU'); // "1 800"
+        const balanceElement = document.querySelector('.anal-value.total');
+        expect(balanceElement).toBeInTheDocument();
+        expect(balanceElement?.textContent).toContain(formattedBalance);
+        expect(balanceElement?.textContent).toContain('₽');
+      },
+      { timeout: 3000 },
+    );
   });
 
   it('should calculate correct incomes and expenses', async () => {
     renderComponent();
-    await waitFor(() => {
-      const totalIncomes = 1000 + 1500;
-      const totalExpenses = 500 + 200;
-      const formattedIncomes = totalIncomes.toLocaleString('ru-RU');
-      const formattedExpenses = totalExpenses.toLocaleString('ru-RU');
-      // Текст разбит на несколько элементов, ищем по классу
-      const incomeElement = document.querySelector('.anal-value.income');
-      const expenseElement = document.querySelector('.anal-value.expense');
-      expect(incomeElement).toBeInTheDocument();
-      expect(expenseElement).toBeInTheDocument();
-      expect(incomeElement?.textContent).toContain(formattedIncomes);
-      expect(incomeElement?.textContent).toContain('₽');
-      expect(expenseElement?.textContent).toContain(formattedExpenses);
-      expect(expenseElement?.textContent).toContain('₽');
-    });
+
+    await waitFor(
+      () => {
+        const totalIncomes = 1000 + 1500; // 2500
+        const totalExpenses = 500 + 200; // 700
+        const formattedIncomes = totalIncomes.toLocaleString('ru-RU'); // "2 500"
+        const formattedExpenses = totalExpenses.toLocaleString('ru-RU'); // "700"
+        const incomeElement = document.querySelector('.anal-value.income');
+        const expenseElement = document.querySelector('.anal-value.expense');
+        expect(incomeElement).toBeInTheDocument();
+        expect(expenseElement).toBeInTheDocument();
+        expect(incomeElement?.textContent).toContain(formattedIncomes);
+        expect(incomeElement?.textContent).toContain('₽');
+        expect(expenseElement?.textContent).toContain(formattedExpenses);
+        expect(expenseElement?.textContent).toContain('₽');
+      },
+      { timeout: 3000 },
+    );
   });
 
   it('should display correct number of transactions', async () => {
