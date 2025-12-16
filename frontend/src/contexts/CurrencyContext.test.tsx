@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -34,7 +34,7 @@ describe('CurrencyContext', () => {
     Storage.prototype.setItem = vi.fn();
   });
 
-  it('should provide default currency RUB', () => {
+  it('should provide default currency RUB', async () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
@@ -46,6 +46,11 @@ describe('CurrencyContext', () => {
         <TestComponent />
       </CurrencyProvider>,
     );
+
+    // Ждем завершения начальной загрузки курсов
+    await waitFor(() => {
+      expect(screen.getByTestId('rates')).toHaveTextContent('rates-loaded');
+    });
 
     expect(screen.getByTestId('currency')).toHaveTextContent('RUB');
   });
@@ -98,7 +103,7 @@ describe('CurrencyContext', () => {
     expect(converted).toHaveTextContent('100');
   });
 
-  it('should return correct currency symbol', () => {
+  it('should return correct currency symbol', async () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
@@ -110,6 +115,11 @@ describe('CurrencyContext', () => {
         <TestComponent />
       </CurrencyProvider>,
     );
+
+    // Ждем завершения начальной загрузки курсов
+    await waitFor(() => {
+      expect(screen.getByTestId('rates')).toHaveTextContent('rates-loaded');
+    });
 
     expect(screen.getByTestId('symbol')).toHaveTextContent('₽');
   });
@@ -133,7 +143,9 @@ describe('CurrencyContext', () => {
     });
 
     const setUsdButton = screen.getByText('Set USD');
-    await user.click(setUsdButton);
+    await act(async () => {
+      await user.click(setUsdButton);
+    });
 
     expect(Storage.prototype.setItem).toHaveBeenCalledWith('fintrack_currency', 'USD');
   });

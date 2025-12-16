@@ -42,6 +42,9 @@ describe('DataManagementSection - Export/Import', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window.URL as any).revokeObjectURL = vi.fn();
     }
+
+    // Мок для HTMLAnchorElement.click() чтобы избежать ошибки навигации jsdom
+    HTMLAnchorElement.prototype.click = vi.fn();
   });
 
   it('should export data when JSON button is clicked', async () => {
@@ -76,6 +79,7 @@ describe('DataManagementSection - Export/Import', () => {
     mockUsersApi.exportData.mockRejectedValue(new Error(errorMessage));
 
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     renderWithProviders(<SettingsPage />);
 
@@ -89,7 +93,11 @@ describe('DataManagementSection - Export/Import', () => {
       expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining(errorMessage));
     });
 
+    // Проверяем, что console.error был вызван
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Export error:', expect.any(Error));
+
     alertSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   it('should import data when file is selected', async () => {
