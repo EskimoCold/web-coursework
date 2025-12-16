@@ -1,11 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
 
-import { AuthProvider } from '../../contexts/AuthContext';
-import { CategoryProvider } from '../../contexts/CategoriesContext';
-import { CurrencyProvider } from '../../contexts/CurrencyContext';
-
-
 import { HomePage } from './HomePage';
 import { resetHomeStore } from './homeStore';
 
@@ -49,16 +44,6 @@ vi.mock('../../api/categories', () => ({
     deleteCategory: vi.fn(),
   },
 }));
-
-// Mock the contexts to avoid nested context issues
-const MockProviders = ({ children }: { children: React.ReactNode }) => (
-  <AuthProvider>
-    <CurrencyProvider>
-      <CategoryProvider>{children}</CategoryProvider>
-    </CurrencyProvider>
-  </AuthProvider>
-);
-
 
 describe('HomePage', () => {
   beforeEach(() => {

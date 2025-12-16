@@ -1,13 +1,11 @@
 import { useEffect, useMemo } from 'react';
 
 import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
-
-
-import { transactionsApi, Transaction, Category, TransactionCreate } from '../../api/transactions';
 import { useCurrency } from '../../contexts/CurrencyContext';
 
-import './home.css';
 import { useHomeStore } from './homeStore';
+
+import './home.css';
 
 interface TransactionSummary {
   totalIncome: number;
@@ -16,31 +14,34 @@ interface TransactionSummary {
 }
 
 export function HomePage() {
-
   const { convertAmount, getCurrencySymbol } = useCurrency();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
-  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [useBackend, setUseBackend] = useState(true);
-  const [backendError, setBackendError] = useState<string | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [formLoading, setFormLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    amount: '',
-    description: '',
-    transaction_type: 'expense',
-    category_id: '',
-    transaction_date: new Date().toISOString().split('T')[0],
-  });
-
+  const {
+    currentPage,
+    filter,
+    allTransactions,
+    categories,
+    loading,
+    useBackend,
+    backendError,
+    showAddModal,
+    formLoading,
+    formData,
+    loadData,
+    setCurrentPage,
+    setFilter,
+    setShowAddModal,
+    setFormLoading,
+    setFormData,
+    resetForm,
+    addLocalTransaction,
+  } = useHomeStore();
 
   const itemsPerPage = 5;
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filteredTransactions = useMemo(() => {
     if (filter === 'all') {
@@ -48,7 +49,6 @@ export function HomePage() {
     }
     return allTransactions.filter((t) => t.transaction_type === filter);
   }, [allTransactions, filter]);
-
 
   // Вычисление summary с пересчетом валюты
 
@@ -152,7 +152,7 @@ export function HomePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleFilterChange = (newFilter: 'all' | 'income' | 'expense') => {
@@ -184,7 +184,6 @@ export function HomePage() {
         </div>
 
         <div className="summary-cards">
-
           <div className="summary-card balance">
             <h3>Общий баланс</h3>
             <div className="amount">
@@ -197,15 +196,12 @@ export function HomePage() {
             <div className="amount">
               +{summary.totalIncome.toLocaleString('ru-RU')} {getCurrencySymbol()}
             </div>
-
           </div>
           <div className="summary-card expense">
-
             <h3>Расходы</h3>
             <div className="amount">
               -{summary.totalExpenses.toLocaleString('ru-RU')} {getCurrencySymbol()}
             </div>
-
           </div>
         </div>
       </div>
@@ -239,66 +235,54 @@ export function HomePage() {
           <p>Список операций с пагинацией</p>
         </div>
 
+        <div className="transactions-table-container">
+          <table className="transactions-table">
+            <thead>
+              <tr>
+                <th>Категория</th>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Описание</th>
+                <th>Тип</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedTransactions.transactions.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td className="category-cell">
+                    <span className="category-badge">
+                      {categories?.find((c) => Number(c.id) === Number(transaction.category_id))
+                        ?.name ?? 'Без категории'}
+                    </span>
+                  </td>
+                  <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
+                  <td className={`amount-cell ${transaction.transaction_type}`}>
+                    {transaction.transaction_type === 'income' ? '+' : '-'}
+                    {convertAmount(transaction.amount).toLocaleString('ru-RU')}{' '}
+                    {getCurrencySymbol()}
+                  </td>
+                  <td className="description-cell">{transaction.description}</td>
+                  <td>
+                    <span className={`type-badge ${transaction.transaction_type}`}>
+                      {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-      <div className="transactions-table-container">
-        <table className="transactions-table">
-          <thead>
-            <tr>
-              <th>Категория</th>
-              <th>Дата</th>
-              <th>Сумма</th>
-              <th>Описание</th>
-              <th>Тип</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedTransactions.transactions.map((transaction) => (
-              <tr key={transaction.id}>
-                <td className="category-cell">
-                  <span className="category-badge">
-                    {categories?.find((c) => Number(c.id) === Number(transaction.category_id))
-                      ?.name ?? 'Без категории'}
-                  </span>
-                </td>
-                <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
-                <td className={`amount-cell ${transaction.transaction_type}`}>
-                  {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {convertAmount(transaction.amount).toLocaleString('ru-RU')} {getCurrencySymbol()}
-                </td>
-                <td className="description-cell">{transaction.description}</td>
-                <td>
-                  <span className={`type-badge ${transaction.transaction_type}`}>
-
-                    {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
-                  </span>
-                </div>
-                <div className={`mobile-card-amount ${transaction.transaction_type}`}>
-                  {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {convertAmount(transaction.amount).toLocaleString('ru-RU')} {getCurrencySymbol()}
-
-                </div>
-              </div>
-              <div className="transaction-meta">
-                <span className={`amount ${transaction.transaction_type}`}>
-                  {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {transaction.amount} ₽
-                </span>
-                <span className="category">{transaction.category?.name || 'Без категории'}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="pagination">
-          {Array.from({ length: paginatedTransactions.totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={currentPage === i + 1 ? 'active' : ''}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </button>
-          ))}
+          <div className="pagination">
+            {Array.from({ length: paginatedTransactions.totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                className={currentPage === i + 1 ? 'active' : ''}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
