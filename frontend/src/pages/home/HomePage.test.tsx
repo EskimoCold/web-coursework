@@ -3,6 +3,7 @@ import { expect, test, vi } from 'vitest';
 
 import { AuthProvider } from '../../contexts/AuthContext';
 import { CategoryProvider } from '../../contexts/CategoriesContext';
+import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
 import { HomePage } from './HomePage';
 
@@ -10,7 +11,7 @@ import { HomePage } from './HomePage';
 vi.mock('./home.css', () => ({}));
 
 // Mock the modules that are causing issues
-vi.mock('../api/transactions', () => ({
+vi.mock('../../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(() =>
       Promise.resolve([
@@ -38,7 +39,7 @@ vi.mock('../api/transactions', () => ({
 }));
 
 // Mock categories API to avoid authorization errors
-vi.mock('../api/categories', () => ({
+vi.mock('../../api/categories', () => ({
   categoriesApi: {
     getCategories: vi.fn(() => Promise.resolve([])),
     createCategory: vi.fn(),
@@ -50,7 +51,9 @@ vi.mock('../api/categories', () => ({
 // Mock the contexts to avoid nested context issues
 const MockProviders = ({ children }: { children: React.ReactNode }) => (
   <AuthProvider>
-    <CategoryProvider>{children}</CategoryProvider>
+    <CurrencyProvider>
+      <CategoryProvider>{children}</CategoryProvider>
+    </CurrencyProvider>
   </AuthProvider>
 );
 
