@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -21,6 +21,8 @@ import { Transaction } from '../../api/transactions';
 import { Category } from '../../contexts/CategoriesContext';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { ExpenseForecastPoint } from '../../ml/expensePredictor';
+
+import { FilterOption } from './analyticsStore';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 type NormalizedTransaction = Omit<Transaction, 'transaction_date'> & { transaction_date: Date };

@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
 
+import { CurrencyProvider } from '../../contexts/CurrencyContext';
+
 import { HomePage } from './HomePage';
 import { resetHomeStore } from './homeStore';
 
@@ -52,7 +54,11 @@ describe('HomePage', () => {
   });
 
   test('renders without crashing', async () => {
-    render(<HomePage />);
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Дашборд финансов')).toBeInTheDocument();
@@ -60,7 +66,11 @@ describe('HomePage', () => {
   });
 
   test('displays transactions correctly', async () => {
-    render(<HomePage />);
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
 
     // Wait for loading to complete and data to be displayed
     await waitFor(() => {
