@@ -172,10 +172,6 @@ const renderComponent = (transactions: Transaction[] = mockTransactions) => {
     rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
   });
 
-  // Мокируем useState для AnalyticsPage, чтобы передать транзакции и категории
-  const useStateSpy = vi.spyOn(React, 'useState');
-  const originalUseState = React.useState;
-
   const mockCategories = [
     { id: 1, name: 'Salary', type: 1, icon: 'salary', description: '' },
     { id: 2, name: 'Food', type: 0, icon: 'food', description: '' },
@@ -183,28 +179,27 @@ const renderComponent = (transactions: Transaction[] = mockTransactions) => {
     { id: 4, name: 'Freelance', type: 1, icon: 'freelance', description: '' },
   ];
 
-  // Определяем вызовы useState по типу начального значения
+  // Мокируем useState для AnalyticsPage, чтобы передать транзакции и категории
+  const useStateSpy = vi.spyOn(React, 'useState');
+  const originalUseState = React.useState;
+
+  // Отслеживаем вызовы useState с пустыми массивами
+  let emptyArrayCallCount = 0;
+
   useStateSpy.mockImplementation((initial) => {
     const result = originalUseState(initial);
 
-    // Мокируем только вызовы с пустым массивом (transactions и categories в AnalyticsPage)
+    // Мокируем только вызовы с пустым массивом
+    // CurrencyProvider не использует пустые массивы, поэтому первые два - из AnalyticsPage
     if (Array.isArray(initial) && initial.length === 0) {
-      // Проверяем тип массива по контексту (это хрупко, но работает)
-      const stack = new Error().stack || '';
-      if (stack.includes('AnalyticsPage')) {
-        // Это вызов из AnalyticsPage
-        // Первый пустой массив - transactions, второй - categories
-        const callIndex = useStateSpy.mock.calls.length;
-        if (
-          callIndex === 0 ||
-          (callIndex > 0 && useStateSpy.mock.calls[callIndex - 1]?.[0] !== initial)
-        ) {
-          // Это первый пустой массив в AnalyticsPage - transactions
-          return [transactions, result[1]];
-        } else {
-          // Это второй пустой массив в AnalyticsPage - categories
-          return [mockCategories, result[1]];
-        }
+      emptyArrayCallCount++;
+
+      if (emptyArrayCallCount === 1) {
+        // Первый пустой массив - transactions
+        return [transactions, result[1]];
+      } else if (emptyArrayCallCount === 2) {
+        // Второй пустой массив - categories
+        return [mockCategories, result[1]];
       }
     }
 
