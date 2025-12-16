@@ -100,9 +100,12 @@ http.interceptors.response.use(
   },
 );
 
-async function request<T>(config: ApiRequestConfig): Promise<T> {
+async function request<T>(config: string | ApiRequestConfig): Promise<T> {
   try {
-    const res: AxiosResponse<T> = await http.request<T>(config);
+    const finalConfig: ApiRequestConfig =
+      typeof config === 'string' ? { url: config, method: 'GET' } : config;
+
+    const res: AxiosResponse<T> = await http.request<T>(finalConfig);
     return res.data;
   } catch (err) {
     if (isAxiosError(err)) {
@@ -130,7 +133,14 @@ async function request<T>(config: ApiRequestConfig): Promise<T> {
 }
 
 export const api = {
-  get: <T>(path: string, options?: { params?: Record<string, string | number> }) => {
+  get: <T>(
+    path: string,
+    options?: {
+      params?: Record<string, string | number>;
+      headers?: AxiosRequestConfig['headers'];
+      skipAuth?: boolean;
+    },
+  ) => {
     let url = path;
     if (options?.params) {
       const searchParams = new URLSearchParams();
@@ -139,6 +149,44 @@ export const api = {
       });
       url += `?${searchParams.toString()}`;
     }
-    return request<T>(url);
+
+    return request<T>({
+      url,
+      method: 'GET',
+      headers: options?.headers,
+      skipAuth: options?.skipAuth,
+    });
+  },
+
+  post: <T>(
+    path: string,
+    data?: unknown,
+    options?: {
+      headers?: AxiosRequestConfig['headers'];
+      skipAuth?: boolean;
+    },
+  ) => {
+    return request<T>({
+      url: path,
+      method: 'POST',
+      data,
+      headers: options?.headers,
+      skipAuth: options?.skipAuth,
+    });
+  },
+
+  delete: <T>(
+    path: string,
+    options?: {
+      headers?: AxiosRequestConfig['headers'];
+      skipAuth?: boolean;
+    },
+  ) => {
+    return request<T>({
+      url: path,
+      method: 'DELETE',
+      headers: options?.headers,
+      skipAuth: options?.skipAuth,
+    });
   },
 };

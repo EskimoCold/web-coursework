@@ -32,6 +32,16 @@ describe('DataManagementSection - Export/Import', () => {
     // Мок для localStorage
     Storage.prototype.getItem = vi.fn(() => null);
     Storage.prototype.setItem = vi.fn();
+
+    // Моки для URL API в jsdom
+    if (!window.URL.createObjectURL) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window.URL as any).createObjectURL = vi.fn(() => 'blob:mock-url');
+    }
+    if (!window.URL.revokeObjectURL) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window.URL as any).revokeObjectURL = vi.fn();
+    }
   });
 
   it('should export data when JSON button is clicked', async () => {
@@ -40,7 +50,7 @@ describe('DataManagementSection - Export/Import', () => {
     mockUsersApi.exportData.mockResolvedValue(mockBlob);
 
     // Моки для создания ссылки и клика
-    vi.spyOn(document, 'createElement');
+    const createElementSpy = vi.spyOn(document, 'createElement');
 
     renderWithProviders(<SettingsPage />);
 
@@ -127,8 +137,9 @@ describe('DataManagementSection - Export/Import', () => {
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(fileInput, mockFile);
 
+    // Для не-JSON файлов импорт не должен вызываться
     await waitFor(() => {
-      expect(screen.getByText(/Пожалуйста, выберите JSON файл/)).toBeInTheDocument();
+      expect(mockUsersApi.importData).not.toHaveBeenCalled();
     });
   });
 

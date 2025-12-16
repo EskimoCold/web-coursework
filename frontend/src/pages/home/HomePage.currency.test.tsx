@@ -75,7 +75,8 @@ describe('HomePage - Currency Conversion', () => {
 
     // Проверяем, что суммы пересчитываются
     // (детальная проверка конверсии требует более сложной настройки)
-    const incomeElement = screen.getByText(/Доходы/).closest('.summary-card');
+    const incomeHeading = screen.getByRole('heading', { name: /Доходы/ });
+    const incomeElement = incomeHeading.closest('.summary-card');
     expect(incomeElement).toBeInTheDocument();
   });
 
@@ -83,11 +84,12 @@ describe('HomePage - Currency Conversion', () => {
     renderWithProviders(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Test income/)).toBeInTheDocument();
+      const descriptions = screen.getAllByText(/Test income/);
+      expect(descriptions.length).toBeGreaterThan(0);
     });
 
     // Проверяем, что суммы транзакций содержат символ валюты
-    const transactionRow = screen.getByText(/Test income/).closest('tr');
+    const transactionRow = screen.getAllByText(/Test income/)[0].closest('tr');
     expect(transactionRow).toBeInTheDocument();
   });
 });
