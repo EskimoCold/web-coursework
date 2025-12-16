@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { initAnalytics, trackPageview } from '../analytics/googleAnalytics';
@@ -14,6 +14,7 @@ import { Register } from '../pages/auth/Register';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { HomePage } from '../pages/home/HomePage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
+import { useNavigationStore } from '../stores/navigationStore';
 
 function AnalyticsTracker() {
   const location = useLocation();
@@ -30,7 +31,8 @@ function AnalyticsTracker() {
 }
 
 function MainApp() {
-  const [active, setActive] = useState('Главная');
+  const active = useNavigationStore((state) => state.activePage);
+  const setActive = useNavigationStore((state) => state.setActivePage);
 
   const pages = useMemo(
     () =>

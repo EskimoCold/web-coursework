@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import * as AuthContext from '../../contexts/AuthContext';
+import { resetAuthFormStore } from '../../stores/authFormStore';
 
 import { Register } from './Register';
 
@@ -26,6 +27,7 @@ describe('Register', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthFormStore();
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       register: mockRegister,
       user: null,

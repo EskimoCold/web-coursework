@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import {
   AreaChart,
   Area,
@@ -16,16 +16,25 @@ import {
 } from 'recharts';
 
 import './analytics.css';
+
 import { categoriesApi } from '../../api/categories';
 import { Transaction, transactionsApi } from '../../api/transactions';
 import { Category } from '../../contexts/CategoriesContext';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { predictExpenses, ExpenseForecastPoint } from '../../ml/expensePredictor';
 
+
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 type NormalizedTransaction = Omit<Transaction, 'transaction_date'> & { transaction_date: Date };
+const FILTERS: [FilterOption, string][] = [
+  ['week', 'Неделя'],
+  ['month', 'Месяц'],
+  ['year', 'Год'],
+  ['all', 'Все время'],
+];
 
 export const AnalyticsPage: React.FC = () => {
+
   const { convertAmount, getCurrencySymbol } = useCurrency();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -34,30 +43,14 @@ export const AnalyticsPage: React.FC = () => {
   const [isForecasting, setIsForecasting] = useState(false);
   const [forecastError, setForecastError] = useState<string | null>(null);
 
+
   useEffect(() => {
-    (async () => {
-      const [tx, cats] = await Promise.all([
-        transactionsApi.getTransactions(),
-        categoriesApi.getCategories(), // +
-      ]);
-      setTransactions(tx);
-      setCategories(cats); // +
-    })();
-  }, []);
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   const categoryNameById = useMemo(
     () => Object.fromEntries((categories ?? []).map((c) => [String(c.id), c.name])),
     [categories],
-  );
-
-  const filters = useMemo(
-    () => [
-      ['week', 'Неделя'],
-      ['month', 'Месяц'],
-      ['year', 'Год'],
-      ['all', 'Все время'],
-    ],
-    [],
   );
 
   const formatDate = useCallback((t: string | Date) => {
@@ -91,14 +84,6 @@ export const AnalyticsPage: React.FC = () => {
   }, [filter]);
 
   const to = useMemo(() => new Date(), []);
-
-  useEffect(() => {
-    const getData = async () => {
-      setTransactions(await transactionsApi.getTransactions());
-    };
-
-    getData();
-  }, []);
 
   const filteredTransactions = useMemo<NormalizedTransaction[]>(
     () =>
@@ -153,6 +138,10 @@ export const AnalyticsPage: React.FC = () => {
       }));
   }, [filteredTransactions, convertAmount]);
 
+  useEffect(() => {
+    runForecast(dailyIncomeExpense);
+  }, [dailyIncomeExpense, runForecast]);
+
   const incomeByCategory = useMemo(() => {
     const imp = new Map<string, number>();
     filteredTransactions
@@ -176,47 +165,6 @@ export const AnalyticsPage: React.FC = () => {
 
     return Array.from(imp, ([name, value]) => ({ name, value }));
   }, [filteredTransactions, categoryNameById, convertAmount]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const runForecast = async () => {
-      if (!dailyIncomeExpense.length) {
-        setExpenseForecast([]);
-        return;
-      }
-
-      setIsForecasting(true);
-      setForecastError(null);
-
-      try {
-        const expensesOnly = dailyIncomeExpense.filter((p) => p.expense > 0);
-        const predictions = await predictExpenses(
-          expensesOnly.length ? expensesOnly : dailyIncomeExpense,
-        );
-
-        if (!cancelled) {
-          setExpenseForecast(predictions);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setExpenseForecast([]);
-          setForecastError('Не удалось построить прогноз расходов');
-          console.error(error);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsForecasting(false);
-        }
-      }
-    };
-
-    runForecast();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [dailyIncomeExpense]);
 
   const chartData = useMemo(() => {
     const byDate = new Map<
@@ -270,7 +218,7 @@ export const AnalyticsPage: React.FC = () => {
   return (
     <div className="anal-main">
       <div className="anal-filters">
-        {filters.map((f) => (
+        {FILTERS.map((f) => (
           <button
             key={f[0]}
             className={filter === f[0] ? 'anal-filter-active' : ''}
