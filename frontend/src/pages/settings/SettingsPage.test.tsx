@@ -6,9 +6,7 @@ import { currencyApi } from '../../api/currency';
 import { AuthProvider } from '../../contexts/AuthContext';
 import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
-
 import { SettingsPage } from './SettingsPage';
-import { resetSettingsStore } from './settingsStore';
 
 // Моки
 vi.mock('../../api/currency', () => ({
@@ -43,30 +41,12 @@ describe('SettingsPage', () => {
       </AuthProvider>,
     );
 
-describe('SettingsPage', () => {
-  beforeEach(() => {
-    resetSettingsStore();
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
-      accessToken: 'token',
-      logout: vi.fn(),
-      user: null,
-      isAuthenticated: true,
-      isLoading: false,
-      login: vi.fn(),
-      register: vi.fn(),
-    });
-  });
-
-  it('renders all settings navigation items', () => {
-    render(<SettingsPage />);
-
     expect(screen.getAllByText('Безопасность').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Данные').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Внешний вид').length).toBeGreaterThan(0);
   });
 
   it('renders security section content by default', () => {
-
     render(
       <AuthProvider>
         <CurrencyProvider>
@@ -74,7 +54,6 @@ describe('SettingsPage', () => {
         </CurrencyProvider>
       </AuthProvider>,
     );
-
 
     expect(screen.getByText('Смена пароля')).toBeInTheDocument();
     expect(screen.getByText('Удаление аккаунта')).toBeInTheDocument();

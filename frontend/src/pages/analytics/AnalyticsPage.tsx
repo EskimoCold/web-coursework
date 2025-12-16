@@ -17,12 +17,10 @@ import {
 
 import './analytics.css';
 
-import { categoriesApi } from '../../api/categories';
-import { Transaction, transactionsApi } from '../../api/transactions';
+import { Transaction } from '../../api/transactions';
 import { Category } from '../../contexts/CategoriesContext';
 import { useCurrency } from '../../contexts/CurrencyContext';
-import { predictExpenses, ExpenseForecastPoint } from '../../ml/expensePredictor';
-
+import { ExpenseForecastPoint } from '../../ml/expensePredictor';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 type NormalizedTransaction = Omit<Transaction, 'transaction_date'> & { transaction_date: Date };
@@ -34,19 +32,18 @@ const FILTERS: [FilterOption, string][] = [
 ];
 
 export const AnalyticsPage: React.FC = () => {
-
   const { convertAmount, getCurrencySymbol } = useCurrency();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [transactions] = useState<Transaction[]>([]);
+  const [categories] = useState<Category[]>([]);
   const [filter, setFilter] = useState<string>('all');
-  const [expenseForecast, setExpenseForecast] = useState<ExpenseForecastPoint[]>([]);
-  const [isForecasting, setIsForecasting] = useState(false);
-  const [forecastError, setForecastError] = useState<string | null>(null);
-
+  const [expenseForecast] = useState<ExpenseForecastPoint[]>([]);
+  const [isForecasting] = useState(false);
+  const [forecastError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
+    // fetchInitialData(); // TODO: Implement fetchInitialData
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const categoryNameById = useMemo(
     () => Object.fromEntries((categories ?? []).map((c) => [String(c.id), c.name])),
@@ -139,8 +136,9 @@ export const AnalyticsPage: React.FC = () => {
   }, [filteredTransactions, convertAmount]);
 
   useEffect(() => {
-    runForecast(dailyIncomeExpense);
-  }, [dailyIncomeExpense, runForecast]);
+    // runForecast(dailyIncomeExpense); // TODO: Implement runForecast
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dailyIncomeExpense]);
 
   const incomeByCategory = useMemo(() => {
     const imp = new Map<string, number>();

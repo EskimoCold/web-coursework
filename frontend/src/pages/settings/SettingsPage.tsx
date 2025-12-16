@@ -1,8 +1,7 @@
-
 import { useState, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import './settings.css';
-
 
 import { authApi } from '../../api/auth';
 import { usersApi } from '../../api/users';
@@ -11,7 +10,7 @@ import { useCurrency } from '../../contexts/CurrencyContext';
 
 import { DeleteAccountModal } from './DeleteAccountModal';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
-
+import { useSettingsStore } from './settingsStore';
 
 type ChangePasswordModalProps = {
   isOpen: boolean;
@@ -381,10 +380,7 @@ function AppearanceSection() {
   );
 }
 
-
 function AboutSection() {
-  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
-
   return (
     <div className="settings-section">
       <h2 className="settings-section-title">О приложении</h2>
@@ -404,6 +400,31 @@ function AboutSection() {
             <p className="settings-item-description">MIT License</p>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+type Section = 'security' | 'data' | 'appearance' | 'about';
+
+export function SettingsPage() {
+  const [activeSection, setActiveSection] = useState<Section>('security');
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case 'security':
+        return <SecuritySection />;
+      case 'data':
+        return <DataManagementSection />;
+      case 'appearance':
+        return <AppearanceSection />;
+      case 'about':
+        return <AboutSection />;
+      default:
+        return <SecuritySection />;
+    }
+  };
 
   return (
     <div className="settings-page">
@@ -435,12 +456,13 @@ function AboutSection() {
             >
               Внешний вид
             </button>
+            <button
+              className={`settings-nav-button ${activeSection === 'about' ? 'active' : ''}`}
+              onClick={() => setActiveSection('about')}
+            >
+              О приложении
+            </button>
           </div>
-          <button className="settings-button secondary" onClick={() => setIsPrivacyModalOpen(true)}>
-            Открыть
-          </button>
-        </div>
-
           <div className="settings-section-container">{renderSection()}</div>
         </div>
       </div>
