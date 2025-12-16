@@ -1,11 +1,14 @@
 import { render } from '@testing-library/react';
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import * as AuthContext from '../contexts/AuthContext';
+import * as CategoryContext from '../contexts/CategoriesContext';
 
 import App from './App';
 
 vi.mock('../contexts/AuthContext');
+vi.mock('../contexts/CategoriesContext');
 
 // Mock для предотвращения ошибок API
 vi.mock('../api/client', () => ({
@@ -30,6 +33,9 @@ describe('App', () => {
     });
 
     vi.mocked(AuthContext.AuthProvider).mockImplementation(
+      ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    );
+    vi.mocked(CategoryContext.CategoryProvider).mockImplementation(
       ({ children }: { children: React.ReactNode }) => <>{children}</>,
     );
   });

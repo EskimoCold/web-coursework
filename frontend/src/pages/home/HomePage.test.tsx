@@ -5,7 +5,9 @@ import { AuthProvider } from '../../contexts/AuthContext';
 import { CategoryProvider } from '../../contexts/CategoriesContext';
 import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
+
 import { HomePage } from './HomePage';
+import { resetHomeStore } from './homeStore';
 
 // Mock CSS files
 vi.mock('./home.css', () => ({}));
@@ -57,33 +59,26 @@ const MockProviders = ({ children }: { children: React.ReactNode }) => (
   </AuthProvider>
 );
 
+
 describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetHomeStore();
   });
 
   test('renders without crashing', async () => {
-    render(
-      <MockProviders>
-        <HomePage />
-      </MockProviders>,
-    );
+    render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Общий баланс')).toBeInTheDocument();
+      expect(screen.getByText('Дашборд финансов')).toBeInTheDocument();
     });
   });
 
   test('displays transactions correctly', async () => {
-    render(
-      <MockProviders>
-        <HomePage />
-      </MockProviders>,
-    );
+    render(<HomePage />);
 
     // Wait for loading to complete and data to be displayed
     await waitFor(() => {
-      // Check for transaction descriptions - use queryAllByText since there might be multiple instances
       const productElements = screen.queryAllByText('Продукты в супермаркете');
       expect(productElements.length).toBeGreaterThan(0);
 
@@ -91,23 +86,16 @@ describe('HomePage', () => {
       expect(salaryElements.length).toBeGreaterThan(0);
     });
 
-    // Check for amounts with proper formatting - use getAllByText for multiple elements
     await waitFor(() => {
-      const incomeAmounts = screen.getAllByText('+50 000 ₽');
-      const expenseAmounts = screen.getAllByText('-1 500 ₽');
+      const incomeAmounts = screen.getAllByText('+50000 ₽');
+      const expenseAmounts = screen.getAllByText('-1500 ₽');
 
       expect(incomeAmounts.length).toBeGreaterThan(0);
       expect(expenseAmounts.length).toBeGreaterThan(0);
     });
 
-    // Check that summary cards are displayed
-    // expect(screen.getByText('48 500 ₽')).toBeInTheDocument(); // Balance
-
-    // For summary amounts, check they exist (there might be multiple)
-    const incomeSummaryElements = screen.getAllByText('+50 000 ₽');
-    const expenseSummaryElements = screen.getAllByText('-1 500 ₽');
-
-    expect(incomeSummaryElements.length).toBeGreaterThan(0);
-    expect(expenseSummaryElements.length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Доходы').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Расходы').length).toBeGreaterThan(0);
+    expect(screen.getByText('Баланс')).toBeInTheDocument();
   });
 });

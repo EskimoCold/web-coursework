@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
 
 import { CategoriesPage } from './CategoriesPage';
+import { resetCategoriesPageStore } from './categoriesPageStore';
 
 vi.mock('./CategoryCard', () => ({
   CategoryCard: ({ cat, handleClick }: { cat: Category; handleClick: () => void }) => (
@@ -71,6 +72,7 @@ const renderComponent = (categories: Category[] = mockCategories, icons: string[
 describe('Categories', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCategoriesPageStore();
   });
 
   it('should render all categories by default', () => {

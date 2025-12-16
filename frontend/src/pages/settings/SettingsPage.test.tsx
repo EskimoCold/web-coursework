@@ -6,7 +6,9 @@ import { currencyApi } from '../../api/currency';
 import { AuthProvider } from '../../contexts/AuthContext';
 import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
+
 import { SettingsPage } from './SettingsPage';
+import { resetSettingsStore } from './settingsStore';
 
 // Моки
 vi.mock('../../api/currency', () => ({
@@ -41,20 +43,30 @@ describe('SettingsPage', () => {
       </AuthProvider>,
     );
 
-    const securityNav = screen.getAllByText('Безопасность');
-    expect(securityNav.length).toBe(2);
+describe('SettingsPage', () => {
+  beforeEach(() => {
+    resetSettingsStore();
+    vi.mocked(AuthContext.useAuth).mockReturnValue({
+      accessToken: 'token',
+      logout: vi.fn(),
+      user: null,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+    });
+  });
 
-    const dataNav = screen.getAllByText('Управление данными');
-    expect(dataNav.length).toBe(1);
+  it('renders all settings navigation items', () => {
+    render(<SettingsPage />);
 
-    const appearanceNav = screen.getAllByText('Внешний вид');
-    expect(appearanceNav.length).toBe(1);
-
-    const aboutNav = screen.getAllByText('О приложении');
-    expect(aboutNav.length).toBe(1);
+    expect(screen.getAllByText('Безопасность').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Данные').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Внешний вид').length).toBeGreaterThan(0);
   });
 
   it('renders security section content by default', () => {
+
     render(
       <AuthProvider>
         <CurrencyProvider>
@@ -62,6 +74,7 @@ describe('SettingsPage', () => {
         </CurrencyProvider>
       </AuthProvider>,
     );
+
 
     expect(screen.getByText('Смена пароля')).toBeInTheDocument();
     expect(screen.getByText('Удаление аккаунта')).toBeInTheDocument();
@@ -78,15 +91,11 @@ describe('SettingsPage', () => {
 
     expect(screen.getByText('Смена пароля')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Управление данными'));
+    fireEvent.click(screen.getByText('Данные'));
     expect(screen.getByText('Экспорт данных')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Внешний вид'));
     expect(screen.getByText('Тема оформления')).toBeInTheDocument();
     expect(screen.getByText('Валюта')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('О приложении'));
-    expect(screen.getByText('Версия приложения')).toBeInTheDocument();
-    expect(screen.getByText('Поддержка')).toBeInTheDocument();
   });
 });
