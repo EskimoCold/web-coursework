@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { currencyApi } from '../../api/currency';
@@ -171,11 +171,55 @@ const renderComponent = (transactions: Transaction[] = mockTransactions) => {
     date: '2024-01-01',
     rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
   });
-  return render(
+
+  // Мокируем useState для AnalyticsPage, чтобы передать транзакции и категории
+  const useStateSpy = vi.spyOn(React, 'useState');
+  const originalUseState = React.useState;
+
+  const mockCategories = [
+    { id: 1, name: 'Salary', type: 1, icon: 'salary', description: '' },
+    { id: 2, name: 'Food', type: 0, icon: 'food', description: '' },
+    { id: 3, name: 'Entertainment', type: 0, icon: 'entertainment', description: '' },
+    { id: 4, name: 'Freelance', type: 1, icon: 'freelance', description: '' },
+  ];
+
+  // Определяем вызовы useState по типу начального значения
+  useStateSpy.mockImplementation((initial) => {
+    const result = originalUseState(initial);
+
+    // Мокируем только вызовы с пустым массивом (transactions и categories в AnalyticsPage)
+    if (Array.isArray(initial) && initial.length === 0) {
+      // Проверяем тип массива по контексту (это хрупко, но работает)
+      const stack = new Error().stack || '';
+      if (stack.includes('AnalyticsPage')) {
+        // Это вызов из AnalyticsPage
+        // Первый пустой массив - transactions, второй - categories
+        const callIndex = useStateSpy.mock.calls.length;
+        if (
+          callIndex === 0 ||
+          (callIndex > 0 && useStateSpy.mock.calls[callIndex - 1]?.[0] !== initial)
+        ) {
+          // Это первый пустой массив в AnalyticsPage - transactions
+          return [transactions, result[1]];
+        } else {
+          // Это второй пустой массив в AnalyticsPage - categories
+          return [mockCategories, result[1]];
+        }
+      }
+    }
+
+    return result;
+  });
+
+  const result = render(
     <CurrencyProvider>
       <AnalyticsPage />
     </CurrencyProvider>,
   );
+
+  // Восстанавливаем после рендера
+  useStateSpy.mockRestore();
+  return result;
 };
 
 describe('AnalyticsPage', () => {
