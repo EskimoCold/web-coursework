@@ -54,12 +54,12 @@ describe('DataManagementSection - Export/Import', () => {
 
     renderWithProviders(<SettingsPage />);
 
-    // Переходим на вкладку "Управление данными"
-    const dataTab = screen.getByText('Управление данными');
+    // Переходим на вкладку "Данные"
+    const dataTab = screen.getByText('Данные');
     await user.click(dataTab);
 
-    // Находим кнопку экспорта
-    const exportButton = screen.getByText('JSON');
+    // Находим кнопку экспорта (ждем появления секции)
+    const exportButton = await screen.findByText('JSON');
     await user.click(exportButton);
 
     await waitFor(() => {
@@ -79,10 +79,10 @@ describe('DataManagementSection - Export/Import', () => {
 
     renderWithProviders(<SettingsPage />);
 
-    const dataTab = screen.getByText('Управление данными');
+    const dataTab = screen.getByText('Данные');
     await user.click(dataTab);
 
-    const exportButton = screen.getByText('JSON');
+    const exportButton = await screen.findByText('JSON');
     await user.click(exportButton);
 
     await waitFor(() => {
@@ -106,8 +106,12 @@ describe('DataManagementSection - Export/Import', () => {
 
     renderWithProviders(<SettingsPage />);
 
-    const dataTab = screen.getByText('Управление данными');
+    const dataTab = screen.getByText('Данные');
     await user.click(dataTab);
+
+    await waitFor(() => {
+      expect(screen.getByText('Управление данными')).toBeInTheDocument();
+    });
 
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     expect(fileInput).toBeInTheDocument();
@@ -131,8 +135,12 @@ describe('DataManagementSection - Export/Import', () => {
 
     renderWithProviders(<SettingsPage />);
 
-    const dataTab = screen.getByText('Управление данными');
+    const dataTab = screen.getByText('Данные');
     await user.click(dataTab);
+
+    await waitFor(() => {
+      expect(screen.getByText('Управление данными')).toBeInTheDocument();
+    });
 
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(fileInput, mockFile);
@@ -152,8 +160,12 @@ describe('DataManagementSection - Export/Import', () => {
 
     renderWithProviders(<SettingsPage />);
 
-    const dataTab = screen.getByText('Управление данными');
+    const dataTab = screen.getByText('Данные');
     await user.click(dataTab);
+
+    await waitFor(() => {
+      expect(screen.getByText('Управление данными')).toBeInTheDocument();
+    });
 
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(fileInput, mockFile);
