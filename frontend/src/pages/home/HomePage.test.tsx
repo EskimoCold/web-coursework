@@ -82,11 +82,19 @@ describe('HomePage', () => {
     });
 
     await waitFor(() => {
-      const incomeAmounts = screen.getAllByText('+50000 ₽');
-      const expenseAmounts = screen.getAllByText('-1500 ₽');
+      // Текст разбит на несколько элементов: "+", "50 000", "₽"
+      // Используем более гибкий поиск
+      const incomeCard = screen.getByText('Доходы').closest('.summary-card');
+      const expenseCard = screen.getByText('Расходы').closest('.summary-card');
 
-      expect(incomeAmounts.length).toBeGreaterThan(0);
-      expect(expenseAmounts.length).toBeGreaterThan(0);
+      expect(incomeCard).toBeInTheDocument();
+      expect(expenseCard).toBeInTheDocument();
+
+      // Проверяем, что суммы присутствуют (могут быть разбиты на элементы)
+      expect(incomeCard?.textContent).toContain('50 000');
+      expect(incomeCard?.textContent).toContain('₽');
+      expect(expenseCard?.textContent).toContain('1 500');
+      expect(expenseCard?.textContent).toContain('₽');
     });
 
     expect(screen.getAllByText('Доходы').length).toBeGreaterThan(0);
