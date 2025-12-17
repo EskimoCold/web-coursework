@@ -1,8 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-import { usersApi } from './users';
-import { tokenStore } from './tokenStore';
 import { BASE_URL } from './client';
+import { tokenStore } from './tokenStore';
+import { usersApi } from './users';
 
 vi.mock('./tokenStore', () => ({
   tokenStore: {
@@ -104,4 +104,3 @@ describe('usersApi', () => {
     await expect(usersApi.importData(mockFile)).rejects.toThrow('Invalid file format');
   });
 });
-
