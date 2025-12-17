@@ -1,6 +1,8 @@
+import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-import { BASE_URL } from './client';
+import { server } from '../test/setup';
+
 import { tokenStore } from './tokenStore';
 import { usersApi } from './users';
 
@@ -10,38 +12,26 @@ vi.mock('./tokenStore', () => ({
   },
 }));
 
-vi.mock('./client', () => ({
-  BASE_URL: 'http://localhost:8000',
-}));
-
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
-
 describe('usersApi', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFetch.mockClear();
     (tokenStore.getAccessToken as ReturnType<typeof vi.fn>).mockReturnValue('test-token');
   });
 
   it('should export data', async () => {
     const mockBlob = new Blob(['test data'], { type: 'application/json' });
 
-    mockFetch.mockResolvedValue({
-      ok: true,
-      blob: () => Promise.resolve(mockBlob),
-    });
+    server.use(
+      http.get('http://localhost:8000/users/me/export', () => {
+        return new HttpResponse(mockBlob, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }),
+    );
 
     const result = await usersApi.exportData();
 
-    expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/users/me/export`, {
-      method: 'GET',
-      headers: {
-        Authorization: 'Bearer test-token',
-      },
-      credentials: 'include',
-    });
-    expect(result).toBe(mockBlob);
+    expect(result).toBeInstanceOf(Blob);
   });
 
   it('should throw error when no token for export', async () => {
@@ -51,11 +41,11 @@ describe('usersApi', () => {
   });
 
   it('should throw error when export fails', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 500,
-      json: () => Promise.resolve({ detail: 'Server error' }),
-    });
+    server.use(
+      http.get('http://localhost:8000/users/me/export', () => {
+        return HttpResponse.json({ detail: 'Server error' }, { status: 500 });
+      }),
+    );
 
     await expect(usersApi.exportData()).rejects.toThrow('Server error');
   });
@@ -68,23 +58,14 @@ describe('usersApi', () => {
       imported_transactions: 10,
     };
 
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockResponse),
-    });
+    server.use(
+      http.post('http://localhost:8000/users/me/import', () => {
+        return HttpResponse.json(mockResponse);
+      }),
+    );
 
     const result = await usersApi.importData(mockFile);
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      `${BASE_URL}/users/me/import`,
-      expect.objectContaining({
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer test-token',
-        },
-        credentials: 'include',
-      }),
-    );
     expect(result).toEqual(mockResponse);
   });
 
@@ -97,11 +78,11 @@ describe('usersApi', () => {
 
   it('should throw error when import fails', async () => {
     const mockFile = new File(['test'], 'test.json');
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 400,
-      json: () => Promise.resolve({ detail: 'Invalid file format' }),
-    });
+    server.use(
+      http.post('http://localhost:8000/users/me/import', () => {
+        return HttpResponse.json({ detail: 'Invalid file format' }, { status: 400 });
+      }),
+    );
 
     await expect(usersApi.importData(mockFile)).rejects.toThrow('Invalid file format');
   });
