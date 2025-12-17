@@ -14,25 +14,27 @@ vi.mock('./client', () => ({
   BASE_URL: 'http://localhost:8000',
 }));
 
-global.fetch = vi.fn();
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
 describe('usersApi', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetch.mockClear();
     (tokenStore.getAccessToken as ReturnType<typeof vi.fn>).mockReturnValue('test-token');
   });
 
   it('should export data', async () => {
     const mockBlob = new Blob(['test data'], { type: 'application/json' });
 
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockFetch.mockResolvedValue({
       ok: true,
       blob: () => Promise.resolve(mockBlob),
     });
 
     const result = await usersApi.exportData();
 
-    expect(global.fetch).toHaveBeenCalledWith(`${BASE_URL}/users/me/export`, {
+    expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/users/me/export`, {
       method: 'GET',
       headers: {
         Authorization: 'Bearer test-token',
@@ -49,7 +51,7 @@ describe('usersApi', () => {
   });
 
   it('should throw error when export fails', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockFetch.mockResolvedValue({
       ok: false,
       status: 500,
       json: () => Promise.resolve({ detail: 'Server error' }),
@@ -66,14 +68,14 @@ describe('usersApi', () => {
       imported_transactions: 10,
     };
 
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(mockResponse),
     });
 
     const result = await usersApi.importData(mockFile);
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(mockFetch).toHaveBeenCalledWith(
       `${BASE_URL}/users/me/import`,
       expect.objectContaining({
         method: 'POST',
@@ -95,7 +97,7 @@ describe('usersApi', () => {
 
   it('should throw error when import fails', async () => {
     const mockFile = new File(['test'], 'test.json');
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockFetch.mockResolvedValue({
       ok: false,
       status: 400,
       json: () => Promise.resolve({ detail: 'Invalid file format' }),
