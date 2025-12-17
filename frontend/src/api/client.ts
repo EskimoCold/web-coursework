@@ -175,6 +175,23 @@ export const api = {
     });
   },
 
+  put: <T>(
+    path: string,
+    data?: unknown,
+    options?: {
+      headers?: AxiosRequestConfig['headers'];
+      skipAuth?: boolean;
+    },
+  ) => {
+    return request<T>({
+      url: path,
+      method: 'PUT',
+      data,
+      headers: options?.headers,
+      skipAuth: options?.skipAuth,
+    });
+  },
+
   delete: <T>(
     path: string,
     options?: {

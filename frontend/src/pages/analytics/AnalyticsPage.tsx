@@ -307,7 +307,7 @@ export const AnalyticsPage: React.FC = () => {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }) =>
+                  label={({ name, value }: { name: string; value: number }) =>
                     `${name}: ${value.toLocaleString('ru-RU')} ${getCurrencySymbol()}`
                   }
                 >
