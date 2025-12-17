@@ -22,7 +22,7 @@ describe('usersApi', () => {
     const mockBlob = new Blob(['test data'], { type: 'application/json' });
 
     server.use(
-      http.get('http://localhost:8000/users/me/export', () => {
+      http.get('http://localhost:8000/api/v1/users/me/export', () => {
         return new HttpResponse(mockBlob, {
           headers: { 'Content-Type': 'application/json' },
         });
@@ -42,7 +42,7 @@ describe('usersApi', () => {
 
   it('should throw error when export fails', async () => {
     server.use(
-      http.get('http://localhost:8000/users/me/export', () => {
+      http.get('http://localhost:8000/api/v1/users/me/export', () => {
         return HttpResponse.json({ detail: 'Server error' }, { status: 500 });
       }),
     );
@@ -59,7 +59,7 @@ describe('usersApi', () => {
     };
 
     server.use(
-      http.post('http://localhost:8000/users/me/import', () => {
+      http.post('http://localhost:8000/api/v1/users/me/import', () => {
         return HttpResponse.json(mockResponse);
       }),
     );
@@ -79,7 +79,7 @@ describe('usersApi', () => {
   it('should throw error when import fails', async () => {
     const mockFile = new File(['test'], 'test.json');
     server.use(
-      http.post('http://localhost:8000/users/me/import', () => {
+      http.post('http://localhost:8000/api/v1/users/me/import', () => {
         return HttpResponse.json({ detail: 'Invalid file format' }, { status: 400 });
       }),
     );
