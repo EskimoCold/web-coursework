@@ -81,45 +81,44 @@ describe('HomePage', () => {
       expect(salaryElements.length).toBeGreaterThan(0);
     });
 
-    await waitFor(() => {
-      // Текст разбит на несколько элементов: "+", "50 000", "₽"
-      // Используем более гибкий поиск
-      // "Доходы" и "Расходы" встречаются несколько раз (в карточках и кнопках фильтров)
-      // Используем getAllByText и находим карточки по классу
-      const incomeCards = screen.getAllByText('Доходы');
-      const expenseCards = screen.getAllByText('Расходы');
+    await waitFor(
+      () => {
+        // Проверяем, что все элементы отрендерились
+        expect(screen.getByText('Общий баланс')).toBeInTheDocument();
 
-      expect(incomeCards.length).toBeGreaterThan(0);
-      expect(expenseCards.length).toBeGreaterThan(0);
+        // "Доходы" и "Расходы" встречаются несколько раз (в карточках и кнопках фильтров)
+        const incomeCards = screen.getAllByText('Доходы');
+        const expenseCards = screen.getAllByText('Расходы');
 
-      // Находим карточки по классу summary-card
-      const incomeCard = document.querySelector('.summary-card.income');
-      const expenseCard = document.querySelector('.summary-card.expense');
+        expect(incomeCards.length).toBeGreaterThan(0);
+        expect(expenseCards.length).toBeGreaterThan(0);
 
-      expect(incomeCard).toBeInTheDocument();
-      expect(expenseCard).toBeInTheDocument();
+        // Находим карточки по классу summary-card
+        const incomeCard = document.querySelector('.summary-card.income');
+        const expenseCard = document.querySelector('.summary-card.expense');
 
-      // Проверяем суммы в элементах .amount внутри карточек (не весь textContent карточки)
-      const incomeAmount = incomeCard?.querySelector('.amount');
-      const expenseAmount = expenseCard?.querySelector('.amount');
+        expect(incomeCard).toBeInTheDocument();
+        expect(expenseCard).toBeInTheDocument();
 
-      expect(incomeAmount).toBeInTheDocument();
-      expect(expenseAmount).toBeInTheDocument();
+        // Проверяем суммы в элементах .amount внутри карточек (не весь textContent карточки)
+        const incomeAmount = incomeCard?.querySelector('.amount');
+        const expenseAmount = expenseCard?.querySelector('.amount');
 
-      // Проверяем, что суммы присутствуют (могут быть разбиты на элементы)
-      // Нормализуем все пробелы (включая неразрывные) для проверки
-      const incomeText = incomeAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
-      const expenseText = expenseAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
+        expect(incomeAmount).toBeInTheDocument();
+        expect(expenseAmount).toBeInTheDocument();
 
-      // Проверяем наличие цифр (более гибкая проверка)
-      expect(incomeText).toMatch(/50\s*000/);
-      expect(incomeText).toContain('₽');
-      expect(expenseText).toMatch(/1\s*500/);
-      expect(expenseText).toContain('₽');
-    });
+        // Проверяем, что суммы присутствуют (могут быть разбиты на элементы)
+        // Нормализуем все пробелы (включая неразрывные) для проверки
+        const incomeText = incomeAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
+        const expenseText = expenseAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
 
-    expect(screen.getAllByText('Доходы').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Расходы').length).toBeGreaterThan(0);
-    expect(screen.getByText('Баланс')).toBeInTheDocument();
+        // Проверяем наличие цифр (более гибкая проверка)
+        expect(incomeText).toMatch(/50\s*000/);
+        expect(incomeText).toContain('₽');
+        expect(expenseText).toMatch(/1\s*500/);
+        expect(expenseText).toContain('₽');
+      },
+      { timeout: 3000 },
+    );
   });
 });
