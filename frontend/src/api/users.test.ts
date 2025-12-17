@@ -31,7 +31,9 @@ describe('usersApi', () => {
 
     const result = await usersApi.exportData();
 
-    expect(result).toBeInstanceOf(Blob);
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty('size');
+    expect(result).toHaveProperty('type', 'application/json');
   });
 
   it('should throw error when no token for export', async () => {
