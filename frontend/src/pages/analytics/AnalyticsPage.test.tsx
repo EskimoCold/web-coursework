@@ -57,6 +57,8 @@ vi.mock('../../api/transactions', () => ({
 // Глобальные переменные для передачи данных в мокированный компонент
 let testTransactions: Transaction[] = [];
 let testCategories: Category[] = [];
+let testExpenseForecast: Array<{ date: Date; predictedExpense: number }> = [];
+let testForecastError: string | null = null;
 
 // Мокаем AnalyticsPage и отрисовываем минимальный UI для тестов
 vi.mock('./AnalyticsPage', async () => {
@@ -134,12 +136,30 @@ vi.mock('./AnalyticsPage', async () => {
         return acc;
       }, {});
 
-    const chartData = filteredTransactions.map((t) => ({
-      date: formatDate(t.transaction_date),
-      income: t.transaction_type === 'income' ? t.amount : 0,
-      expense: t.transaction_type === 'expense' ? t.amount : 0,
-      predictedExpense: 0,
-    }));
+    // Объединяем данные транзакций с прогнозом расходов
+    const chartData = filteredTransactions.map((t) => {
+      const tDate = formatDate(t.transaction_date);
+      const forecast = testExpenseForecast.find((f) => formatDate(f.date) === tDate);
+      return {
+        date: tDate,
+        income: t.transaction_type === 'income' ? t.amount : 0,
+        expense: t.transaction_type === 'expense' ? t.amount : 0,
+        predictedExpense: forecast?.predictedExpense ?? 0,
+      };
+    });
+
+    // Добавляем прогноз для дат, которых нет в транзакциях
+    testExpenseForecast.forEach((forecast) => {
+      const forecastDate = formatDate(forecast.date);
+      if (!chartData.some((d) => d.date === forecastDate)) {
+        chartData.push({
+          date: forecastDate,
+          income: 0,
+          expense: 0,
+          predictedExpense: forecast.predictedExpense,
+        });
+      }
+    });
 
     return (
       <div className="anal-main">
@@ -179,20 +199,34 @@ vi.mock('./AnalyticsPage', async () => {
           </div>
         </div>
 
-        <div data-testid="area-chart" data-data={JSON.stringify(chartData)} />
-        <div
-          data-testid="bar-chart"
-          data-data={JSON.stringify(
-            Object.entries(incomeByCategory).map(([name, value]) => ({ name, value })),
-          )}
-        />
-        <div data-testid="pie-chart" />
-        <div
-          data-testid="pie"
-          data-data={JSON.stringify(
-            Object.entries(expenseByCategory).map(([name, value]) => ({ name, value })),
-          )}
-        />
+        <div>
+          <h2>Динамика доходов и расходов</h2>
+          <div data-testid="area-chart" data-data={JSON.stringify(chartData)} />
+        </div>
+        <div>
+          <h2>Доходы по категориям</h2>
+          <div
+            data-testid="bar-chart"
+            data-data={JSON.stringify(
+              Object.entries(incomeByCategory).map(([name, value]) => ({ name, value })),
+            )}
+          />
+        </div>
+        <div>
+          <h2>Расходы по категориям</h2>
+          <div data-testid="pie-chart" />
+          <div
+            data-testid="pie"
+            data-data={JSON.stringify(
+              Object.entries(expenseByCategory).map(([name, value]) => ({ name, value })),
+            )}
+          />
+        </div>
+        {testForecastError && (
+          <div>
+            <p>Не удалось построить прогноз расходов</p>
+          </div>
+        )}
         <div data-testid="line-predictedExpense" />
         <div data-testid="tooltip" data-formatter="true" />
       </div>
@@ -435,9 +469,11 @@ describe('AnalyticsPage', () => {
   });
 
   it('should show predicted expenses line on the chart', async () => {
-    (predictExpenses as vi.Mock).mockResolvedValueOnce([
-      { date: new Date('2024-02-01'), predictedExpense: 500 },
-    ]);
+    const forecastData = [{ date: new Date('2024-02-01'), predictedExpense: 500 }];
+    (predictExpenses as vi.Mock).mockResolvedValueOnce(forecastData);
+
+    // Устанавливаем прогноз перед рендером
+    testExpenseForecast = forecastData;
 
     renderComponent();
 
@@ -513,6 +549,8 @@ describe('AnalyticsPage', () => {
 
   it('shows forecast error when predictor fails', async () => {
     (predictExpenses as vi.Mock).mockRejectedValueOnce(new Error('boom'));
+    // Устанавливаем ошибку прогноза
+    testForecastError = 'Не удалось построить прогноз расходов';
     renderComponent(mockTransactions);
 
     await waitFor(() => {
