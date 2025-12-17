@@ -99,11 +99,18 @@ describe('HomePage', () => {
       expect(incomeCard).toBeInTheDocument();
       expect(expenseCard).toBeInTheDocument();
 
+      // Проверяем суммы в элементах .amount внутри карточек (не весь textContent карточки)
+      const incomeAmount = incomeCard?.querySelector('.amount');
+      const expenseAmount = expenseCard?.querySelector('.amount');
+
+      expect(incomeAmount).toBeInTheDocument();
+      expect(expenseAmount).toBeInTheDocument();
+
       // Проверяем, что суммы присутствуют (могут быть разбиты на элементы)
-      expect(incomeCard?.textContent).toContain('50 000');
-      expect(incomeCard?.textContent).toContain('₽');
-      expect(expenseCard?.textContent).toContain('1 500');
-      expect(expenseCard?.textContent).toContain('₽');
+      expect(incomeAmount?.textContent).toContain('50 000');
+      expect(incomeAmount?.textContent).toContain('₽');
+      expect(expenseAmount?.textContent).toContain('1 500');
+      expect(expenseAmount?.textContent).toContain('₽');
     });
 
     expect(screen.getAllByText('Доходы').length).toBeGreaterThan(0);
