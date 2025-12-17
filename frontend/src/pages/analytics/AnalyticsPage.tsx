@@ -307,9 +307,13 @@ export const AnalyticsPage: React.FC = () => {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }: { name: string; value: number }) =>
-                    `${name}: ${value.toLocaleString('ru-RU')} ${getCurrencySymbol()}`
-                  }
+                  label={(props: { name?: string; value?: number }) => {
+                    // eslint-disable-next-line react/prop-types
+                    const name = props.name || '';
+                    // eslint-disable-next-line react/prop-types
+                    const value = typeof props.value === 'number' ? props.value : 0;
+                    return `${name}: ${value.toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
+                  }}
                 >
                   {expenseByCategory.map((_, index) => (
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
