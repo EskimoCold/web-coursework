@@ -1,10 +1,11 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-import { CategoryProvider, useCategories } from './CategoriesContext';
-import { useCategoryStore } from '../stores/categoryStore';
 import { useAuthStore } from '../stores/authStore';
+import { useCategoryStore } from '../stores/categoryStore';
+
+import { CategoryProvider, useCategories } from './CategoriesContext';
 
 vi.mock('../stores/categoryStore', () => ({
   useCategoryStore: vi.fn(),
@@ -111,4 +112,3 @@ describe('CategoriesContext', () => {
     });
   });
 });
-

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-import { currencyApi } from './currency';
 import { api } from './client';
+import { currencyApi } from './currency';
 
 vi.mock('./client', () => ({
   api: {
@@ -47,4 +47,3 @@ describe('currencyApi', () => {
     expect(result).toEqual(mockConvertResult);
   });
 });
-

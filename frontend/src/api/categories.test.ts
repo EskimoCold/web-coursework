@@ -48,11 +48,21 @@ describe('categoriesApi', () => {
   });
 
   it('should add category', async () => {
-    const createdCategory = { id: 3, name: 'New Category', type: 0, icon: 'new-icon', description: 'New category description' };
+    const createdCategory = {
+      id: 3,
+      name: 'New Category',
+      type: 0,
+      icon: 'new-icon',
+      description: 'New category description',
+    };
 
     (api.post as ReturnType<typeof vi.fn>).mockResolvedValue(createdCategory);
 
-    const result = await categoriesApi.addCategory('New Category', 'New category description', 'new-icon');
+    const result = await categoriesApi.addCategory(
+      'New Category',
+      'New category description',
+      'new-icon',
+    );
 
     expect(api.post).toHaveBeenCalledWith(
       '/categories',
@@ -65,7 +75,9 @@ describe('categoriesApi', () => {
   it('should throw error when no token for addCategory', async () => {
     (tokenStore.getAccessToken as ReturnType<typeof vi.fn>).mockReturnValue(null);
 
-    await expect(categoriesApi.addCategory('Test', 'Desc', 'icon')).rejects.toThrow('Authorization failed');
+    await expect(categoriesApi.addCategory('Test', 'Desc', 'icon')).rejects.toThrow(
+      'Authorization failed',
+    );
   });
 
   it('should update category', async () => {
@@ -83,7 +95,11 @@ describe('categoriesApi', () => {
 
     expect(api.put).toHaveBeenCalledWith(
       `/categories/${updatedCategory.id}`,
-      { name: updatedCategory.name, description: updatedCategory.description, icon: updatedCategory.icon },
+      {
+        name: updatedCategory.name,
+        description: updatedCategory.description,
+        icon: updatedCategory.icon,
+      },
       { headers: { Authorization: 'Bearer test-token' } },
     );
     expect(result).toEqual(updatedCategory);
@@ -103,4 +119,3 @@ describe('categoriesApi', () => {
     expect(result).toEqual(mockResponse);
   });
 });
-

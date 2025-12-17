@@ -1,5 +1,5 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { Icon } from './Icon';
@@ -31,4 +31,3 @@ describe('Icon', () => {
     expect(img).toHaveStyle({ width: '20px', height: '20px', opacity: '0.5' });
   });
 });
-

@@ -25,4 +25,3 @@ describe('tokenStore', () => {
     expect(tokenStore.getAccessToken()).toBeNull();
   });
 });
-
