@@ -107,10 +107,15 @@ describe('HomePage', () => {
       expect(expenseAmount).toBeInTheDocument();
 
       // Проверяем, что суммы присутствуют (могут быть разбиты на элементы)
-      expect(incomeAmount?.textContent).toContain('50 000');
-      expect(incomeAmount?.textContent).toContain('₽');
-      expect(expenseAmount?.textContent).toContain('1 500');
-      expect(expenseAmount?.textContent).toContain('₽');
+      // Нормализуем все пробелы (включая неразрывные) для проверки
+      const incomeText = incomeAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
+      const expenseText = expenseAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
+
+      // Проверяем наличие цифр (более гибкая проверка)
+      expect(incomeText).toMatch(/50\s*000/);
+      expect(incomeText).toContain('₽');
+      expect(expenseText).toMatch(/1\s*500/);
+      expect(expenseText).toContain('₽');
     });
 
     expect(screen.getAllByText('Доходы').length).toBeGreaterThan(0);
