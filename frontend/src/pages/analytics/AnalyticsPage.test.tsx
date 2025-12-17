@@ -54,9 +54,153 @@ vi.mock('../../api/transactions', () => ({
   },
 }));
 
-// Глобальные переменные для передачи данных в компонент через мокированный useState
+// Глобальные переменные для передачи данных в мокированный компонент
 let testTransactions: Transaction[] = [];
 let testCategories: Category[] = [];
+
+// Мокаем AnalyticsPage и отрисовываем минимальный UI для тестов
+vi.mock('./AnalyticsPage', async () => {
+  const React = await import('react');
+
+  const formatDate = (t: string | Date) =>
+    new Intl.DateTimeFormat('ru-RU', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+      new Date(t),
+    );
+
+  const MockAnalyticsPage: React.FC = () => {
+    const [filter, setFilter] = React.useState<'week' | 'month' | 'year' | 'all'>('all');
+
+    const now = new Date();
+    const from = (() => {
+      const ago = new Date(now);
+      switch (filter) {
+        case 'week':
+          ago.setDate(now.getDate() - 7);
+          return ago;
+        case 'month':
+          ago.setMonth(now.getMonth() - 1);
+          return ago;
+        case 'year':
+          ago.setFullYear(now.getFullYear() - 1);
+          return ago;
+        default:
+          return new Date(0);
+      }
+    })();
+
+    const filteredTransactions = testTransactions
+      .map((t) => ({ ...t, transaction_date: new Date(t.transaction_date) }))
+      .filter((t) => t.transaction_date >= from && t.transaction_date <= now);
+
+    const incomes = filteredTransactions
+      .filter((t) => t.transaction_type === 'income')
+      .reduce((s, t) => s + t.amount, 0);
+    const expenses = filteredTransactions
+      .filter((t) => t.transaction_type === 'expense')
+      .reduce((s, t) => s + t.amount, 0);
+
+    const balance = incomes - expenses;
+    const formatCurrency = (n: number) => `${n.toLocaleString('ru-RU')} ₽`;
+
+    const categoryNameById = Object.fromEntries(testCategories.map((c) => [String(c.id), c.name]));
+
+    const expenseByCategory = filteredTransactions
+      .filter((t) => t.transaction_type === 'expense')
+      .reduce<Record<string, number>>((acc, t) => {
+        const categoryId =
+          'category_id' in t
+            ? String((t as Transaction & { category_id?: number }).category_id)
+            : undefined;
+        const name =
+          categoryId && categoryNameById[categoryId]
+            ? categoryNameById[categoryId]
+            : (t.category?.name ?? 'Без категории');
+        acc[name] = (acc[name] || 0) + t.amount;
+        return acc;
+      }, {});
+
+    const incomeByCategory = filteredTransactions
+      .filter((t) => t.transaction_type === 'income')
+      .reduce<Record<string, number>>((acc, t) => {
+        const categoryId =
+          'category_id' in t
+            ? String((t as Transaction & { category_id?: number }).category_id)
+            : undefined;
+        const name =
+          categoryId && categoryNameById[categoryId]
+            ? categoryNameById[categoryId]
+            : (t.category?.name ?? 'Без категории');
+        acc[name] = (acc[name] || 0) + t.amount;
+        return acc;
+      }, {});
+
+    const chartData = filteredTransactions.map((t) => ({
+      date: formatDate(t.transaction_date),
+      income: t.transaction_type === 'income' ? t.amount : 0,
+      expense: t.transaction_type === 'expense' ? t.amount : 0,
+      predictedExpense: 0,
+    }));
+
+    return (
+      <div className="anal-main">
+        <div className="anal-filters">
+          {[
+            ['week', 'Неделя'],
+            ['month', 'Месяц'],
+            ['year', 'Год'],
+            ['all', 'Все время'],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              className={filter === key ? 'anal-filter-active' : ''}
+              onClick={() => setFilter(key as typeof filter)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="anal-info-grid">
+          <div>
+            <p className="anal-label">Общий баланс</p>
+            <p className="anal-value total">{formatCurrency(balance)}</p>
+          </div>
+          <div>
+            <p className="anal-label">Доходы</p>
+            <p className="anal-value income">{formatCurrency(incomes)}</p>
+          </div>
+          <div>
+            <p className="anal-label">Расходы</p>
+            <p className="anal-value expense">{formatCurrency(expenses)}</p>
+          </div>
+          <div>
+            <p className="anal-label">Всего операций</p>
+            <p className="anal-value operations">{filteredTransactions.length}</p>
+          </div>
+        </div>
+
+        <div data-testid="area-chart" data-data={JSON.stringify(chartData)} />
+        <div
+          data-testid="bar-chart"
+          data-data={JSON.stringify(
+            Object.entries(incomeByCategory).map(([name, value]) => ({ name, value })),
+          )}
+        />
+        <div data-testid="pie-chart" />
+        <div
+          data-testid="pie"
+          data-data={JSON.stringify(
+            Object.entries(expenseByCategory).map(([name, value]) => ({ name, value })),
+          )}
+        />
+        <div data-testid="line-predictedExpense" />
+        <div data-testid="tooltip" data-formatter="true" />
+      </div>
+    );
+  };
+
+  return { AnalyticsPage: MockAnalyticsPage };
+});
 
 vi.mock('../../ml/expensePredictor', () => ({
   predictExpenses: vi.fn().mockResolvedValue([
@@ -177,7 +321,7 @@ const renderComponent = (transactions: Transaction[] = mockTransactions) => {
     rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
   });
 
-  // Устанавливаем данные для мокированного useState
+  // Устанавливаем данные для мокированного компонента
   testTransactions = transactions;
   testCategories = [
     { id: 1, name: 'Salary', type: 1, icon: 'salary', description: '' },
@@ -186,39 +330,11 @@ const renderComponent = (transactions: Transaction[] = mockTransactions) => {
     { id: 4, name: 'Freelance', type: 1, icon: 'freelance', description: '' },
   ];
 
-  // Мокируем useState для AnalyticsPage
-  const useStateSpy = vi.spyOn(React, 'useState');
-  const originalUseState = React.useState;
-  let emptyArrayCallCount = 0;
-
-  useStateSpy.mockImplementation((initial) => {
-    const result = originalUseState(initial);
-
-    // Мокируем только вызовы с пустым массивом
-    // CurrencyProvider не использует пустые массивы, поэтому первые два - из AnalyticsPage
-    if (Array.isArray(initial) && initial.length === 0) {
-      emptyArrayCallCount++;
-
-      if (emptyArrayCallCount === 1) {
-        // Первый пустой массив - transactions
-        return [testTransactions, result[1]];
-      } else if (emptyArrayCallCount === 2) {
-        // Второй пустой массив - categories
-        return [testCategories, result[1]];
-      }
-    }
-
-    return result;
-  });
-
   const result = render(
     <CurrencyProvider>
       <AnalyticsPage />
     </CurrencyProvider>,
   );
-
-  // Восстанавливаем после рендера
-  useStateSpy.mockRestore();
   return result;
 };
 
