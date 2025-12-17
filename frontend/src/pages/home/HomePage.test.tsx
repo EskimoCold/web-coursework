@@ -84,8 +84,17 @@ describe('HomePage', () => {
     await waitFor(() => {
       // Текст разбит на несколько элементов: "+", "50 000", "₽"
       // Используем более гибкий поиск
-      const incomeCard = screen.getByText('Доходы').closest('.summary-card');
-      const expenseCard = screen.getByText('Расходы').closest('.summary-card');
+      // "Доходы" и "Расходы" встречаются несколько раз (в карточках и кнопках фильтров)
+      // Используем getAllByText и находим карточки по классу
+      const incomeCards = screen.getAllByText('Доходы');
+      const expenseCards = screen.getAllByText('Расходы');
+
+      expect(incomeCards.length).toBeGreaterThan(0);
+      expect(expenseCards.length).toBeGreaterThan(0);
+
+      // Находим карточки по классу summary-card
+      const incomeCard = document.querySelector('.summary-card.income');
+      const expenseCard = document.querySelector('.summary-card.expense');
 
       expect(incomeCard).toBeInTheDocument();
       expect(expenseCard).toBeInTheDocument();
