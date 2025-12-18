@@ -46,25 +46,37 @@ describe('expensePredictor', () => {
     expect(runMock).not.toHaveBeenCalled();
   });
 
-  it('returns forecasted values with incremented dates', async () => {
+  it('blends feature-based and ONNX forecasts and increments dates', async () => {
     const history: ExpenseHistoryPoint[] = [
       { date: new Date('2024-01-01'), expense: 100 },
       { date: new Date('2024-01-02'), expense: 120 },
+      { date: new Date('2024-01-03'), expense: 90 },
     ];
 
+    // First, capture the feature-only output by forcing ONNX to fail.
+    runMock.mockRejectedValueOnce(new Error('no wasm'));
+    const featureOnly = await predictExpenses(history, 2);
+
+    __resetPredictorState();
+    runMock.mockReset();
+    createMock.mockClear();
+
     runMock.mockResolvedValueOnce({
-      Y: { data: new Float32Array([200.4, 150.2]) },
+      Y: { data: new Float32Array([400, 300]) },
     });
 
-    const result = await predictExpenses(history, 2);
+    const blended = await predictExpenses(history, 2);
 
     expect(createMock).toHaveBeenCalledTimes(1);
     expect(runMock).toHaveBeenCalledTimes(1);
-    expect(result).toHaveLength(2);
-    expect(result[0].predictedExpense).toBe(200); // rounded
-    expect(result[1].predictedExpense).toBe(150);
-    expect(result[0].date.getDate()).toBe(3);
-    expect(result[1].date.getDate()).toBe(4);
+    expect(blended).toHaveLength(2);
+
+    blended.forEach((point, idx) => {
+      expect(point.date.getDate()).toBe(4 + idx);
+    });
+
+    expect(blended[0].predictedExpense).toBeGreaterThan(featureOnly[0].predictedExpense);
+    expect(blended[0].predictedExpense).toBeLessThan(400);
   });
 
   it('reuses a single session across multiple calls', async () => {
@@ -80,5 +92,22 @@ describe('expensePredictor', () => {
 
     expect(createMock).toHaveBeenCalledTimes(1);
     expect(runMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('falls back to feature model when ONNX run fails', async () => {
+    const history: ExpenseHistoryPoint[] = [
+      { date: new Date('2024-01-01'), expense: 200 },
+      { date: new Date('2024-01-02'), expense: 180 },
+      { date: new Date('2024-01-03'), expense: 220 },
+    ];
+
+    runMock.mockRejectedValueOnce(new Error('boom'));
+
+    const result = await predictExpenses(history, 2);
+
+    expect(result).toHaveLength(2);
+    expect(createMock).toHaveBeenCalledTimes(1);
+    expect(runMock).toHaveBeenCalledTimes(1);
+    expect(result[0].predictedExpense).toBeGreaterThan(0);
   });
 });
