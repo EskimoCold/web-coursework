@@ -50,15 +50,14 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load currency rates';
       setError(errorMessage);
       console.error('Error loading currency rates:', err);
-      // Если не удалось загрузить курсы, используем фиксированные значения для работы без API
       setRates({
         base: 'RUB',
         date: new Date().toISOString().split('T')[0],
         rates: {
           RUB: 1.0,
-          USD: 0.011, // Примерный курс: 1 RUB = 0.011 USD (примерно 90 RUB за 1 USD)
-          EUR: 0.01, // Примерный курс: 1 RUB = 0.01 EUR (примерно 100 RUB за 1 EUR)
-          CNY: 0.08, // Примерный курс: 1 RUB = 0.08 CNY (примерно 12.5 RUB за 1 CNY)
+          USD: 0.011,
+          EUR: 0.01,
+          CNY: 0.08,
         },
       });
     } finally {
@@ -68,7 +67,6 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refreshRates();
-    // Обновляем курсы каждые 5 минут
     const interval = setInterval(refreshRates, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -76,22 +74,11 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const convertAmount = (amount: number, fromCurrency: Currency = 'RUB'): number => {
     if (!rates) return amount;
     if (fromCurrency === currency) return amount;
-
-    // API возвращает курсы в формате: rates["USD"] = сколько USD в 1 RUB
-    // Например, если rates["USD"] = 0.011, то 1 RUB = 0.011 USD
-    // Для конвертации из RUB в USD: amount * rates["USD"]
-    // Для конвертации из USD в RUB: amount / rates["USD"]
-
     if (fromCurrency === 'RUB') {
-      // Конвертируем из RUB в другую валюту
       return amount * rates.rates[currency];
     } else if (currency === 'RUB') {
-      // Конвертируем из другой валюты в RUB
       return amount / rates.rates[fromCurrency];
     } else {
-      // Конвертируем через RUB: from -> RUB -> to
-      // Сначала конвертируем в RUB: amount / rates[fromCurrency]
-      // Затем конвертируем из RUB в целевую: (amount / rates[fromCurrency]) * rates[currency]
       const amountInRub = amount / rates.rates[fromCurrency];
       return amountInRub * rates.rates[currency];
     }
