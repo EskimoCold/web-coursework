@@ -40,7 +40,6 @@ export function HomePage() {
 
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filteredTransactions = useMemo(() => {
@@ -50,7 +49,6 @@ export function HomePage() {
     return allTransactions.filter((t) => t.transaction_type === filter);
   }, [allTransactions, filter]);
 
-  // Вычисление summary с пересчетом валюты
 
   const summary = useMemo((): TransactionSummary => {
     const totalIncome = allTransactions

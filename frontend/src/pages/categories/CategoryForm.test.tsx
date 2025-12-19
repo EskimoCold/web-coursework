@@ -6,7 +6,6 @@ import { Category, useCategories } from '../../contexts/CategoriesContext';
 
 import { CategoryForm } from './CategoryForm';
 
-// --- Mocks ---
 vi.mock('../../components/Icon', () => ({
   Icon: ({ source, className }: { source: string; size: number; className: string }) => (
     <div data-testid={`icon-${source}`} className={className}>
@@ -29,7 +28,6 @@ vi.mock('../../api/categories', () => ({
   },
 }));
 
-// --- Shared test helpers ---
 const mockSetCategories = vi.fn();
 const mockSetOpen = vi.fn();
 
@@ -73,7 +71,6 @@ const renderComponent = (props = {}, token = 'mock-token') => {
   return render(<CategoryForm {...defaultProps} {...props} />);
 };
 
-// --- Tests ---
 describe('CategoryForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();

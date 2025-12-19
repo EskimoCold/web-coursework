@@ -254,7 +254,6 @@ function DataManagementSection() {
       if (result.errors && result.errors.length > 0) {
         console.warn('Ошибки при импорте:', result.errors);
       }
-      // Перезагружаем страницу через 2 секунды для обновления данных
       setTimeout(() => {
         window.location.reload();
       }, 2000);

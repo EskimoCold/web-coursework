@@ -7,7 +7,7 @@ import { CategoryWindow } from './CategoryWindow';
 
 type Props = {
   label: string;
-  modify: boolean; // редактирование старой категории?
+  modify: boolean;
   submit: string;
   placeholder?: {
     category: Category;

@@ -1,4 +1,3 @@
-// src/components/SettingsPage.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,7 +7,6 @@ import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
 import { SettingsPage } from './SettingsPage';
 
-// Моки
 vi.mock('../../api/currency', () => ({
   currencyApi: {
     getRates: vi.fn().mockResolvedValue({

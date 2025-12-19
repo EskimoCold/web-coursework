@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Mock onnxruntime-web so we can unit test without WASM binaries
 const { runMock, createMock } = vi.hoisted(() => {
   const run = vi.fn();
   const create = vi.fn();

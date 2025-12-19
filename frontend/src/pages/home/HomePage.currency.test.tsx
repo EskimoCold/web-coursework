@@ -7,7 +7,6 @@ import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
 import { HomePage } from './HomePage';
 
-// Моки
 vi.mock('../../api/transactions');
 vi.mock('../../api/currency');
 
@@ -24,14 +23,12 @@ describe('HomePage - Currency Conversion', () => {
     Storage.prototype.getItem = vi.fn(() => null);
     Storage.prototype.setItem = vi.fn();
 
-    // Мок для курсов валют
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
       rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
     });
 
-    // Мок для транзакций
     mockTransactionsApi.getTransactions.mockResolvedValue([
       {
         id: 1,
@@ -61,7 +58,6 @@ describe('HomePage - Currency Conversion', () => {
       expect(screen.getByText(/Общий баланс/)).toBeInTheDocument();
     });
 
-    // Проверяем, что суммы отображаются с символом валюты
     const balanceElement = screen.getByText(/Общий баланс/).closest('.summary-card');
     expect(balanceElement).toBeInTheDocument();
   });
@@ -73,8 +69,6 @@ describe('HomePage - Currency Conversion', () => {
       expect(screen.getByText(/Общий баланс/)).toBeInTheDocument();
     });
 
-    // Проверяем, что суммы пересчитываются
-    // (детальная проверка конверсии требует более сложной настройки)
     const incomeHeading = screen.getByRole('heading', { name: /Доходы/ });
     const incomeElement = incomeHeading.closest('.summary-card');
     expect(incomeElement).toBeInTheDocument();
@@ -88,7 +82,6 @@ describe('HomePage - Currency Conversion', () => {
       expect(descriptions.length).toBeGreaterThan(0);
     });
 
-    // Проверяем, что суммы транзакций содержат символ валюты
     const transactionRow = screen.getAllByText(/Test income/)[0].closest('tr');
     expect(transactionRow).toBeInTheDocument();
   });

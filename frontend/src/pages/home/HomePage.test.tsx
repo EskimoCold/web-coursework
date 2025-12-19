@@ -6,10 +6,8 @@ import { CurrencyProvider } from '../../contexts/CurrencyContext';
 import { HomePage } from './HomePage';
 import { resetHomeStore } from './homeStore';
 
-// Mock CSS files
 vi.mock('./home.css', () => ({}));
 
-// Mock the modules that are causing issues
 vi.mock('../../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(() =>
@@ -37,7 +35,6 @@ vi.mock('../../api/transactions', () => ({
   },
 }));
 
-// Mock categories API to avoid authorization errors
 vi.mock('../../api/categories', () => ({
   categoriesApi: {
     getCategories: vi.fn(() => Promise.resolve([])),
@@ -72,7 +69,6 @@ describe('HomePage', () => {
       </CurrencyProvider>,
     );
 
-    // Wait for loading to complete and data to be displayed
     await waitFor(() => {
       const productElements = screen.queryAllByText('Продукты в супермаркете');
       expect(productElements.length).toBeGreaterThan(0);
@@ -83,36 +79,29 @@ describe('HomePage', () => {
 
     await waitFor(
       () => {
-        // Проверяем, что все элементы отрендерились
         expect(screen.getByText('Общий баланс')).toBeInTheDocument();
 
-        // "Доходы" и "Расходы" встречаются несколько раз (в карточках и кнопках фильтров)
         const incomeCards = screen.getAllByText('Доходы');
         const expenseCards = screen.getAllByText('Расходы');
 
         expect(incomeCards.length).toBeGreaterThan(0);
         expect(expenseCards.length).toBeGreaterThan(0);
 
-        // Находим карточки по классу summary-card
         const incomeCard = document.querySelector('.summary-card.income');
         const expenseCard = document.querySelector('.summary-card.expense');
 
         expect(incomeCard).toBeInTheDocument();
         expect(expenseCard).toBeInTheDocument();
 
-        // Проверяем суммы в элементах .amount внутри карточек (не весь textContent карточки)
         const incomeAmount = incomeCard?.querySelector('.amount');
         const expenseAmount = expenseCard?.querySelector('.amount');
 
         expect(incomeAmount).toBeInTheDocument();
         expect(expenseAmount).toBeInTheDocument();
 
-        // Проверяем, что суммы присутствуют (могут быть разбиты на элементы)
-        // Нормализуем все пробелы (включая неразрывные) для проверки
         const incomeText = incomeAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
         const expenseText = expenseAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
 
-        // Проверяем наличие цифр (более гибкая проверка)
         expect(incomeText).toMatch(/50\s*000/);
         expect(incomeText).toContain('₽');
         expect(expenseText).toMatch(/1\s*500/);

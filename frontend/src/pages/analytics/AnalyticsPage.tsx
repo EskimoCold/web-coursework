@@ -42,10 +42,7 @@ export const AnalyticsPage: React.FC = () => {
   const [isForecasting] = useState(false);
   const [forecastError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // fetchInitialData(); // TODO: Implement fetchInitialData
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => {}, []);
 
   const categoryNameById = useMemo(
     () => Object.fromEntries((categories ?? []).map((c) => [String(c.id), c.name])),
