@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
 
+import { CurrencyProvider } from '../../contexts/CurrencyContext';
+
 import { HomePage } from './HomePage';
 import { resetHomeStore } from './homeStore';
 
-// Mock CSS files
 vi.mock('./home.css', () => ({}));
 
-// Mock the modules that are causing issues
 vi.mock('../../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(() =>
@@ -35,7 +35,6 @@ vi.mock('../../api/transactions', () => ({
   },
 }));
 
-// Mock categories API to avoid authorization errors
 vi.mock('../../api/categories', () => ({
   categoriesApi: {
     getCategories: vi.fn(() => Promise.resolve([])),
@@ -52,7 +51,11 @@ describe('HomePage', () => {
   });
 
   test('renders without crashing', async () => {
-    render(<HomePage />);
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Дашборд финансов')).toBeInTheDocument();
@@ -60,9 +63,12 @@ describe('HomePage', () => {
   });
 
   test('displays transactions correctly', async () => {
-    render(<HomePage />);
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
 
-    // Wait for loading to complete and data to be displayed
     await waitFor(() => {
       const productElements = screen.queryAllByText('Продукты в супермаркете');
       expect(productElements.length).toBeGreaterThan(0);
@@ -71,16 +77,37 @@ describe('HomePage', () => {
       expect(salaryElements.length).toBeGreaterThan(0);
     });
 
-    await waitFor(() => {
-      const incomeAmounts = screen.getAllByText('+50000 ₽');
-      const expenseAmounts = screen.getAllByText('-1500 ₽');
+    await waitFor(
+      () => {
+        expect(screen.getByText('Общий баланс')).toBeInTheDocument();
 
-      expect(incomeAmounts.length).toBeGreaterThan(0);
-      expect(expenseAmounts.length).toBeGreaterThan(0);
-    });
+        const incomeCards = screen.getAllByText('Доходы');
+        const expenseCards = screen.getAllByText('Расходы');
 
-    expect(screen.getAllByText('Доходы').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Расходы').length).toBeGreaterThan(0);
-    expect(screen.getByText('Баланс')).toBeInTheDocument();
+        expect(incomeCards.length).toBeGreaterThan(0);
+        expect(expenseCards.length).toBeGreaterThan(0);
+
+        const incomeCard = document.querySelector('.summary-card.income');
+        const expenseCard = document.querySelector('.summary-card.expense');
+
+        expect(incomeCard).toBeInTheDocument();
+        expect(expenseCard).toBeInTheDocument();
+
+        const incomeAmount = incomeCard?.querySelector('.amount');
+        const expenseAmount = expenseCard?.querySelector('.amount');
+
+        expect(incomeAmount).toBeInTheDocument();
+        expect(expenseAmount).toBeInTheDocument();
+
+        const incomeText = incomeAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
+        const expenseText = expenseAmount?.textContent?.replace(/\s+/g, ' ').trim() || '';
+
+        expect(incomeText).toMatch(/50\s*000/);
+        expect(incomeText).toContain('₽');
+        expect(expenseText).toMatch(/1\s*500/);
+        expect(expenseText).toContain('₽');
+      },
+      { timeout: 3000 },
+    );
   });
 });

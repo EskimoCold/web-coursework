@@ -36,6 +36,19 @@ export const handlers = [
     return HttpResponse.json({ detail: 'Token refresh failed' }, { status: 401 });
   }),
 
+  http.get('*/api/v1/currency/rates', () => {
+    return HttpResponse.json({
+      base: 'RUB',
+      date: '2024-01-01',
+      rates: {
+        RUB: 1,
+        USD: 0.011,
+        EUR: 0.01,
+        CNY: 0.08,
+      },
+    });
+  }),
+
   http.get('*/api/v1/transactions', () => {
     return HttpResponse.json([
       {
