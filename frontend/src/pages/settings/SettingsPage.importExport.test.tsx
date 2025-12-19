@@ -32,12 +32,15 @@ describe('DataManagementSection - Export/Import', () => {
     Storage.prototype.setItem = vi.fn();
 
     if (!window.URL.createObjectURL) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window.URL as any).createObjectURL = vi.fn(() => 'blob:mock-url');
     }
     if (!window.URL.revokeObjectURL) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window.URL as any).revokeObjectURL = vi.fn();
     }
 
+    // Мок для HTMLAnchorElement.click() чтобы избежать ошибки навигации jsdom
     HTMLAnchorElement.prototype.click = vi.fn();
   });
 
@@ -46,13 +49,16 @@ describe('DataManagementSection - Export/Import', () => {
     const mockBlob = new Blob(['{"test": "data"}'], { type: 'application/json' });
     mockUsersApi.exportData.mockResolvedValue(mockBlob);
 
+    // Моки для создания ссылки и клика
     const createElementSpy = vi.spyOn(document, 'createElement');
 
     renderWithProviders(<SettingsPage />);
 
+    // Переходим на вкладку "Данные"
     const dataTab = screen.getByText('Данные');
     await user.click(dataTab);
 
+    // Находим кнопку экспорта (ждем появления секции)
     const exportButton = await screen.findByText('JSON');
     await user.click(exportButton);
 
@@ -60,6 +66,7 @@ describe('DataManagementSection - Export/Import', () => {
       expect(mockUsersApi.exportData).toHaveBeenCalledTimes(1);
     });
 
+    // Проверяем, что создана ссылка для скачивания
     expect(createElementSpy).toHaveBeenCalledWith('a');
   });
 
@@ -83,6 +90,7 @@ describe('DataManagementSection - Export/Import', () => {
       expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining(errorMessage));
     });
 
+    // Проверяем, что console.error был вызван
     expect(consoleErrorSpy).toHaveBeenCalledWith('Export error:', expect.any(Error));
 
     alertSpy.mockRestore();
@@ -113,12 +121,14 @@ describe('DataManagementSection - Export/Import', () => {
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     expect(fileInput).toBeInTheDocument();
 
+    // Симулируем выбор файла
     await user.upload(fileInput, mockFile);
 
     await waitFor(() => {
       expect(mockUsersApi.importData).toHaveBeenCalledWith(mockFile);
     });
 
+    // Проверяем сообщение об успехе
     await waitFor(() => {
       expect(screen.getByText(/Импорт завершен/)).toBeInTheDocument();
     });
@@ -140,6 +150,7 @@ describe('DataManagementSection - Export/Import', () => {
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(fileInput, mockFile);
 
+    // Для не-JSON файлов импорт не должен вызываться
     await waitFor(() => {
       expect(mockUsersApi.importData).not.toHaveBeenCalled();
     });

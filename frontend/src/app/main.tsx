@@ -12,6 +12,7 @@ import '../styles/globals.css';
 registerSW({
   immediate: true,
   onNeedRefresh() {
+    // eslint-disable-next-line no-console
     console.log('New content available, but auto-reload is disabled for dev stability.');
   },
 });
