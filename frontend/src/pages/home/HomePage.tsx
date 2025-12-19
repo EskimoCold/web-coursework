@@ -40,7 +40,7 @@ export function HomePage() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const filteredTransactions = useMemo(() => {
     if (filter === 'all') {
@@ -48,7 +48,6 @@ export function HomePage() {
     }
     return allTransactions.filter((t) => t.transaction_type === filter);
   }, [allTransactions, filter]);
-
 
   const summary = useMemo((): TransactionSummary => {
     const totalIncome = allTransactions

@@ -64,14 +64,11 @@ async def convert_currency(amount: float, from_currency: str, to_currency: str):
                 detail=f"Unsupported currency. Supported: {list(rates.keys())}",
             )
 
-
-
         if from_currency == "RUB":
             converted = amount * rates[to_currency]
         elif to_currency == "RUB":
             converted = amount / rates[from_currency]
         else:
-
             amount_in_rub = amount / rates[from_currency]
             converted = amount_in_rub * rates[to_currency]
 
