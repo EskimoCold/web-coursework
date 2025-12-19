@@ -1,7 +1,5 @@
 import { useEffect, useMemo } from 'react';
-
 import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
-
 import './home.css';
 import { useHomeStore } from './homeStore';
 
@@ -154,6 +152,21 @@ export function HomePage() {
     setCurrentPage(1);
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const formatAmount = (amount: number) => {
+    return new Intl.NumberFormat('ru-RU', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
   if (loading) {
     return (
       <div className="home-page">
@@ -172,108 +185,189 @@ export function HomePage() {
             <h1>Дашборд финансов</h1>
             <p>Быстрый обзор ваших доходов и расходов</p>
           </div>
-          <button className="primary-button" onClick={handleAddTransaction}>
+          <button className="primary-button add-button" onClick={handleAddTransaction}>
             + Добавить транзакцию
           </button>
         </div>
 
         <div className="summary-cards">
+          <div className="summary-card balance">
+            <h3>Баланс</h3>
+            <div className="amount">{formatAmount(summary.balance)} ₽</div>
+          </div>
           <div className="summary-card income">
-            <p>Доходы</p>
-            <h2>{summary.totalIncome} ₽</h2>
+            <h3>Доходы</h3>
+            <div className="amount">+{formatAmount(summary.totalIncome)} ₽</div>
           </div>
           <div className="summary-card expense">
-            <p>Расходы</p>
-            <h2>{summary.totalExpenses} ₽</h2>
-          </div>
-          <div className="summary-card balance">
-            <p>Баланс</p>
-            <h2>{summary.balance} ₽</h2>
+            <h3>Расходы</h3>
+            <div className="amount">-{formatAmount(summary.totalExpenses)} ₽</div>
           </div>
         </div>
       </div>
 
       <div className="filters-section">
-        <div className="filter-buttons">
+        <div className="filters">
           <button
-            className={filter === 'all' ? 'active' : ''}
+            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
             onClick={() => handleFilterChange('all')}
           >
             Все
           </button>
           <button
-            className={filter === 'income' ? 'active' : ''}
+            className={`filter-btn ${filter === 'income' ? 'active' : ''}`}
             onClick={() => handleFilterChange('income')}
           >
             Доходы
           </button>
           <button
-            className={filter === 'expense' ? 'active' : ''}
+            className={`filter-btn ${filter === 'expense' ? 'active' : ''}`}
             onClick={() => handleFilterChange('expense')}
           >
             Расходы
           </button>
         </div>
+        <div className="table-info">
+          Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length} транзакций
+        </div>
       </div>
 
-      <div className="transactions-section">
-        <div className="transactions-header">
-          <h2>Последние транзакции</h2>
-          <p>Список операций с пагинацией</p>
-        </div>
+      {/* Transactions Table - Desktop */}
+      <div className="transactions-table-container">
+        {paginatedTransactions.transactions.length === 0 ? (
+          <div className="empty-state">
+            <p>Нет транзакций для отображения</p>
+          </div>
+        ) : (
+          <table className="transactions-table">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Описание</th>
+                <th>Категория</th>
+                <th>Тип</th>
+                <th>Сумма</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedTransactions.transactions.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td>{formatDate(transaction.transaction_date)}</td>
+                  <td>
+                    <div className="description-cell">
+                      <div className="description-text">{transaction.description}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="category-badge">
+                      {transaction.category?.name || 'Без категории'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`type-badge ${transaction.transaction_type}`}>
+                      {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
+                    </span>
+                  </td>
+                  <td className={`amount-cell ${transaction.transaction_type}`}>
+                    {transaction.transaction_type === 'income' ? '+' : '-'}
+                    {formatAmount(transaction.amount)} ₽
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
 
-        <div className="transactions-list">
-          {paginatedTransactions.transactions.map((transaction) => (
-            <div key={transaction.id} className="transaction-card">
-              <div className="transaction-main">
-                <div className="transaction-type">
-                  <span className={`badge ${transaction.transaction_type}`}>
-                    {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
-                  </span>
-                </div>
-                <div className="transaction-info">
-                  <h3>{transaction.description}</h3>
-                  <p>{new Date(transaction.transaction_date).toLocaleDateString()}</p>
-                </div>
+      {/* Mobile Transactions Cards */}
+      <div className="mobile-transactions">
+        {paginatedTransactions.transactions.map((transaction) => (
+          <div
+            key={transaction.id}
+            className={`mobile-transaction-card ${transaction.transaction_type}`}
+          >
+            <div className="mobile-card-header">
+              <div className="mobile-card-category">
+                {transaction.category?.name || 'Без категории'}
               </div>
-              <div className="transaction-meta">
-                <span className={`amount ${transaction.transaction_type}`}>
-                  {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {transaction.amount} ₽
-                </span>
-                <span className="category">{transaction.category?.name || 'Без категории'}</span>
+              <div className={`mobile-card-amount ${transaction.transaction_type}`}>
+                {transaction.transaction_type === 'income' ? '+' : '-'}
+                {formatAmount(transaction.amount)} ₽
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className="pagination">
-          {Array.from({ length: paginatedTransactions.totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={currentPage === i + 1 ? 'active' : ''}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
+            <div className="mobile-card-description">{transaction.description}</div>
+            <div className="mobile-card-footer">
+              <div className="mobile-card-date">{formatDate(transaction.transaction_date)}</div>
+              <span className={`mobile-card-type ${transaction.transaction_type}`}>
+                {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
 
+      {/* Pagination */}
+      {paginatedTransactions.totalPages > 1 && (
+        <div className="pagination">
+          <button
+            className="pagination-btn"
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            ← Назад
+          </button>
+          
+          <div className="pagination-numbers">
+            {Array.from({ length: Math.min(5, paginatedTransactions.totalPages) }, (_, i) => {
+              let pageNum;
+              if (paginatedTransactions.totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= paginatedTransactions.totalPages - 2) {
+                pageNum = paginatedTransactions.totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  className={`pagination-number ${currentPage === pageNum ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(pageNum)}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+          
+          <button
+            className="pagination-btn"
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === paginatedTransactions.totalPages}
+          >
+            Далее →
+          </button>
+        </div>
+      )}
+
+      {/* Add Transaction Modal */}
       {showAddModal && (
         <div className="modal-overlay">
-          <div className="modal">
+          <div className="modal-content">
             <div className="modal-header">
-              <h3>Новая транзакция</h3>
+              <h2>Новая транзакция</h2>
               <button className="close-button" onClick={handleCloseModal}>
                 ×
               </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="modal-form">
+            <form onSubmit={handleFormSubmit}>
               <div className="form-group">
-                <label>Тип операции</label>
+                <label htmlFor="transaction_type">Тип операции</label>
                 <select
+                  id="transaction_type"
                   name="transaction_type"
                   value={formData.transaction_type}
                   onChange={handleInputChange}
@@ -285,32 +379,37 @@ export function HomePage() {
               </div>
 
               <div className="form-group">
-                <label>Сумма</label>
+                <label htmlFor="amount">Сумма (₽)</label>
                 <input
                   type="number"
+                  id="amount"
                   name="amount"
                   value={formData.amount}
                   onChange={handleInputChange}
                   min="0"
                   step="0.01"
+                  placeholder="0.00"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label>Описание</label>
-                <textarea
+                <label htmlFor="description">Описание</label>
+                <input
+                  type="text"
+                  id="description"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  rows={2}
+                  placeholder="Краткое описание транзакции"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label>Категория</label>
+                <label htmlFor="category_id">Категория</label>
                 <select
+                  id="category_id"
                   name="category_id"
                   value={formData.category_id}
                   onChange={handleInputChange}
@@ -322,12 +421,14 @@ export function HomePage() {
                     </option>
                   ))}
                 </select>
+                <div className="category-hint">Необязательно</div>
               </div>
 
               <div className="form-group">
-                <label>Дата</label>
+                <label htmlFor="transaction_date">Дата операции</label>
                 <input
                   type="date"
+                  id="transaction_date"
                   name="transaction_date"
                   value={formData.transaction_date}
                   onChange={handleInputChange}
@@ -335,11 +436,11 @@ export function HomePage() {
                 />
               </div>
 
-              <div className="modal-actions">
-                <button type="button" className="secondary-button" onClick={handleCloseModal}>
+              <div className="form-actions">
+                <button type="button" className="cancel-button" onClick={handleCloseModal}>
                   Отмена
                 </button>
-                <button type="submit" className="primary-button" disabled={formLoading}>
+                <button type="submit" className="submit-button" disabled={formLoading}>
                   {formLoading ? 'Сохранение...' : 'Сохранить'}
                 </button>
               </div>
