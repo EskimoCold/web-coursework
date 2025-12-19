@@ -206,7 +206,7 @@ export const AnalyticsPage: React.FC = () => {
         {FILTERS.map((f) => (
           <button
             key={f[0]}
-            className={filter === f[0] ? 'anal-filter-active' : ''}
+            className={'anal-filters-btn ' + (filter === f[0] ? 'anal-filter-active' : '')}
             onClick={() => setFilter(f[0])}
           >
             {f[1]}

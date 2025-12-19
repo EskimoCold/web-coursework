@@ -159,6 +159,13 @@ function SecuritySection() {
   };
 
   return (
+    <>
+          <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={closePasswordModal}
+        accessToken={accessToken}
+      />
+      <DeleteAccountModal isOpen={isDeleteAccountModalOpen} onClose={closeDeleteModal} />
     <div className="settings-section">
       <h2 className="settings-section-title">Безопасность</h2>
       <p className="settings-section-description">Настройки входа и защиты данных</p>
@@ -187,14 +194,8 @@ function SecuritySection() {
           </button>
         </div>
       </div>
-
-      <ChangePasswordModal
-        isOpen={isPasswordModalOpen}
-        onClose={closePasswordModal}
-        accessToken={accessToken}
-      />
-      <DeleteAccountModal isOpen={isDeleteAccountModalOpen} onClose={closeDeleteModal} />
     </div>
+    </>
   );
 }
 

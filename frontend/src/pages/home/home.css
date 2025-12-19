@@ -699,3 +699,124 @@
     min-width: 35px;
   }
 }
+
+
+/* Улучшения для таблицы */
+.description-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.description-text {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.description-notes {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Адаптивная таблица */
+@media (max-width: 768px) {
+  .transactions-table {
+    display: none;
+  }
+  
+  .mobile-transactions {
+    display: block;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-transactions {
+    display: none;
+  }
+}
+
+/* Анимации */
+.transactions-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.transactions-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Стили для мобильных карточек */
+.mobile-transaction-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #2b7cff;
+}
+
+.mobile-transaction-card.income {
+  border-left-color: #10b981;
+}
+
+.mobile-transaction-card.expense {
+  border-left-color: #ef4444;
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.mobile-card-category {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.mobile-card-amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.mobile-card-amount.income {
+  color: #10b981;
+}
+
+.mobile-card-amount.expense {
+  color: #ef4444;
+}
+
+.mobile-card-description {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.mobile-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.mobile-card-type {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.mobile-card-type.income {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.mobile-card-type.expense {
+  background: #fee2e2;
+  color: #991b1b;
+}
