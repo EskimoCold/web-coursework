@@ -6,7 +6,6 @@ import { currencyApi } from '../api/currency';
 
 import { CurrencyProvider, useCurrency } from './CurrencyContext';
 
-// Моки
 vi.mock('../api/currency');
 
 const mockCurrencyApi = vi.mocked(currencyApi);

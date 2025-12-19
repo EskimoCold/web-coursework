@@ -5,8 +5,6 @@ import httpx
 
 router = APIRouter(prefix="/currency", tags=["Currency"])
 
-# Используем бесплатный API exchangerate-api.com
-# Можно также использовать: https://api.exchangerate-api.com/v4/latest/RUB
 EXCHANGE_RATE_API = "https://api.exchangerate-api.com/v4/latest/RUB"
 HTTP_OK = 200
 
@@ -66,21 +64,14 @@ async def convert_currency(amount: float, from_currency: str, to_currency: str):
                 detail=f"Unsupported currency. Supported: {list(rates.keys())}",
             )
 
-        # API возвращает курсы в формате: rates["USD"] = сколько USD в 1 RUB
-        # Например, если rates["USD"] = 0.011, то 1 RUB = 0.011 USD
-        # Для конвертации из RUB в USD: amount * rates["USD"]
-        # Для конвертации из USD в RUB: amount / rates["USD"]
+
 
         if from_currency == "RUB":
-            # Конвертируем из RUB в другую валюту
             converted = amount * rates[to_currency]
         elif to_currency == "RUB":
-            # Конвертируем из другой валюты в RUB
             converted = amount / rates[from_currency]
         else:
-            # Конвертируем через RUB: from -> RUB -> to
-            # Сначала конвертируем в RUB: amount / rates[fromCurrency]
-            # Затем конвертируем из RUB в целевую: (amount / rates[fromCurrency]) * rates[currency]
+
             amount_in_rub = amount / rates[from_currency]
             converted = amount_in_rub * rates[to_currency]
 

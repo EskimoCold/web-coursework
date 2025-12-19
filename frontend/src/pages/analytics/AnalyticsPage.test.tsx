@@ -11,7 +11,6 @@ import { predictExpenses } from '../../ml/expensePredictor';
 import { AnalyticsPage } from './AnalyticsPage';
 import { resetAnalyticsStore } from './analyticsStore';
 
-/** 🔧 NEW: silence console noise from React effects during tests (optional) */
 let errSpy: ReturnType<typeof vi.spyOn>;
 let warnSpy: ReturnType<typeof vi.spyOn>;
 beforeAll(() => {
@@ -23,7 +22,6 @@ afterAll(() => {
   warnSpy?.mockRestore();
 });
 
-/** Mock currency API */
 vi.mock('../../api/currency', () => ({
   currencyApi: {
     getRates: vi.fn().mockResolvedValue({
@@ -35,7 +33,6 @@ vi.mock('../../api/currency', () => ({
   },
 }));
 
-/** 🔧 NEW: mock categories API so it never throws for missing token */
 vi.mock('../../api/categories', () => ({
   categoriesApi: {
     getCategories: vi.fn().mockResolvedValue([
@@ -47,20 +44,17 @@ vi.mock('../../api/categories', () => ({
   },
 }));
 
-/** keep your transactions mock */
 vi.mock('../../api/transactions', () => ({
   transactionsApi: {
     getTransactions: vi.fn(),
   },
 }));
 
-// Глобальные переменные для передачи данных в мокированный компонент
 let testTransactions: Transaction[] = [];
 let testCategories: Category[] = [];
 let testExpenseForecast: Array<{ date: Date; predictedExpense: number }> = [];
 let testForecastError: string | null = null;
 
-// Мокаем AnalyticsPage и отрисовываем минимальный UI для тестов
 vi.mock('./AnalyticsPage', async () => {
   const React = await import('react');
 
@@ -148,7 +142,6 @@ vi.mock('./AnalyticsPage', async () => {
       };
     });
 
-    // Добавляем прогноз для дат, которых нет в транзакциях
     testExpenseForecast.forEach((forecast) => {
       const forecastDate = formatDate(forecast.date);
       if (!chartData.some((d) => d.date === forecastDate)) {
@@ -355,7 +348,6 @@ const renderComponent = (transactions: Transaction[] = mockTransactions) => {
     rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
   });
 
-  // Устанавливаем данные для мокированного компонента
   testTransactions = transactions;
   testCategories = [
     { id: 1, name: 'Salary', type: 1, icon: 'salary', description: '' },
@@ -416,7 +408,6 @@ describe('AnalyticsPage', () => {
   it('should calculate correct balance', async () => {
     renderComponent();
 
-    // Ждем, пока данные загрузятся и баланс отобразится
     await waitFor(
       () => {
         const totalBalance = 1000 + 1500 - 500 - 200; // 1800
@@ -472,7 +463,6 @@ describe('AnalyticsPage', () => {
     const forecastData = [{ date: new Date('2024-02-01'), predictedExpense: 500 }];
     (predictExpenses as vi.Mock).mockResolvedValueOnce(forecastData);
 
-    // Устанавливаем прогноз перед рендером
     testExpenseForecast = forecastData;
 
     renderComponent();
@@ -549,7 +539,6 @@ describe('AnalyticsPage', () => {
 
   it('shows forecast error when predictor fails', async () => {
     (predictExpenses as vi.Mock).mockRejectedValueOnce(new Error('boom'));
-    // Устанавливаем ошибку прогноза
     testForecastError = 'Не удалось построить прогноз расходов';
     renderComponent(mockTransactions);
 
@@ -695,7 +684,6 @@ describe('AnalyticsPage', () => {
         const pie = screen.getByTestId('pie');
         expect(pie).toBeInTheDocument();
         const data = JSON.parse(pie.getAttribute('data-data') || '[]');
-        // Должны быть расходы по категориям
         expect(data.length).toBeGreaterThan(0);
         expect(data.some((item: { name: string; value: number }) => item.value > 0)).toBe(true);
       },
@@ -704,9 +692,6 @@ describe('AnalyticsPage', () => {
   });
 
   it('should display chart data with predicted expenses', async () => {
-    // Прогноз расходов не используется в текущей реализации компонента
-    // (expenseForecast всегда пустой массив)
-    // Этот тест проверяет, что компонент корректно обрабатывает данные графика
     renderComponent();
 
     await waitFor(() => {
@@ -767,10 +752,8 @@ describe('AnalyticsPage', () => {
 
     await waitFor(
       () => {
-        // Старая транзакция должна быть отфильтрована
         const balanceElement = document.querySelector('.anal-value.total');
         expect(balanceElement).toBeInTheDocument();
-        // Баланс должен быть 0, так как транзакция старше недели
         expect(balanceElement?.textContent).toContain('0');
       },
       { timeout: 3000 },
@@ -819,14 +802,12 @@ describe('AnalyticsPage', () => {
   it('should handle filter switching between different periods', async () => {
     renderComponent();
 
-    // Переключаемся на неделю
     const weekButton = screen.getByText('Неделя');
     fireEvent.click(weekButton);
     await waitFor(() => {
       expect(weekButton).toHaveClass('anal-filter-active');
     });
 
-    // Переключаемся на месяц
     const monthButton = screen.getByText('Месяц');
     fireEvent.click(monthButton);
     await waitFor(() => {
@@ -834,7 +815,6 @@ describe('AnalyticsPage', () => {
       expect(weekButton).not.toHaveClass('anal-filter-active');
     });
 
-    // Возвращаемся к "Все время"
     const allTimeButton = screen.getByText('Все время');
     fireEvent.click(allTimeButton);
     await waitFor(() => {
