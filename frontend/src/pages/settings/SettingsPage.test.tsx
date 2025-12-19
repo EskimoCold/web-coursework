@@ -1,32 +1,43 @@
-// src/components/SettingsPage.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as AuthContext from '../../contexts/AuthContext';
+import { currencyApi } from '../../api/currency';
+import { AuthProvider } from '../../contexts/AuthContext';
+import { CurrencyProvider } from '../../contexts/CurrencyContext';
 
 import { SettingsPage } from './SettingsPage';
-import { resetSettingsStore } from './settingsStore';
 
-vi.mock('../../contexts/AuthContext', () => ({
-  useAuth: vi.fn(),
+vi.mock('../../api/currency', () => ({
+  currencyApi: {
+    getRates: vi.fn().mockResolvedValue({
+      base: 'RUB',
+      date: '2024-01-01',
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+    }),
+    convert: vi.fn(),
+  },
 }));
+
+const mockCurrencyApi = vi.mocked(currencyApi);
 
 describe('SettingsPage', () => {
   beforeEach(() => {
-    resetSettingsStore();
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
-      accessToken: 'token',
-      logout: vi.fn(),
-      user: null,
-      isAuthenticated: true,
-      isLoading: false,
-      login: vi.fn(),
-      register: vi.fn(),
+    vi.clearAllMocks();
+    mockCurrencyApi.getRates.mockResolvedValue({
+      base: 'RUB',
+      date: '2024-01-01',
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
     });
   });
 
   it('renders all settings navigation items', () => {
-    render(<SettingsPage />);
+    render(
+      <AuthProvider>
+        <CurrencyProvider>
+          <SettingsPage />
+        </CurrencyProvider>
+      </AuthProvider>,
+    );
 
     expect(screen.getAllByText('Безопасность').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Данные').length).toBeGreaterThan(0);
@@ -34,14 +45,26 @@ describe('SettingsPage', () => {
   });
 
   it('renders security section content by default', () => {
-    render(<SettingsPage />);
+    render(
+      <AuthProvider>
+        <CurrencyProvider>
+          <SettingsPage />
+        </CurrencyProvider>
+      </AuthProvider>,
+    );
 
     expect(screen.getByText('Смена пароля')).toBeInTheDocument();
     expect(screen.getByText('Удаление аккаунта')).toBeInTheDocument();
   });
 
   it('switches between sections correctly', () => {
-    render(<SettingsPage />);
+    render(
+      <AuthProvider>
+        <CurrencyProvider>
+          <SettingsPage />
+        </CurrencyProvider>
+      </AuthProvider>,
+    );
 
     expect(screen.getByText('Смена пароля')).toBeInTheDocument();
 

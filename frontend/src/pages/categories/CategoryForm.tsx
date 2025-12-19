@@ -9,7 +9,7 @@ import { createCategoryFormStore } from './categoryFormStore';
 
 type Props = {
   label: string;
-  modify: boolean; // редактирование старой категории?
+  modify: boolean;
   submit: string;
   placeholder?: {
     category: Category;

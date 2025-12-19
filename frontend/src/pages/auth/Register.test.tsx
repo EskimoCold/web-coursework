@@ -17,7 +17,6 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Fix the AuthContext mock - use the correct path and ensure useAuth is a mock function
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
