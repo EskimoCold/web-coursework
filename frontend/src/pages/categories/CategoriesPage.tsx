@@ -51,7 +51,7 @@ export const CategoriesPage: React.FC = () => {
   );
 
   return (
-    <div aria-label="content-placeholder" className="cat-main">
+    <div className="cat-main">
       <div className="cat-list">
         <div className="cat-list-selectors">
           <input

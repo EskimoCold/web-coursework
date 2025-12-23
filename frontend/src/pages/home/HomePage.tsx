@@ -1,5 +1,7 @@
 import { useEffect, useMemo } from 'react';
+
 import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
+
 import './home.css';
 import { useHomeStore } from './homeStore';
 
@@ -228,7 +230,8 @@ export function HomePage() {
           </button>
         </div>
         <div className="table-info">
-          Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length} транзакций
+          Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length}{' '}
+          транзакций
         </div>
       </div>
 
@@ -316,7 +319,7 @@ export function HomePage() {
           >
             ← Назад
           </button>
-          
+
           <div className="pagination-numbers">
             {Array.from({ length: Math.min(5, paginatedTransactions.totalPages) }, (_, i) => {
               let pageNum;
@@ -329,7 +332,7 @@ export function HomePage() {
               } else {
                 pageNum = currentPage - 2 + i;
               }
-              
+
               return (
                 <button
                   key={pageNum}
@@ -341,7 +344,7 @@ export function HomePage() {
               );
             })}
           </div>
-          
+
           <button
             className="pagination-btn"
             onClick={() => setCurrentPage(currentPage + 1)}

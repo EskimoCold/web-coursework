@@ -1,11 +1,30 @@
 :root {
   color-scheme: light dark;
+  --bg: #f3f6f9;
+  --panel: #fff;
+  --ink: #0f172a;
+  --muted: #94a3b8;
+  --primary: #2b7cff;
+  --primary-ghost: #e7f0ff;
+  --stroke: #e5e7eb;
+}
+
+.dark {
+  --bg: #0f172a;
+  --panel: #1e293b;
+  --ink: #f1f5f9;
+  --muted: #94a3b8;
+  --primary: #60a5fa;
+  --primary-ghost: #1e3a8a;
+  --stroke: #334155;
 }
 
 body {
   margin: 0;
   padding: 0;
   font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
 }
 
 h1,
@@ -15,4 +34,37 @@ h2 {
 
 hr {
   margin: 1.5rem 0;
+  border-color: var(--stroke);
+}
+
+input,
+select,
+textarea {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--stroke);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink);
+  -webkit-box-shadow: 0 0 0px 1000px var(--panel) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark .layout-content {
+  background: none;
+  border: none;
 }
