@@ -10,7 +10,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       devOptions: {
-        enabled: true,
+        enabled: false,
         suppressWarnings: true,
         type: 'module',
       },
@@ -44,7 +44,7 @@ export default defineConfig({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
       authToken: process.env.SENTRY_AUTH_TOKEN,
-      release: process.env.VITE_RELEASE,
+      release: { name: process.env.VITE_RELEASE },
       sourcemaps: { assets: './dist/assets/**' },
       telemetry: false,
     }),
