@@ -48,8 +48,6 @@ async function enableMocks() {
   }
 }
 
-// Render immediately to avoid blank page if mocks hang
 renderApp();
 
-// Try to enable mocks in background
 enableMocks().catch(console.error);

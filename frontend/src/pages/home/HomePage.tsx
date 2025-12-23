@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react';
 
 import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
+import { useCurrency } from '../../contexts/CurrencyContext';
+
+import { useHomeStore } from './homeStore';
 
 import './home.css';
-import { useHomeStore } from './homeStore';
 
 interface TransactionSummary {
   totalIncome: number;
@@ -12,6 +14,7 @@ interface TransactionSummary {
 }
 
 export function HomePage() {
+  const { convertAmount, getCurrencySymbol } = useCurrency();
   const {
     currentPage,
     filter,
@@ -49,16 +52,16 @@ export function HomePage() {
   const summary = useMemo((): TransactionSummary => {
     const totalIncome = allTransactions
       .filter((t) => t.transaction_type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + convertAmount(t.amount), 0);
 
     const totalExpenses = allTransactions
       .filter((t) => t.transaction_type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + convertAmount(t.amount), 0);
 
     const balance = totalIncome - totalExpenses;
 
     return { totalIncome, totalExpenses, balance };
-  }, [allTransactions]);
+  }, [allTransactions, convertAmount]);
 
   const paginatedTransactions = useMemo(() => {
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -146,7 +149,7 @@ export function HomePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleFilterChange = (newFilter: 'all' | 'income' | 'expense') => {
@@ -194,16 +197,23 @@ export function HomePage() {
 
         <div className="summary-cards">
           <div className="summary-card balance">
-            <h3>Баланс</h3>
-            <div className="amount">{formatAmount(summary.balance)} ₽</div>
+            <h3>Общий баланс</h3>
+            <div className="amount">
+              {summary.balance.toLocaleString('ru-RU')} {getCurrencySymbol()}
+            </div>
           </div>
+
           <div className="summary-card income">
             <h3>Доходы</h3>
-            <div className="amount">+{formatAmount(summary.totalIncome)} ₽</div>
+            <div className="amount">
+              +{summary.totalIncome.toLocaleString('ru-RU')} {getCurrencySymbol()}
+            </div>
           </div>
           <div className="summary-card expense">
             <h3>Расходы</h3>
-            <div className="amount">-{formatAmount(summary.totalExpenses)} ₽</div>
+            <div className="amount">
+              -{summary.totalExpenses.toLocaleString('ru-RU')} {getCurrencySymbol()}
+            </div>
           </div>
         </div>
       </div>
@@ -282,76 +292,54 @@ export function HomePage() {
         )}
       </div>
 
-      {/* Mobile Transactions Cards */}
-      <div className="mobile-transactions">
-        {paginatedTransactions.transactions.map((transaction) => (
-          <div
-            key={transaction.id}
-            className={`mobile-transaction-card ${transaction.transaction_type}`}
-          >
-            <div className="mobile-card-header">
-              <div className="mobile-card-category">
-                {transaction.category?.name || 'Без категории'}
-              </div>
-              <div className={`mobile-card-amount ${transaction.transaction_type}`}>
-                {transaction.transaction_type === 'income' ? '+' : '-'}
-                {formatAmount(transaction.amount)} ₽
-              </div>
-            </div>
-            <div className="mobile-card-description">{transaction.description}</div>
-            <div className="mobile-card-footer">
-              <div className="mobile-card-date">{formatDate(transaction.transaction_date)}</div>
-              <span className={`mobile-card-type ${transaction.transaction_type}`}>
-                {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
-              </span>
-            </div>
+        <div className="transactions-table-container">
+          <table className="transactions-table">
+            <thead>
+              <tr>
+                <th>Категория</th>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Описание</th>
+                <th>Тип</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedTransactions.transactions.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td className="category-cell">
+                    <span className="category-badge">
+                      {categories?.find((c) => Number(c.id) === Number(transaction.category_id))
+                        ?.name ?? 'Без категории'}
+                    </span>
+                  </td>
+                  <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
+                  <td className={`amount-cell ${transaction.transaction_type}`}>
+                    {transaction.transaction_type === 'income' ? '+' : '-'}
+                    {convertAmount(transaction.amount).toLocaleString('ru-RU')}{' '}
+                    {getCurrencySymbol()}
+                  </td>
+                  <td className="description-cell">{transaction.description}</td>
+                  <td>
+                    <span className={`type-badge ${transaction.transaction_type}`}>
+                      {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="pagination">
+            {Array.from({ length: paginatedTransactions.totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                className={currentPage === i + 1 ? 'active' : ''}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
           </div>
-        ))}
-      </div>
-
-      {/* Pagination */}
-      {paginatedTransactions.totalPages > 1 && (
-        <div className="pagination">
-          <button
-            className="pagination-btn"
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            ← Назад
-          </button>
-
-          <div className="pagination-numbers">
-            {Array.from({ length: Math.min(5, paginatedTransactions.totalPages) }, (_, i) => {
-              let pageNum;
-              if (paginatedTransactions.totalPages <= 5) {
-                pageNum = i + 1;
-              } else if (currentPage <= 3) {
-                pageNum = i + 1;
-              } else if (currentPage >= paginatedTransactions.totalPages - 2) {
-                pageNum = paginatedTransactions.totalPages - 4 + i;
-              } else {
-                pageNum = currentPage - 2 + i;
-              }
-
-              return (
-                <button
-                  key={pageNum}
-                  className={`pagination-number ${currentPage === pageNum ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(pageNum)}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            className="pagination-btn"
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === paginatedTransactions.totalPages}
-          >
-            Далее →
-          </button>
         </div>
       )}
 

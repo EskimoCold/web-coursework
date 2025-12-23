@@ -29,7 +29,6 @@ describe('AuthContext', () => {
     tokenStore.clearAccessToken();
     vi.clearAllMocks();
     resetAuthStore();
-    // Default: refresh fails (no session)
     vi.mocked(authApi.authApi.refreshToken).mockRejectedValue(new Error('No refresh token'));
   });
 
@@ -270,7 +269,6 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('no');
     });
 
-    // Logout API should be called to clear HttpOnly cookie
     expect(authApi.authApi.logout).toHaveBeenCalled();
   });
 
