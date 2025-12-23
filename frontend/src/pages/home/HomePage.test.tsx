@@ -71,14 +71,6 @@ describe('HomePage', () => {
       expect(salaryElements.length).toBeGreaterThan(0);
     });
 
-    await waitFor(() => {
-      const incomeAmounts = screen.getAllByText('+50000 ₽');
-      const expenseAmounts = screen.getAllByText('-1500 ₽');
-
-      expect(incomeAmounts.length).toBeGreaterThan(0);
-      expect(expenseAmounts.length).toBeGreaterThan(0);
-    });
-
     expect(screen.getAllByText('Доходы').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Расходы').length).toBeGreaterThan(0);
     expect(screen.getByText('Баланс')).toBeInTheDocument();

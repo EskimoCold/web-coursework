@@ -112,8 +112,8 @@ export const useSettingsStore = create<SettingsState>()(
         theme: state.theme,
         currency: state.currency,
       }),
-    }
-  )
+    },
+  ),
 );
 
 export const resetSettingsStore = () => useSettingsStore.getState().reset();

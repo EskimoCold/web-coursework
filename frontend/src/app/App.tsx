@@ -36,7 +36,7 @@ function MainApp() {
 
   const { theme } = useSettingsStore();
 
- useEffect(() => {
+  useEffect(() => {
     const root = document.documentElement;
     const isDark =
       theme === 'dark' ||
