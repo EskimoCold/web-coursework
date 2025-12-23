@@ -7,6 +7,7 @@ import { ProtectedRoute } from '../components/ProtectedRoute';
 import { Sidebar } from '../components/Sidebar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { CategoryProvider } from '../contexts/CategoriesContext';
+import { CurrencyProvider } from '../contexts/CurrencyContext';
 import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
 import { Login } from '../pages/auth/Login';
 import { Register } from '../pages/auth/Register';
@@ -62,10 +63,12 @@ function MainApp() {
 
   return (
     <CategoryProvider>
-      <div className="app-root">
-        <Sidebar active={active} onSelect={setActive} />
-        <Layout title={active}>{renderContent()}</Layout>
-      </div>
+      <CurrencyProvider>
+        <div className="app-root">
+          <Sidebar active={active} onSelect={setActive} />
+          <Layout title={active}>{renderContent()}</Layout>
+        </div>
+      </CurrencyProvider>
     </CategoryProvider>
   );
 }

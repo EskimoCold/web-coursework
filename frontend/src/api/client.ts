@@ -100,9 +100,12 @@ http.interceptors.response.use(
   },
 );
 
-async function request<T>(config: ApiRequestConfig): Promise<T> {
+async function request<T>(config: string | ApiRequestConfig): Promise<T> {
   try {
-    const res: AxiosResponse<T> = await http.request<T>(config);
+    const finalConfig: ApiRequestConfig =
+      typeof config === 'string' ? { url: config, method: 'GET' } : config;
+
+    const res: AxiosResponse<T> = await http.request<T>(finalConfig);
     return res.data;
   } catch (err) {
     if (isAxiosError(err)) {
@@ -130,12 +133,77 @@ async function request<T>(config: ApiRequestConfig): Promise<T> {
 }
 
 export const api = {
-  get: <T>(path: string, config?: ApiRequestConfig) =>
-    request<T>({ ...(config ?? {}), method: 'GET', url: path }),
-  post: <T>(path: string, data?: unknown, config?: ApiRequestConfig) =>
-    request<T>({ ...(config ?? {}), method: 'POST', url: path, data }),
-  put: <T>(path: string, data?: unknown, config?: ApiRequestConfig) =>
-    request<T>({ ...(config ?? {}), method: 'PUT', url: path, data }),
-  delete: <T>(path: string, config?: ApiRequestConfig) =>
-    request<T>({ ...(config ?? {}), method: 'DELETE', url: path }),
+  get: <T>(
+    path: string,
+    options?: {
+      params?: Record<string, string | number>;
+      headers?: AxiosRequestConfig['headers'];
+      skipAuth?: boolean;
+    },
+  ) => {
+    let url = path;
+    if (options?.params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(options.params).forEach(([key, value]) => {
+        searchParams.append(key, String(value));
+      });
+      url += `?${searchParams.toString()}`;
+    }
+
+    return request<T>({
+      url,
+      method: 'GET',
+      headers: options?.headers,
+      skipAuth: options?.skipAuth,
+    });
+  },
+
+  post: <T>(
+    path: string,
+    data?: unknown,
+    options?: {
+      headers?: AxiosRequestConfig['headers'];
+      skipAuth?: boolean;
+    },
+  ) => {
+    return request<T>({
+      url: path,
+      method: 'POST',
+      data,
+      headers: options?.headers,
+      skipAuth: options?.skipAuth,
+    });
+  },
+
+  put: <T>(
+    path: string,
+    data?: unknown,
+    options?: {
+      headers?: AxiosRequestConfig['headers'];
+      skipAuth?: boolean;
+    },
+  ) => {
+    return request<T>({
+      url: path,
+      method: 'PUT',
+      data,
+      headers: options?.headers,
+      skipAuth: options?.skipAuth,
+    });
+  },
+
+  delete: <T>(
+    path: string,
+    options?: {
+      headers?: AxiosRequestConfig['headers'];
+      skipAuth?: boolean;
+    },
+  ) => {
+    return request<T>({
+      url: path,
+      method: 'DELETE',
+      headers: options?.headers,
+      skipAuth: options?.skipAuth,
+    });
+  },
 };
