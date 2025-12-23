@@ -238,6 +238,14 @@ input:focus {
   font-family: inherit;
 }
 
+.dark input,
+.dark textarea,
+.dark select {
+  background: var(--panel);
+  color: var(--ink);
+  border-color: var(--stroke);
+}
+
 .cat-form textarea:focus {
   outline: none;
   border: 2px solid var(--cat-dark-grey);
@@ -307,6 +315,12 @@ input:focus {
   color: var(--cat-dark-text);
   transform: none;
   cursor: not-allowed;
+}
+
+.dark .cat-button {
+  background: var(--panel);
+  color: var(--ink);
+  border-color: var(--stroke);
 }
 
 .cat-button:disabled:hover {
@@ -641,14 +655,6 @@ input:focus {
   border-color: var(--stroke);
 }
 
-.dark input,
-.dark textarea,
-.dark select {
-  background: var(--panel);
-  color: var(--ink);
-  border-color: var(--stroke);
-}
-
 .dark .cat-card {
   background: var(--panel);
   border-color: var(--stroke);
@@ -672,12 +678,6 @@ input:focus {
 .dark .cat-form select {
   background: var(--panel);
   color: var(--ink);
-}
-
-.dark .cat-button {
-  background: var(--panel);
-  color: var(--ink);
-  border-color: var(--stroke);
 }
 
 .dark .submit {

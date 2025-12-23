@@ -192,6 +192,12 @@
   border-color: #2b7cff;
 }
 
+.dark .filter-btn {
+  background: var(--panel);
+  border-color: var(--stroke);
+  color: var(--ink);
+}
+
 .filter-btn:hover:not(.active) {
   border-color: #2b7cff;
   color: #2b7cff;
@@ -233,6 +239,10 @@
   padding: 12px 8px;
   border-bottom: 1px solid #f1f5f9;
   font-size: 0.8rem;
+}
+
+.transactions-table tbody tr {
+  transition: background-color 0.2s ease;
 }
 
 .transactions-table tr:hover {
@@ -312,6 +322,17 @@
   cursor: not-allowed;
 }
 
+.pagination-number {
+  padding: 8px 12px;
+}
+
+.dark .pagination-btn,
+.dark .pagination-number {
+  background: var(--panel);
+  border-color: var(--stroke);
+  color: var(--ink);
+}
+
 .pagination-btn:hover:not(:disabled) {
   background: #2b7cff;
   color: #fff;
@@ -323,10 +344,6 @@
   gap: 4px;
   flex-wrap: wrap;
   justify-content: center;
-}
-
-.pagination-number {
-  padding: 8px 12px;
 }
 
 .pagination-number.active {
@@ -496,6 +513,11 @@
   transform: none;
 }
 
+.dark .submit-button {
+  background: var(--primary);
+  color: white;
+}
+
 .submit-button:hover:not(:disabled) {
   background: #4338ca;
   transform: translateY(-1px);
@@ -571,6 +593,7 @@
   color: #6b7280;
   font-size: 0.9rem;
   margin-bottom: 8px;
+  line-height: 1.4;
 }
 
 .mobile-card-footer {
@@ -711,7 +734,7 @@
 }
 
 /* Адаптивная таблица */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .transactions-table {
     display: none;
   }
@@ -721,77 +744,15 @@
   }
 }
 
-@media (min-width: 769px) {
+@media (width > 769px) {
   .mobile-transactions {
     display: none;
   }
 }
 
 /* Анимации */
-.transactions-table tbody tr {
-  transition: background-color 0.2s ease;
-}
-
 .transactions-table tbody tr:hover {
   background-color: #f8fafc;
-}
-
-/* Стили для мобильных карточек */
-.mobile-transaction-card {
-  background: white;
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-bottom: 12px;
-  border-left: 4px solid #2b7cff;
-}
-
-.mobile-transaction-card.income {
-  border-left-color: #10b981;
-}
-
-.mobile-transaction-card.expense {
-  border-left-color: #ef4444;
-}
-
-.mobile-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
-
-.mobile-card-category {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #374151;
-}
-
-.mobile-card-amount {
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-.mobile-card-amount.income {
-  color: #10b981;
-}
-
-.mobile-card-amount.expense {
-  color: #ef4444;
-}
-
-.mobile-card-description {
-  color: #6b7280;
-  font-size: 0.9rem;
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
-
-.mobile-card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.8rem;
-  color: #9ca3af;
 }
 
 .mobile-card-type {
@@ -864,12 +825,6 @@
   border: 1px solid var(--stroke);
 }
 
-.dark .filter-btn {
-  background: var(--panel);
-  border-color: var(--stroke);
-  color: var(--ink);
-}
-
 .dark .filter-btn.active {
   background: var(--primary);
   color: white;
@@ -926,13 +881,6 @@
 
 .dark .empty-state {
   color: var(--muted);
-}
-
-.dark .pagination-btn,
-.dark .pagination-number {
-  background: var(--panel);
-  border-color: var(--stroke);
-  color: var(--ink);
 }
 
 .dark .pagination-number.active {
@@ -994,11 +942,6 @@
 .dark .cancel-button:hover {
   border-color: var(--primary);
   color: var(--primary);
-}
-
-.dark .submit-button {
-  background: var(--primary);
-  color: white;
 }
 
 .dark .submit-button:hover:not(:disabled) {
