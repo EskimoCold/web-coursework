@@ -334,7 +334,7 @@ function DataManagementSection() {
 }
 
 function AppearanceSection() {
-  const [theme, setTheme] = useState('light');
+  const { theme, setTheme } = useSettingsStore();
   const { currency, setCurrency } = useCurrency();
 
   return (
