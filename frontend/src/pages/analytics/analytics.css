@@ -1,16 +1,24 @@
 :root {
-  --anal-green: #50e3c2;
-  --anal-red: #ff6b6b;
+  --anal-green: #10b981;
+  --anal-red: #ef4444;
   --anal-grey: #dee2e6;
   --anal-light-grey: #f3f6f9;
   --anal-dark-text: #4a4b4b;
-  --stroke: #e5e7eb;
-  --cat-dark-text: #4a4b4b;
+}
+
+.dark {
+  --anal-green: #5ee9c2;
+  --anal-red: #ff6b6b;
+  --anal-grey: #334155;
+  --anal-light-grey: #1e293b;
+  --anal-dark-text: #f1f5f9;
 }
 
 .anal-main {
   padding: 20px;
   border-radius: 10px;
+  background: none;
+  color: var(--ink);
 }
 
 .anal-header {
@@ -19,7 +27,7 @@
 
 .anal-title {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--cat-dark-text);
+  color: var(--ink);
   font-size: 24px;
   font-weight: 700;
   padding: 30px 0 0 40px;
@@ -28,8 +36,9 @@
 
 .anal-dates {
   font-size: 16px;
-  color: #666;
+  color: var(--muted);
   margin-top: 10px;
+  padding: 0 40px;
 }
 
 .anal-info-grid {
@@ -41,7 +50,7 @@
 }
 
 .anal-info-grid-item {
-  background: #f3f6f9;
+  background: var(--panel);
   border: 1px solid var(--stroke);
   border-radius: 10px;
   padding: 20px;
@@ -55,7 +64,7 @@
 }
 
 .anal-chart-container {
-  background: #f3f6f9;
+  background: var(--panel);
   border: 1px solid var(--stroke);
   border-radius: 10px;
   padding: 20px;
@@ -64,7 +73,7 @@
 
 .anal-label {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--cat-dark-text);
+  color: var(--ink);
   font-size: 22px;
   font-weight: 600;
   margin: 0;
@@ -72,7 +81,7 @@
 
 .anal-value {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--cat-dark-text);
+  color: var(--ink);
   font-size: 16px;
   font-weight: 600;
   margin: 0;
@@ -89,6 +98,7 @@
 
 .anal-chart-title {
   margin-top: 10px;
+  color: var(--ink);
 }
 
 .anal-filters {
@@ -103,7 +113,8 @@
   cursor: pointer;
   background: none;
   border: none;
-  color: var(--anal-dark-text);
+  color: var(--ink);
+  padding: 5px 10px;
 }
 
 .anal-filters-btn:hover {
@@ -111,7 +122,7 @@
 }
 
 .anal-filter-active {
-  background: var(--anal-light-grey);
+  background: var(--panel);
   padding: 5px;
   border-radius: 12px;
 }

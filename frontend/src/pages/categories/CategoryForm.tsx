@@ -126,7 +126,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
           {submit}
         </button>
         {modify && (
-          <button className="cat-button red" type="reset">
+          <button className="cat-button danger" type="reset">
             Удалить
           </button>
         )}

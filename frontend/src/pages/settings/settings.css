@@ -1,6 +1,5 @@
 .settings-page {
   min-height: 100vh;
-  background: #fff;
   color: #333;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   padding: 0 16px 16px;
@@ -313,7 +312,7 @@
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  
+
   .settings-nav {
     flex-direction: row;
     overflow-x: auto;
@@ -322,34 +321,34 @@
     border-bottom: 1px solid #e5e7eb;
     gap: 8px;
   }
-  
+
   .settings-nav-button {
     padding: 10px 14px;
     font-size: 0.85rem;
     white-space: nowrap;
   }
-  
+
   .settings-item {
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
   }
-  
+
   .settings-button {
     width: 100%;
     text-align: center;
   }
-  
+
   .settings-button-group {
     width: 100%;
     flex-direction: column;
   }
-  
+
   .settings-select {
     width: 100%;
     min-width: unset;
   }
-  
+
   .settings-modal-content {
     margin: 0 16px;
     padding: 20px;
@@ -361,29 +360,161 @@
     padding: 16px;
     margin-top: 16px;
   }
-  
+
   .settings-header {
     margin-bottom: 24px;
     padding-bottom: 16px;
   }
-  
+
   .settings-title {
     font-size: 1.5rem;
   }
-  
+
   .settings-section-title {
     font-size: 1.3rem;
   }
-  
+
   .settings-item {
     padding: 16px;
   }
-  
+
   .settings-modal {
     padding: 10px;
   }
-  
+
   .settings-modal-content {
     padding: 16px;
   }
+}
+
+.dark .settings-page {
+  min-height: 100vh;
+  color: var(--ink);
+  padding: 0 16px 16px;
+}
+
+.dark .settings-card {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 10%);
+  margin-top: 20px;
+}
+
+.dark .settings-header {
+  border-bottom: 1px solid var(--stroke);
+}
+
+.dark .settings-title {
+  color: var(--ink);
+}
+
+.dark .settings-subtitle {
+  color: var(--muted);
+}
+
+.dark .settings-nav {
+  border-right: 1px solid var(--stroke);
+}
+
+.dark .settings-nav-button {
+  color: var(--muted);
+}
+
+.dark .settings-nav-button:hover {
+  background: color-mix(in srgb, var(--bg) 50%, transparent);
+  color: var(--ink);
+}
+
+.dark .settings-nav-button.active {
+  background: var(--primary);
+  color: white;
+}
+
+.dark .settings-section-title {
+  color: var(--ink);
+}
+
+.dark .settings-section-description {
+  color: var(--muted);
+}
+
+.dark .settings-item {
+  background: color-mix(in srgb, var(--panel) 90%, var(--bg));
+  border: 1px solid var(--stroke);
+}
+
+.dark .settings-item.danger {
+  background: color-mix(in srgb, #dc2626 20%, var(--panel));
+  border-color: #dc2626;
+}
+
+.dark .settings-item-title {
+  color: var(--ink);
+}
+
+.dark .settings-item-description {
+  color: var(--muted);
+}
+
+.dark .settings-button {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  color: var(--ink);
+}
+
+.dark .settings-button.primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.dark .settings-button.secondary {
+  background: var(--primary-ghost);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.dark .settings-button.danger {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+.dark .settings-select {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  color: var(--ink);
+}
+
+.dark .settings-select:focus {
+  border-color: var(--primary);
+}
+
+.dark .settings-modal-content {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.dark .settings-form-input {
+  background: var(--panel);
+  border: 2px solid var(--stroke);
+  color: var(--ink);
+}
+
+.dark .settings-form-input:focus {
+  border-color: var(--primary);
+}
+
+.dark .settings-form .error {
+  background: color-mix(in srgb, #dc2626 20%, transparent);
+  color: #fca5a5;
+  border: 1px solid #dc2626;
+}
+
+.dark .settings-form .success {
+  background: color-mix(in srgb, #059669 20%, transparent);
+  color: #86efac;
+  border: 1px solid #059669;
 }

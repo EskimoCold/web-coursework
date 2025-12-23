@@ -1,5 +1,5 @@
 :root {
-  --sb-w: 240px;
+  --sb-w: 220px;
   --sb-border: #e6e9ee;
   --sb-bg: #fff;
   --ink: #0f172a;
@@ -21,6 +21,7 @@
   flex-direction: column;
   gap: 10px;
   color: var(--ink);
+  z-index: 10;
 }
 
 /* brand */
@@ -262,4 +263,28 @@
   .sb-exit .sb-label {
     font-size: 9px;
   }
+}
+
+.sb {
+  background: var(--panel);
+  border-right: 1px solid var(--stroke);
+  color: var(--ink);
+}
+
+.sb-item {
+  color: var(--ink);
+}
+
+.sb-item:hover {
+  background: color-mix(in srgb, var(--panel) 90%, var(--bg));
+}
+
+.sb-item.is-active {
+  background: var(--primary-ghost);
+  border-color: var(--primary);
+}
+
+.sb-exit {
+  background: color-mix(in srgb, var(--primary-ghost) 50%, transparent);
+  border: 1px solid var(--primary);
 }

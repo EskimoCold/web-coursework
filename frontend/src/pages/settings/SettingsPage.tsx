@@ -160,41 +160,41 @@ function SecuritySection() {
 
   return (
     <>
-          <ChangePasswordModal
+      <ChangePasswordModal
         isOpen={isPasswordModalOpen}
         onClose={closePasswordModal}
         accessToken={accessToken}
       />
       <DeleteAccountModal isOpen={isDeleteAccountModalOpen} onClose={closeDeleteModal} />
-    <div className="settings-section">
-      <h2 className="settings-section-title">Безопасность</h2>
-      <p className="settings-section-description">Настройки входа и защиты данных</p>
+      <div className="settings-section">
+        <h2 className="settings-section-title">Безопасность</h2>
+        <p className="settings-section-description">Настройки входа и защиты данных</p>
 
-      <div className="settings-items">
-        <div className="settings-item">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Смена пароля</h3>
-            <p className="settings-item-description">Обновите ваш пароль для защиты аккаунта</p>
+        <div className="settings-items">
+          <div className="settings-item">
+            <div className="settings-item-content">
+              <h3 className="settings-item-title">Смена пароля</h3>
+              <p className="settings-item-description">Обновите ваш пароль для защиты аккаунта</p>
+            </div>
+            <button className="settings-button primary" onClick={() => setPasswordModalOpen(true)}>
+              Сменить пароль
+            </button>
           </div>
-          <button className="settings-button primary" onClick={() => setPasswordModalOpen(true)}>
-            Сменить пароль
-          </button>
-        </div>
 
-        <div className="settings-item danger">
-          <div className="settings-item-content">
-            <h3 className="settings-item-title">Удаление аккаунта</h3>
-            <p className="settings-item-description">Безвозвратное удаление всех данных</p>
+          <div className="settings-item danger">
+            <div className="settings-item-content">
+              <h3 className="settings-item-title">Удаление аккаунта</h3>
+              <p className="settings-item-description">Безвозвратное удаление всех данных</p>
+            </div>
+            <button
+              className="settings-button danger"
+              onClick={() => setDeleteAccountModalOpen(true)}
+            >
+              Удалить аккаунт
+            </button>
           </div>
-          <button
-            className="settings-button danger"
-            onClick={() => setDeleteAccountModalOpen(true)}
-          >
-            Удалить аккаунт
-          </button>
         </div>
       </div>
-    </div>
     </>
   );
 }
