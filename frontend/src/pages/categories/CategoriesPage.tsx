@@ -1,31 +1,25 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import './categories.css';
 
 import { Category, useCategories } from '../../contexts/CategoriesContext';
 
+import { useCategoriesPageStore } from './categoriesPageStore';
 import { CategoryCard } from './CategoryCard';
 import { CategoryForm } from './CategoryForm';
 import { CategoryWindow } from './CategoryWindow';
 
 export const CategoriesPage: React.FC = () => {
   const { categories } = useCategories();
-
-  const [cardWindow, setCardWindow] = useState<Category>();
-  const [isOpen, setOpen] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
-
-  const [searchQuery, setSearchQuery] = useState('');
-  /*
-  const [filter, setFilter] = useState('all');
-  const filters = useMemo(
-    () => [
-      ['all', 'Все'],
-      ['income', 'Доходы'],
-      ['expense', 'Расходы'],
-    ],
-    [],
-  );
-  */
+  const {
+    cardWindow,
+    isOpen,
+    showAddForm,
+    searchQuery,
+    setCardWindow,
+    setIsOpen,
+    setShowAddForm,
+    setSearchQuery,
+  } = useCategoriesPageStore();
 
   const isMobile = useMemo(() => {
     const style = window.getComputedStyle(document.body);
@@ -35,21 +29,17 @@ export const CategoriesPage: React.FC = () => {
     return rem <= 48;
   }, []);
 
-  const openCard = (cat: Category) => {
-    setCardWindow(cat);
-    setOpen(true);
-  };
+  const openCard = useCallback(
+    (cat: Category) => {
+      setCardWindow(cat);
+      setIsOpen(true);
+    },
+    [setCardWindow, setIsOpen],
+  );
 
   const filteredCategories = useMemo(
-    () =>
-      categories
-        /*.filter((cat) => {
-          if (filter === 'all') return true;
-          else if (filter === 'income') return !!cat.type;
-          else return !cat.type;
-        })*/
-        .filter((cat) => cat.name.toLowerCase().includes(searchQuery.toLowerCase())),
-    [/*filter, */ categories, searchQuery],
+    () => categories.filter((cat) => cat.name.toLowerCase().includes(searchQuery.toLowerCase())),
+    [categories, searchQuery],
   );
 
   const categoryCards = useMemo(
@@ -57,11 +47,11 @@ export const CategoriesPage: React.FC = () => {
       filteredCategories.map((cat) => (
         <CategoryCard key={cat.id} cat={cat} handleClick={() => openCard(cat)} />
       )),
-    [filteredCategories],
+    [filteredCategories, openCard],
   );
 
   return (
-    <div aria-label="content-placeholder" className="cat-main">
+    <div className="cat-main">
       <div className="cat-list">
         <div className="cat-list-selectors">
           <input
@@ -71,19 +61,6 @@ export const CategoriesPage: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          {/*
-          <div className="cat-filters cat-text">
-            {filters.map((f) => (
-              <button
-                key={f[0]}
-                className={filter === f[0] ? 'cat-filter-active' : ''}
-                onClick={() => setFilter(f[0])}
-              >
-                {f[1]}
-              </button>
-            ))}
-          </div>
-          */}
         </div>
         <div className="cat-list-grid">{categoryCards}</div>
       </div>
@@ -106,7 +83,7 @@ export const CategoriesPage: React.FC = () => {
         </div>
       )}
 
-      {isOpen && cardWindow && <CategoryWindow cat={cardWindow} setOpen={setOpen} />}
+      {isOpen && cardWindow && <CategoryWindow cat={cardWindow} setOpen={setIsOpen} />}
     </div>
   );
 };

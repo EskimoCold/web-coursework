@@ -1,5 +1,5 @@
-// src/api/transactions.ts
-import { api, BASE_URL } from './client';
+import { api } from './client';
+import { tokenStore } from './tokenStore';
 
 export interface Transaction {
   id: number;
@@ -28,10 +28,8 @@ export interface TransactionCreate {
   transaction_date: string;
 }
 
-// Функция для получения токена
 const getAuthToken = (): string | null => {
-  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-  return token;
+  return tokenStore.getAccessToken();
 };
 
 export const transactionsApi = {
@@ -44,26 +42,19 @@ export const transactionsApi = {
       throw new Error('No authentication token found');
     }
 
-    return fetch(BASE_URL + '/transactions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    }).then((response) => {
-      if (!response.ok) {
-        // Попробуем получить детальную ошибку от сервера
-        return response
-          .json()
-          .then((errorData) => {
-            throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-          })
-          .catch(() => {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          });
-      }
-      return response.json();
+    return api.post<Transaction>('/transactions', data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+  deleteTransaction: (id: number) => {
+    const token = getAuthToken();
+
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    return api.delete<Response>(`/transactions/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
   },
 };

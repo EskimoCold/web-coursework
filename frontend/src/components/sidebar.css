@@ -1,5 +1,5 @@
 :root {
-  --sb-w: 240px;
+  --sb-w: 220px;
   --sb-border: #e6e9ee;
   --sb-bg: #fff;
   --ink: #0f172a;
@@ -10,20 +10,19 @@
   --icon-gray: #cbd5e1;
 }
 
-/* flex column so exit anchors to bottom */
 .sb {
   width: var(--sb-w);
   min-height: 100vh;
-  background: #fcfdff;
-  border-right: 1px solid var(--sb-border);
+  background: var(--panel);
+  border-right: 1px solid var(--stroke);
   padding: 18px 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   color: var(--ink);
+  z-index: 10;
 }
 
-/* brand */
 .sb-brand {
   display: flex;
   align-items: center;
@@ -44,7 +43,6 @@
   box-shadow: inset 0 0 0 4px var(--pill-bg);
 }
 
-/* user */
 .sb-user {
   display: flex;
   align-items: center;
@@ -64,7 +62,6 @@
   font-size: 16px;
 }
 
-/* nav list */
 .sb-list {
   list-style: none;
   margin: 6px 0 0;
@@ -77,7 +74,6 @@
   display: block;
 }
 
-/* nav item */
 .sb-item {
   position: relative;
   display: grid;
@@ -96,12 +92,12 @@
 }
 
 .sb-item:hover {
-  background: #f8fafc;
+  background: color-mix(in srgb, var(--panel) 90%, var(--bg));
 }
 
 .sb-item.is-active {
-  background: var(--pill-bg);
-  border-color: var(--pill-stroke);
+  background: var(--primary-ghost);
+  border-color: var(--primary);
   box-shadow: 0 0 0 1px var(--pill-stroke) inset;
 }
 
@@ -127,19 +123,17 @@
   line-height: 1;
 }
 
-/* spacer works because .sb is flex */
 .sb-spacer {
   flex: 1;
 }
 
-/* exit */
 .sb-exit {
+  background: color-mix(in srgb, var(--primary-ghost) 50%, transparent);
+  border: 1px solid var(--primary);
   margin-top: auto;
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f3f7ff;
-  border: 1px solid var(--pill-stroke);
   padding: 10px 12px;
   border-radius: 12px;
   cursor: pointer;
@@ -147,10 +141,9 @@
 }
 
 .sb-exit:hover {
-  background: var(--pill-bg);
+  background: var(--primary-ghost);
 }
 
-/* Mobile Responsive Styles */
 @media (width <= 768px) {
   .sb {
     position: fixed;

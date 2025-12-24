@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+import { api } from './client';
 
 export interface LoginRequest {
   username: string;
@@ -12,7 +12,6 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   access_token: string;
-  refresh_token: string;
   token_type: string;
 }
 
@@ -24,78 +23,55 @@ export interface User {
   updated_at: string;
 }
 
+export interface PasswordChangeRequest {
+  old_password: string;
+  new_password: string;
+}
+
 export const authApi = {
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+    return api.post<AuthResponse>('/auth/login', data, {
+      headers: { 'X-Skip-Auth': '1' },
+      skipAuth: true,
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Login failed');
-    }
-
-    return response.json();
   },
 
   async register(data: RegisterRequest): Promise<User> {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+    return api.post<User>('/auth/register', data, {
+      headers: { 'X-Skip-Auth': '1' },
+      skipAuth: true,
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Registration failed');
-    }
-
-    return response.json();
   },
 
   async getCurrentUser(token: string): Promise<User> {
-    const response = await fetch(`${API_URL}/users/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    return api.get<User>('/users/me', {
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to get user');
-    }
-
-    return response.json();
   },
 
-  async refreshToken(refreshToken: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+  async changePassword(data: PasswordChangeRequest, token: string): Promise<void> {
+    await api.post<void>('/users/me/password', data, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    if (!response.ok) {
-      throw new Error('Token refresh failed');
-    }
-
-    return response.json();
   },
 
-  async logout(refreshToken: string): Promise<void> {
-    await fetch(`${API_URL}/auth/logout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+  async refreshToken(): Promise<AuthResponse> {
+    return api.post<AuthResponse>('/auth/refresh', undefined, {
+      headers: { 'X-Skip-Auth': '1' },
+      skipAuth: true,
+    });
+  },
+
+  async logout(): Promise<void> {
+    await api.post<void>('/auth/logout', undefined, {
+      headers: { 'X-Skip-Auth': '1' },
+      skipAuth: true,
+    });
+  },
+
+  async deleteAccount(accessToken: string): Promise<void> {
+    await api.delete<void>('/users/me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
   },
 };

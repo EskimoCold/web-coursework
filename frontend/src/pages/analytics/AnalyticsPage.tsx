@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import {
   AreaChart,
   Area,
@@ -12,47 +12,51 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Line,
 } from 'recharts';
 
 import './analytics.css';
-import { categoriesApi } from '../../api/categories';
-import { Transaction, transactionsApi } from '../../api/transactions';
-import { Category } from '../../contexts/CategoriesContext';
+
+import { Transaction } from '../../api/transactions';
+import { useCurrency } from '../../contexts/CurrencyContext';
+
+import { FilterOption, useAnalyticsStore } from './analyticsStore';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
+type NormalizedTransaction = Omit<Transaction, 'transaction_date'> & { transaction_date: Date };
+const FILTERS: [FilterOption, string][] = [
+  ['week', 'Неделя'],
+  ['month', 'Месяц'],
+  ['year', 'Год'],
+  ['all', 'Все время'],
+];
 
 export const AnalyticsPage: React.FC = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [filter, setFilter] = useState<string>('all');
+  const { convertAmount, getCurrencySymbol } = useCurrency();
+  const {
+    transactions,
+    categories,
+    filter,
+    setFilter,
+    expenseForecast,
+    isForecasting,
+    forecastError,
+    fetchInitialData,
+    runForecast,
+  } = useAnalyticsStore();
 
   useEffect(() => {
-    (async () => {
-      const [tx, cats] = await Promise.all([
-        transactionsApi.getTransactions(),
-        categoriesApi.getCategories(), // +
-      ]);
-      setTransactions(tx);
-      setCategories(cats); // +
-    })();
-  }, []);
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  useEffect(() => {}, []);
 
   const categoryNameById = useMemo(
     () => Object.fromEntries((categories ?? []).map((c) => [String(c.id), c.name])),
     [categories],
   );
 
-  const filters = useMemo(
-    () => [
-      ['week', 'Неделя'],
-      ['month', 'Месяц'],
-      ['year', 'Год'],
-      ['all', 'Все время'],
-    ],
-    [],
-  );
-
-  const formatDate = (t: string | Date) => {
+  const formatDate = useCallback((t: string | Date) => {
     const formatter = new Intl.DateTimeFormat('ru-RU', {
       year: 'numeric',
       month: '2-digit',
@@ -60,7 +64,7 @@ export const AnalyticsPage: React.FC = () => {
     });
     const date = new Date(t);
     return formatter.format(date);
-  };
+  }, []);
 
   const from = useMemo(() => {
     const now = new Date();
@@ -84,29 +88,14 @@ export const AnalyticsPage: React.FC = () => {
 
   const to = useMemo(() => new Date(), []);
 
-  useEffect(() => {
-    const getData = async () => {
-      setTransactions(await transactionsApi.getTransactions());
-    };
-
-    getData();
-  }, []);
-
-  const filteredTransactions = useMemo(
+  const filteredTransactions = useMemo<NormalizedTransaction[]>(
     () =>
       transactions
-        .map((t) => {
-          return {
-            ...t,
-            transaction_date: new Date(t.transaction_date),
-          };
-        })
-        .filter((t) => t.transaction_date >= from)
-        .filter((t) => t.transaction_date <= to)
-        .map((t) => ({
+        .map<NormalizedTransaction>((t) => ({
           ...t,
-          transaction_date: formatDate(t.transaction_date),
-        })),
+          transaction_date: new Date(t.transaction_date),
+        }))
+        .filter((t) => t.transaction_date >= from && t.transaction_date <= to),
     [transactions, from, to],
   );
 
@@ -124,33 +113,35 @@ export const AnalyticsPage: React.FC = () => {
     [filteredTransactions],
   );
 
-  const incomeExpenseData = useMemo(() => {
-    const ied = new Map<string, Array<number>>([]);
-    filteredTransactions.forEach((transaction) => {
-      const dts = transaction.transaction_date;
-      let num = ied.get(dts);
-      const ind = transaction.transaction_type === 'income' ? 0 : 1;
+  const dailyIncomeExpense = useMemo(() => {
+    const totals = new Map<number, { income: number; expense: number }>();
 
-      if (!num) {
-        num = [0, 0];
-        num[ind] = num[ind] + transaction.amount;
-        ied.set(dts, num);
-      } else {
-        num[ind] = num[ind] + transaction.amount;
+    filteredTransactions.forEach((transaction) => {
+      const day = new Date(transaction.transaction_date);
+      day.setHours(0, 0, 0, 0);
+      const key = day.getTime();
+
+      const current = totals.get(key) ?? { income: 0, expense: 0 };
+      if (transaction.transaction_type === 'income') {
+        current.income += transaction.amount;
+      } else if (transaction.transaction_type === 'expense') {
+        current.expense += transaction.amount;
       }
+      totals.set(key, current);
     });
 
-    const res: { date: string; income: number; expense: number }[] = [];
-    ied.forEach((num, date) =>
-      res.push({
-        date: date,
-        income: num[0],
-        expense: num[1],
-      }),
-    );
+    return Array.from(totals.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([timestamp, values]) => ({
+        date: new Date(timestamp),
+        income: convertAmount(values.income),
+        expense: convertAmount(values.expense),
+      }));
+  }, [filteredTransactions, convertAmount]);
 
-    return res.sort((a, b) => (a.date < b.date ? -1 : 1));
-  }, [filteredTransactions]);
+  useEffect(() => {
+    runForecast(dailyIncomeExpense);
+  }, [dailyIncomeExpense, runForecast]);
 
   const incomeByCategory = useMemo(() => {
     const imp = new Map<string, number>();
@@ -161,8 +152,8 @@ export const AnalyticsPage: React.FC = () => {
         imp.set(name, (imp.get(name) || 0) + t.amount);
       });
 
-    return Array.from(imp, ([name, value]) => ({ name, value }));
-  }, [filteredTransactions, categoryNameById]);
+    return Array.from(imp, ([name, value]) => ({ name: name, value: convertAmount(value) }));
+  }, [filteredTransactions, categoryNameById, convertAmount]);
 
   const expenseByCategory = useMemo(() => {
     const imp = new Map<string, number>();
@@ -173,16 +164,65 @@ export const AnalyticsPage: React.FC = () => {
         imp.set(name, (imp.get(name) || 0) + t.amount);
       });
 
-    return Array.from(imp, ([name, value]) => ({ name, value }));
-  }, [filteredTransactions, categoryNameById]);
+    return Array.from(imp, ([name, value]) => ({ name: name, value: convertAmount(value) }));
+  }, [filteredTransactions, categoryNameById, convertAmount]);
+
+  const chartData = useMemo(() => {
+    const byDate = new Map<
+      number,
+      { date: string; income: number; expense: number; predictedExpense?: number }
+    >();
+
+    dailyIncomeExpense.forEach(({ date, income, expense }) => {
+      byDate.set(date.getTime(), {
+        date: formatDate(date),
+        income,
+        expense,
+      });
+    });
+
+    expenseForecast.forEach(({ date, predictedExpense }) => {
+      const ts = date.getTime();
+      const existing = byDate.get(ts);
+      const label = formatDate(date);
+      const convertedPredicted = predictedExpense;
+
+      if (existing) {
+        byDate.set(ts, { ...existing, predictedExpense: convertedPredicted });
+      } else {
+        byDate.set(ts, {
+          date: label,
+          income: 0,
+          expense: 0,
+          predictedExpense: convertedPredicted,
+        });
+      }
+    });
+
+    return Array.from(byDate.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([, value]) => value);
+  }, [dailyIncomeExpense, expenseForecast, formatDate]);
+
+  const tooltipFormatter = useCallback(
+    (value: number, name: string) => {
+      const symbol = getCurrencySymbol();
+      if (name === 'income') return [`${value.toLocaleString('ru-RU')} ${symbol}`, 'Доход'];
+      if (name === 'expense') return [`${value.toLocaleString('ru-RU')} ${symbol}`, 'Расход'];
+      if (name === 'predictedExpense')
+        return [`${value.toLocaleString('ru-RU')} ${symbol}`, 'Прогноз расхода'];
+      return [`${value.toLocaleString('ru-RU')} ${symbol}`, name];
+    },
+    [getCurrencySymbol],
+  );
 
   return (
     <div className="anal-main">
       <div className="anal-filters">
-        {filters.map((f) => (
+        {FILTERS.map((f) => (
           <button
             key={f[0]}
-            className={filter === f[0] ? 'anal-filter-active' : ''}
+            className={'anal-filters-btn ' + (filter === f[0] ? 'anal-filter-active' : '')}
             onClick={() => setFilter(f[0])}
           >
             {f[1]}
@@ -193,15 +233,21 @@ export const AnalyticsPage: React.FC = () => {
       <div className="anal-info-grid">
         <div>
           <p className="anal-label">Общий баланс</p>
-          <p className="anal-value total">{incomes - expenses} ₽</p>
+          <p className="anal-value total">
+            {convertAmount(incomes - expenses).toLocaleString('ru-RU')} {getCurrencySymbol()}
+          </p>
         </div>
         <div>
           <p className="anal-label">Доходы</p>
-          <p className="anal-value income">{incomes} ₽</p>
+          <p className="anal-value income">
+            {convertAmount(incomes).toLocaleString('ru-RU')} {getCurrencySymbol()}
+          </p>
         </div>
         <div>
           <p className="anal-label">Расходы</p>
-          <p className="anal-value expense">{expenses} ₽</p>
+          <p className="anal-value expense">
+            {convertAmount(expenses).toLocaleString('ru-RU')} {getCurrencySymbol()}
+          </p>
         </div>
         <div>
           <p className="anal-label">Всего операций</p>
@@ -212,14 +258,13 @@ export const AnalyticsPage: React.FC = () => {
       <div className="anal-charts-grid">
         <div className="anal-chart-container">
           <h3 className="anal-chart-title">Динамика доходов и расходов</h3>
-          <ResponsiveContainer width="100%" height="70%">
-            <AreaChart data={incomeExpenseData}>
+          {forecastError && <p className="anal-value expense">{forecastError}</p>}
+          <ResponsiveContainer width="100%" height={320}>
+            <AreaChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
-              <Tooltip
-                formatter={(value, name) => [`${value} ₽`, name === 'income' ? 'Доход' : 'Расход']}
-              />
+              <Tooltip formatter={tooltipFormatter} />
               <Area
                 type="monotone"
                 dataKey="expense"
@@ -235,6 +280,16 @@ export const AnalyticsPage: React.FC = () => {
                 stroke="#00C49F"
                 fill="#00C49F"
                 fillOpacity={0.3}
+              />
+              <Line
+                type="monotone"
+                dataKey="predictedExpense"
+                stroke="#6A4BFF"
+                strokeWidth={2}
+                dot={false}
+                strokeDasharray="6 3"
+                connectNulls
+                isAnimationActive={!isForecasting}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -253,7 +308,13 @@ export const AnalyticsPage: React.FC = () => {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value} ₽`}
+                  label={(props: { name?: string; value?: number }) => {
+                    // eslint-disable-next-line react/prop-types
+                    const name = props.name || '';
+                    // eslint-disable-next-line react/prop-types
+                    const value = typeof props.value === 'number' ? props.value : 0;
+                    return `${name}: ${value.toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
+                  }}
                 >
                   {expenseByCategory.map((_, index) => (
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />

@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,8 +15,31 @@ from src.core.security import (
 )
 from src.models.refresh_token import RefreshToken
 from src.models.user import User
-from src.schemas.token import Token, TokenRefresh
+from src.schemas.token import TokenResponse
 from src.schemas.user import UserCreate, UserLogin, UserResponse
+
+
+def set_refresh_token_cookie(response: Response, refresh_token: str) -> None:
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=settings.refresh_token_expire_days * 24 * 60 * 60,
+        path="/api/v1/auth",  # Only send cookie to auth endpoints
+    )
+
+
+def clear_refresh_token_cookie(response: Response) -> None:
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=not settings.debug,
+        samesite="lax",
+        path="/api/v1/auth",
+    )
+
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -45,8 +68,12 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     return new_user
 
 
-@router.post("/login", response_model=Token)
-async def login(user_data: UserLogin, db: AsyncSession = Depends(get_db)):
+@router.post("/login", response_model=TokenResponse)
+async def login(
+    user_data: UserLogin,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
     result = await db.execute(select(User).filter(User.username == user_data.username))
     user = result.scalar_one_or_none()
 
@@ -75,27 +102,37 @@ async def login(user_data: UserLogin, db: AsyncSession = Depends(get_db)):
     db.add(refresh_token)
     await db.commit()
 
+    set_refresh_token_cookie(response, refresh_token_str)
+
     return {
         "access_token": access_token,
-        "refresh_token": refresh_token_str,
         "token_type": "bearer",
     }
 
 
-@router.post("/refresh", response_model=Token)
+@router.post("/refresh", response_model=TokenResponse)
 async def refresh_token(
-    token_data: TokenRefresh,
+    response: Response,
     db: AsyncSession = Depends(get_db),
+    refresh_token_cookie: str | None = Cookie(None, alias="refresh_token"),
 ):
-    payload = decode_token(token_data.refresh_token)
+    if not refresh_token_cookie:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token not provided",
+        )
+
+    payload = decode_token(refresh_token_cookie)
 
     if payload is None:
+        clear_refresh_token_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
         )
 
     if payload.get("type") != "refresh":
+        clear_refresh_token_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token type",
@@ -103,6 +140,7 @@ async def refresh_token(
 
     user_id_str = payload.get("sub")
     if user_id_str is None:
+        clear_refresh_token_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
@@ -111,6 +149,7 @@ async def refresh_token(
     try:
         user_id = int(user_id_str)
     except (ValueError, TypeError):
+        clear_refresh_token_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
@@ -118,25 +157,28 @@ async def refresh_token(
 
     result = await db.execute(
         select(RefreshToken).filter(
-            RefreshToken.token == token_data.refresh_token,
+            RefreshToken.token == refresh_token_cookie,
             RefreshToken.user_id == user_id,
         )
     )
     stored_token = result.scalar_one_or_none()
 
     if not stored_token:
+        clear_refresh_token_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token not found",
         )
 
     if stored_token.is_revoked:
+        clear_refresh_token_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token has been revoked",
         )
 
     if stored_token.expires_at < datetime.now(UTC):
+        clear_refresh_token_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token has expired",
@@ -146,6 +188,7 @@ async def refresh_token(
     user = result.scalar_one_or_none()
 
     if not user or not user.is_active:
+        clear_refresh_token_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or inactive",
@@ -165,25 +208,30 @@ async def refresh_token(
     db.add(new_refresh_token)
     await db.commit()
 
+    set_refresh_token_cookie(response, new_refresh_token_str)
+
     return {
         "access_token": new_access_token,
-        "refresh_token": new_refresh_token_str,
         "token_type": "bearer",
     }
 
 
 @router.post("/logout")
 async def logout(
-    token_data: TokenRefresh,
+    response: Response,
     db: AsyncSession = Depends(get_db),
+    refresh_token_cookie: str | None = Cookie(None, alias="refresh_token"),
 ):
-    result = await db.execute(
-        select(RefreshToken).filter(RefreshToken.token == token_data.refresh_token)
-    )
-    stored_token = result.scalar_one_or_none()
+    if refresh_token_cookie:
+        result = await db.execute(
+            select(RefreshToken).filter(RefreshToken.token == refresh_token_cookie)
+        )
+        stored_token = result.scalar_one_or_none()
 
-    if stored_token:
-        stored_token.is_revoked = True
-        await db.commit()
+        if stored_token:
+            stored_token.is_revoked = True
+            await db.commit()
+
+    clear_refresh_token_cookie(response)
 
     return {"message": "Successfully logged out"}

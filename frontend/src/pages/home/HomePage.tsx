@@ -1,7 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import { transactionsApi, Transaction, Category, TransactionCreate } from '../../api/transactions';
+import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
+import { Icon } from '../../components/Icon';
+import { useCurrency } from '../../contexts/CurrencyContext';
+
 import './home.css';
+
+import { useHomeStore } from './homeStore';
 
 interface TransactionSummary {
   totalIncome: number;
@@ -9,54 +14,36 @@ interface TransactionSummary {
   balance: number;
 }
 
-const MOCK_TRANSACTIONS: Transaction[] = [
-  {
-    id: 1,
-    amount: 1500,
-    transaction_type: 'expense',
-    transaction_date: '2024-01-15T00:00:00Z',
-    description: 'Продукты в супермаркете',
-    category: { id: 1, name: 'Продукты' },
-  },
-  {
-    id: 2,
-    amount: 50000,
-    transaction_type: 'income',
-    transaction_date: '2024-01-10T00:00:00Z',
-    description: 'Зарплата за январь',
-    category: { id: 2, name: 'Зарплата' },
-  },
-  {
-    id: 3,
-    amount: 800,
-    transaction_type: 'expense',
-    transaction_date: '2024-01-08T00:00:00Z',
-    description: 'Проездной на метро',
-    category: { id: 3, name: 'Транспорт' },
-  },
-];
-
 export function HomePage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
-  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [useBackend, setUseBackend] = useState(true);
-  const [backendError, setBackendError] = useState<string | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [formLoading, setFormLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    amount: '',
-    description: '',
-    transaction_type: 'expense',
-    category_id: '',
-    transaction_date: new Date().toISOString().split('T')[0],
-  });
+  const { convertAmount, revertAmount, getCurrencySymbol } = useCurrency();
+  const {
+    currentPage,
+    filter,
+    allTransactions,
+    categories,
+    loading,
+    useBackend,
+    backendError,
+    showAddModal,
+    formLoading,
+    formData,
+    loadData,
+    setCurrentPage,
+    setFilter,
+    setShowAddModal,
+    setFormLoading,
+    setFormData,
+    resetForm,
+    addLocalTransaction,
+    deleteLocalTransaction,
+  } = useHomeStore();
 
   const itemsPerPage = 5;
 
-  // Фильтрация транзакций на клиенте
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   const filteredTransactions = useMemo(() => {
     if (filter === 'all') {
       return allTransactions;
@@ -64,22 +51,22 @@ export function HomePage() {
     return allTransactions.filter((t) => t.transaction_type === filter);
   }, [allTransactions, filter]);
 
-  // Вычисление summary
   const summary = useMemo((): TransactionSummary => {
-    const totalIncome = allTransactions
-      .filter((t) => t.transaction_type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+    const totalIncome = allTransactions.reduce(
+      (acc, curVal) => acc + (curVal.transaction_type === 'income' ? curVal.amount : 0),
+      0,
+    );
 
-    const totalExpenses = allTransactions
-      .filter((t) => t.transaction_type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = allTransactions.reduce(
+      (acc, curVal) => acc + (curVal.transaction_type === 'expense' ? curVal.amount : 0),
+      0,
+    );
 
     const balance = totalIncome - totalExpenses;
 
     return { totalIncome, totalExpenses, balance };
   }, [allTransactions]);
 
-  // Пагинация
   const paginatedTransactions = useMemo(() => {
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -89,61 +76,13 @@ export function HomePage() {
     };
   }, [filteredTransactions, currentPage, itemsPerPage]);
 
-  // Загрузка данных один раз при монтировании
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setBackendError(null);
-
-      if (useBackend) {
-        try {
-          const [transactionsData, categoriesData] = await Promise.all([
-            transactionsApi.getTransactions(),
-            transactionsApi.getCategories(),
-          ]);
-          setAllTransactions(transactionsData);
-          setCategories(categoriesData);
-          setBackendError(null);
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-          setBackendError(`Бэкенд недоступен: ${errorMessage}`);
-          setUseBackend(false);
-          // Переключаемся на моки
-          setAllTransactions(MOCK_TRANSACTIONS);
-          setCategories([]);
-        }
-      } else {
-        setAllTransactions(MOCK_TRANSACTIONS);
-        setCategories([]);
-      }
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка';
-      setBackendError(`Ошибка: ${errorMessage}`);
-      setAllTransactions(MOCK_TRANSACTIONS);
-      setCategories([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [useBackend]);
-
-  // Загружаем данные только при монтировании и смене useBackend
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
   const handleAddTransaction = () => {
     setShowAddModal(true);
   };
 
   const handleCloseModal = () => {
     setShowAddModal(false);
-    setFormData({
-      amount: '',
-      description: '',
-      transaction_type: 'expense',
-      category_id: '',
-      transaction_date: new Date().toISOString().split('T')[0],
-    });
+    resetForm();
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -173,7 +112,7 @@ export function HomePage() {
       }
 
       const submitData: TransactionCreate = {
-        amount: parseFloat(formData.amount),
+        amount: revertAmount(parseFloat(formData.amount)),
         description: formData.description,
         transaction_type: formData.transaction_type as 'income' | 'expense',
         category_id: categoryId,
@@ -182,7 +121,6 @@ export function HomePage() {
 
       if (useBackend) {
         await transactionsApi.createTransaction(submitData);
-        // После успешного создания перезагружаем данные
         await loadData();
       } else {
         const { category_id, ...transactionData } = submitData;
@@ -191,8 +129,7 @@ export function HomePage() {
           ...transactionData,
           category: categories.find((c) => c.id === category_id),
         };
-        // Добавляем транзакцию локально
-        setAllTransactions((prev) => [newTransaction, ...prev]);
+        addLocalTransaction(newTransaction);
       }
       handleCloseModal();
     } catch (error) {
@@ -216,12 +153,28 @@ export function HomePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleFilterChange = (newFilter: 'all' | 'income' | 'expense') => {
     setFilter(newFilter);
-    setCurrentPage(1); // Сбрасываем на первую страницу при смене фильтра
+    setCurrentPage(1);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const formatAmount = (amount: number) => {
+    const convertedAmount = convertAmount(amount);
+    return new Intl.NumberFormat('ru-RU', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(convertedAmount);
   };
 
   if (loading) {
@@ -232,31 +185,52 @@ export function HomePage() {
     );
   }
 
+  const handleDeleteTransaction = async (id: number) => {
+    try {
+      if (useBackend) {
+        await transactionsApi.deleteTransaction(id);
+        await loadData();
+      } else {
+        deleteLocalTransaction(id);
+      }
+    } catch {
+      alert('Ошибка! Не получилось удалить транзакцию');
+    }
+  };
+
   return (
     <div className="home-page">
       {backendError && <div className="backend-error">⚠️ {backendError}</div>}
 
       <div className="summary-section">
         <div className="summary-header">
-          <button className="add-button" onClick={handleAddTransaction}>
+          <div>
+            <h1>Дашборд финансов</h1>
+            <p>Быстрый обзор ваших доходов и расходов</p>
+          </div>
+          <button className="primary-button add-button" onClick={handleAddTransaction}>
             + Добавить транзакцию
           </button>
         </div>
 
         <div className="summary-cards">
           <div className="summary-card balance">
-            <h3>Общий баланс</h3>
-            <div className="amount">{summary.balance.toLocaleString('ru-RU')} ₽</div>
+            <h3>Баланс</h3>
+            <div className="amount">
+              {formatAmount(summary.balance)} {getCurrencySymbol()}
+            </div>
           </div>
-
           <div className="summary-card income">
             <h3>Доходы</h3>
-            <div className="amount">+{summary.totalIncome.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">
+              +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+            </div>
           </div>
-
           <div className="summary-card expense">
             <h3>Расходы</h3>
-            <div className="amount">-{summary.totalExpenses.toLocaleString('ru-RU')} ₽</div>
+            <div className="amount">
+              -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+            </div>
           </div>
         </div>
       </div>
@@ -282,121 +256,148 @@ export function HomePage() {
             Расходы
           </button>
         </div>
-
         <div className="table-info">
           Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length}{' '}
-          операций
+          транзакций
         </div>
       </div>
 
+      {/* Transactions Table - Desktop */}
       <div className="transactions-table-container">
-        <table className="transactions-table">
-          <thead>
-            <tr>
-              <th>Категория</th>
-              <th>Дата</th>
-              <th>Сумма</th>
-              <th>Описание</th>
-              <th>Тип</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedTransactions.transactions.map((transaction) => (
-              <tr key={transaction.id}>
-                <td className="category-cell">
-                  <span className="category-badge">
-                    {categories?.find((c) => Number(c.id) === Number(transaction.category_id))
-                      ?.name ?? 'Без категории'}
-                  </span>
-                </td>
-                <td>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</td>
-                <td className={`amount-cell ${transaction.transaction_type}`}>
-                  {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {transaction.amount.toLocaleString('ru-RU')} ₽
-                </td>
-                <td className="description-cell">{transaction.description}</td>
-                <td>
-                  <span className={`type-badge ${transaction.transaction_type}`}>
-                    {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
-                  </span>
-                </td>
+        {paginatedTransactions.transactions.length === 0 ? (
+          <div className="empty-state">
+            <p>Нет транзакций для отображения</p>
+          </div>
+        ) : (
+          <table className="transactions-table">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Описание</th>
+                <th>Категория</th>
+                <th>Тип</th>
+                <th>Сумма</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Мобильное отображение */}
-        <div className="mobile-transactions">
-          {paginatedTransactions.transactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              className={`mobile-transaction-card ${transaction.transaction_type}`}
-            >
-              <div className="mobile-card-header">
-                <div className="mobile-card-category">
-                  {categories?.find((c) => Number(c.id) === Number(transaction.category_id))
-                    ?.name ?? 'Без категории'}
-                </div>
-                <div className={`mobile-card-amount ${transaction.transaction_type}`}>
-                  {transaction.transaction_type === 'income' ? '+' : '-'}
-                  {transaction.amount.toLocaleString('ru-RU')} ₽
-                </div>
-              </div>
-              <div className="mobile-card-description">{transaction.description}</div>
-              <div className="mobile-card-footer">
-                <span>{new Date(transaction.transaction_date).toLocaleDateString('ru-RU')}</span>
-                <span className={`type-badge ${transaction.transaction_type}`}>
-                  {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredTransactions.length === 0 && (
-          <div className="empty-state">Нет транзакций для отображения</div>
+            </thead>
+            <tbody>
+              {paginatedTransactions.transactions.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td>{formatDate(transaction.transaction_date)}</td>
+                  <td>
+                    <div className="description-cell">
+                      <div className="description-text">{transaction.description}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="category-badge">
+                      {categories.find((c) => c.id === transaction.category_id)?.name ||
+                        'Без категории'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`type-badge ${transaction.transaction_type}`}>
+                      {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
+                    </span>
+                  </td>
+                  <td className={`amount-cell ${transaction.transaction_type}`}>
+                    {transaction.transaction_type === 'income' ? '+' : '-'}
+                    {formatAmount(transaction.amount)} {getCurrencySymbol()}
+                  </td>
+                  <td>
+                    <button
+                      className="home-trans-del-btn"
+                      onClick={() => handleDeleteTransaction(transaction.id)}
+                    >
+                      <Icon source="icons/sidebar/trash.png" size={20} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 
+      {/* Mobile Transactions Cards */}
+      <div className="mobile-transactions">
+        {paginatedTransactions.transactions.map((transaction) => (
+          <div
+            key={transaction.id}
+            className={`mobile-transaction-card ${transaction.transaction_type}`}
+          >
+            <div className="mobile-card-header">
+              <div className="mobile-card-category">
+                {transaction.category?.name || 'Без категории'}
+              </div>
+              <div className={`mobile-card-amount ${transaction.transaction_type}`}>
+                {transaction.transaction_type === 'income' ? '+' : '-'}
+                {formatAmount(transaction.amount)} {getCurrencySymbol()}
+              </div>
+            </div>
+            <div className="mobile-card-description">{transaction.description}</div>
+            <div className="mobile-card-footer">
+              <div className="mobile-card-date">{formatDate(transaction.transaction_date)}</div>
+              <span className={`mobile-card-type ${transaction.transaction_type}`}>
+                {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination */}
       {paginatedTransactions.totalPages > 1 && (
         <div className="pagination">
           <button
             className="pagination-btn"
-            disabled={currentPage === 1}
             onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
           >
-            Назад
+            ← Назад
           </button>
 
           <div className="pagination-numbers">
-            {Array.from({ length: paginatedTransactions.totalPages }, (_, i) => i + 1).map(
-              (page) => (
+            {Array.from({ length: Math.min(5, paginatedTransactions.totalPages) }, (_, i) => {
+              let pageNum;
+              if (paginatedTransactions.totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= paginatedTransactions.totalPages - 2) {
+                pageNum = paginatedTransactions.totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+
+              return (
                 <button
-                  key={page}
-                  className={`pagination-number ${currentPage === page ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(page)}
+                  key={pageNum}
+                  className={`pagination-number ${currentPage === pageNum ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(pageNum)}
                 >
-                  {page}
+                  {pageNum}
                 </button>
-              ),
-            )}
+              );
+            })}
           </div>
 
           <button
             className="pagination-btn"
-            disabled={currentPage === paginatedTransactions.totalPages}
             onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === paginatedTransactions.totalPages}
           >
-            Вперед
+            Далее →
           </button>
         </div>
       )}
 
+      {/* Add Transaction Modal */}
       {showAddModal && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Добавить транзакцию</h2>
+              <h2>Новая транзакция</h2>
               <button className="close-button" onClick={handleCloseModal}>
                 ×
               </button>
@@ -404,7 +405,7 @@ export function HomePage() {
 
             <form onSubmit={handleFormSubmit}>
               <div className="form-group">
-                <label htmlFor="transaction_type">Тип операции *</label>
+                <label htmlFor="transaction_type">Тип операции</label>
                 <select
                   id="transaction_type"
                   name="transaction_type"
@@ -418,29 +419,29 @@ export function HomePage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="amount">Сумма *</label>
+                <label htmlFor="amount">Сумма ({getCurrencySymbol()})</label>
                 <input
                   type="number"
                   id="amount"
                   name="amount"
                   value={formData.amount}
                   onChange={handleInputChange}
-                  min="0.01"
+                  min="0"
                   step="0.01"
-                  placeholder="Введите сумму"
+                  placeholder="0.00"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="description">Описание *</label>
+                <label htmlFor="description">Описание</label>
                 <textarea
                   id="description"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  rows={3}
-                  placeholder="Введите описание транзакции"
+                  placeholder="Краткое описание транзакции"
+                  rows={2}
                   required
                 />
               </div>
@@ -460,15 +461,11 @@ export function HomePage() {
                     </option>
                   ))}
                 </select>
-                {categories.length === 0 && useBackend && (
-                  <div className="category-hint">
-                    На сервере нет созданных категорий. Вы можете создать транзакцию без категории.
-                  </div>
-                )}
+                <div className="category-hint">Необязательно</div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="transaction_date">Дата *</label>
+                <label htmlFor="transaction_date">Дата операции</label>
                 <input
                   type="date"
                   id="transaction_date"
@@ -484,7 +481,7 @@ export function HomePage() {
                   Отмена
                 </button>
                 <button type="submit" className="submit-button" disabled={formLoading}>
-                  {formLoading ? 'Создание...' : 'Создать транзакцию'}
+                  {formLoading ? 'Сохранение...' : 'Сохранить'}
                 </button>
               </div>
             </form>

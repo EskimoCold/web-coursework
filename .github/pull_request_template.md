@@ -1,4 +1,5 @@
 ## 📝 Summary
+
 <!-- Briefly explain what this PR does and why it’s needed -->
 
 Fixes # (issue)
@@ -6,7 +7,9 @@ Fixes # (issue)
 ---
 
 ## 🔍 What’s Changed
+
 <!-- List key changes made in this PR -->
+
 - [ ] Updated component:
 - [ ] Added hook / logic:
 - [ ] UI / style change:
@@ -14,11 +17,13 @@ Fixes # (issue)
 ---
 
 ## 📸 Screenshots / Logs (optional)
+
 <!-- Add before/after screenshots, logs, or console output -->
 
 ---
 
 ## 🔒 Checklist
+
 - [ ] Runs locally (no console errors)
 - [ ] Code follows style guidelines
 - [ ] Tests added / updated
@@ -27,4 +32,5 @@ Fixes # (issue)
 ---
 
 ## 🧠 Notes for Reviewers
+
 <!-- Anything special reviewers should pay attention to -->

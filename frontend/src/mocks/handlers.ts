@@ -1,4 +1,3 @@
-// src/mocks/handlers.ts
 import { http, HttpResponse } from 'msw';
 
 interface Category {
@@ -22,10 +21,35 @@ interface DeleteCategoryRequest {
 }
 
 export const handlers = [
-  // ... существующие handlers ...
+  http.options('*/api/v1/*', () => {
+    return new HttpResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': '*',
+        'Access-Control-Allow-Headers': '*',
+      },
+    });
+  }),
 
-  // Новые handlers для HomePage
-  http.get('/api/v1/transactions', () => {
+  http.post('*/api/v1/auth/refresh', () => {
+    return HttpResponse.json({ detail: 'Token refresh failed' }, { status: 401 });
+  }),
+
+  http.get('*/api/v1/currency/rates', () => {
+    return HttpResponse.json({
+      base: 'RUB',
+      date: '2024-01-01',
+      rates: {
+        RUB: 1,
+        USD: 0.011,
+        EUR: 0.01,
+        CNY: 0.08,
+      },
+    });
+  }),
+
+  http.get('*/api/v1/transactions', () => {
     return HttpResponse.json([
       {
         id: 1,
@@ -54,14 +78,14 @@ export const handlers = [
     ]);
   }),
 
-  http.get('/api/v1/categories', () => {
+  http.get('*/api/v1/categories', () => {
     return HttpResponse.json([
       { id: 1, name: 'Продукты' },
       { id: 2, name: 'Зарплата' },
       { id: 3, name: 'Транспорт' },
     ]);
   }),
-  http.get('/api/cat/list', () => {
+  http.get('*/api/cat/list', () => {
     return HttpResponse.json(
       Array.from({ length: 10 }, (_, i) => ({
         id: i,
@@ -72,7 +96,7 @@ export const handlers = [
       })),
     );
   }),
-  http.post('/api/cat/add', async ({ request }) => {
+  http.post('*/api/cat/add', async ({ request }) => {
     const data = (await request.json()) as AddCategoryRequest;
     const { name, description, icon, type, id } = data;
 
@@ -93,7 +117,7 @@ export const handlers = [
       { status: 201 },
     );
   }),
-  http.delete('/api/cat/delete', async ({ request }) => {
+  http.delete('*/api/cat/delete', async ({ request }) => {
     const data = (await request.json()) as DeleteCategoryRequest;
     const { id } = data;
 

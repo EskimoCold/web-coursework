@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
 
 import { CategoriesPage } from './CategoriesPage';
+import { resetCategoriesPageStore } from './categoriesPageStore';
 
 vi.mock('./CategoryCard', () => ({
   CategoryCard: ({ cat, handleClick }: { cat: Category; handleClick: () => void }) => (
@@ -40,29 +41,29 @@ const mockCategories: Category[] = [
   {
     id: 1,
     name: 'Food',
-    type: 0,
     icon: 'food-icon',
     description: 'Food expenses',
   },
   {
     id: 2,
     name: 'Salary',
-    type: 1,
     icon: 'salary-icon',
     description: 'Salary income',
   },
   {
     id: 3,
     name: 'Entertainment',
-    type: 0,
     icon: 'entertainment-icon',
     description: 'Entertainment expenses',
   },
 ];
 
-const renderComponent = (categories: Category[] = mockCategories) => {
+const mockIcons = ['1.svg', '2.svg', '3.svg'];
+
+const renderComponent = (categories: Category[] = mockCategories, icons: string[] = mockIcons) => {
   (useCategories as vi.Mock).mockReturnValue({
     categories,
+    icons,
   });
 
   return render(<CategoriesPage />);
@@ -71,6 +72,7 @@ const renderComponent = (categories: Category[] = mockCategories) => {
 describe('Categories', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCategoriesPageStore();
   });
 
   it('should render all categories by default', () => {
@@ -85,9 +87,6 @@ describe('Categories', () => {
     renderComponent();
 
     expect(screen.getByPlaceholderText('Поиск')).toBeInTheDocument();
-    // expect(screen.getByText('Все')).toBeInTheDocument();
-    // expect(screen.getByText('Доходы')).toBeInTheDocument();
-    // expect(screen.getByText('Расходы')).toBeInTheDocument();
   });
 
   it('should filter categories by search query', () => {
@@ -100,40 +99,6 @@ describe('Categories', () => {
     expect(screen.queryByTestId('category-card-2')).not.toBeInTheDocument();
     expect(screen.queryByTestId('category-card-3')).not.toBeInTheDocument();
   });
-
-  // it('should filter categories by type - income', () => {
-  //   renderComponent();
-
-  //   const incomeButton = screen.getByText('Доходы');
-  //   fireEvent.click(incomeButton);
-
-  //   expect(screen.queryByTestId('category-card-1')).not.toBeInTheDocument();
-  //   expect(screen.getByTestId('category-card-2')).toBeInTheDocument();
-  //   expect(screen.queryByTestId('category-card-3')).not.toBeInTheDocument();
-  // });
-
-  // it('should filter categories by type - expense', () => {
-  //   renderComponent();
-
-  //   const expenseButton = screen.getByText('Расходы');
-  //   fireEvent.click(expenseButton);
-
-  //   expect(screen.getByTestId('category-card-1')).toBeInTheDocument();
-  //   expect(screen.queryByTestId('category-card-2')).not.toBeInTheDocument();
-  //   expect(screen.getByTestId('category-card-3')).toBeInTheDocument();
-  // });
-
-  // it('should show all categories when "all" filter is selected', () => {
-  //   renderComponent();
-
-  //   fireEvent.click(screen.getByText('Доходы'));
-  //   expect(screen.queryByTestId('category-card-1')).not.toBeInTheDocument();
-
-  //   fireEvent.click(screen.getByText('Все'));
-  //   expect(screen.getByTestId('category-card-1')).toBeInTheDocument();
-  //   expect(screen.getByTestId('category-card-2')).toBeInTheDocument();
-  //   expect(screen.getByTestId('category-card-3')).toBeInTheDocument();
-  // });
 
   it('should open category window when category card is clicked', () => {
     renderComponent();
@@ -165,21 +130,6 @@ describe('Categories', () => {
     expect(screen.queryByTestId('category-card-2')).not.toBeInTheDocument();
     expect(screen.queryByTestId('category-card-3')).not.toBeInTheDocument();
   });
-
-  // it('should apply active class to selected filter', () => {
-  //   renderComponent();
-
-  //   const allButton = screen.getByText('Все');
-  //   const incomeButton = screen.getByText('Доходы');
-
-  //   expect(allButton).toHaveClass('cat-filter-active');
-  //   expect(incomeButton).not.toHaveClass('cat-filter-active');
-
-  //   fireEvent.click(incomeButton);
-
-  //   expect(allButton).not.toHaveClass('cat-filter-active');
-  //   expect(incomeButton).toHaveClass('cat-filter-active');
-  // });
 
   it('should handle case insensitive search', () => {
     renderComponent();

@@ -2,19 +2,21 @@ import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import * as authApi from '../api/auth';
+import { tokenStore } from '../api/tokenStore';
 
-import { AuthProvider, useAuth } from './AuthContext';
+import { AuthProvider, useAuth, resetAuthStore } from './AuthContext';
 
 vi.mock('../api/auth');
 
 const TestComponent = () => {
-  const { user, isAuthenticated, isLoading, login, register, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, accessToken, login, register, logout } = useAuth();
 
   return (
     <div>
       <div data-testid="loading">{isLoading ? 'loading' : 'loaded'}</div>
       <div data-testid="authenticated">{isAuthenticated ? 'yes' : 'no'}</div>
       <div data-testid="username">{user?.username || 'none'}</div>
+      <div data-testid="hasToken">{accessToken ? 'yes' : 'no'}</div>
       <button onClick={() => login({ username: 'test', password: 'pass' })}>Login</button>
       <button onClick={() => register({ username: 'new', password: 'pass' })}>Register</button>
       <button onClick={logout}>Logout</button>
@@ -24,29 +26,34 @@ const TestComponent = () => {
 
 describe('AuthContext', () => {
   beforeEach(() => {
-    localStorage.clear();
+    tokenStore.clearAccessToken();
     vi.clearAllMocks();
+    resetAuthStore();
+    vi.mocked(authApi.authApi.refreshToken).mockRejectedValue(new Error('No refresh token'));
   });
 
   it('should start with loading state', async () => {
-    vi.mocked(authApi.authApi.getCurrentUser).mockImplementation(
+    vi.mocked(authApi.authApi.refreshToken).mockImplementation(
       () =>
         new Promise((resolve) =>
           setTimeout(
             () =>
               resolve({
-                id: 1,
-                username: 'testuser',
-                is_active: true,
-                created_at: '2025-01-01T00:00:00Z',
-                updated_at: '2025-01-01T00:00:00Z',
+                access_token: 'test_token',
+                token_type: 'bearer',
               }),
             100,
           ),
         ),
     );
 
-    localStorage.setItem('access_token', 'test_token');
+    vi.mocked(authApi.authApi.getCurrentUser).mockResolvedValue({
+      id: 1,
+      username: 'testuser',
+      is_active: true,
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2025-01-01T00:00:00Z',
+    });
 
     render(
       <AuthProvider>
@@ -61,9 +68,7 @@ describe('AuthContext', () => {
     });
   });
 
-  it('should restore session from localStorage', async () => {
-    localStorage.setItem('access_token', 'stored_token');
-
+  it('should restore session from HttpOnly cookie via refresh', async () => {
     const mockUser = {
       id: 1,
       username: 'testuser',
@@ -72,6 +77,10 @@ describe('AuthContext', () => {
       updated_at: '2025-01-01T00:00:00Z',
     };
 
+    vi.mocked(authApi.authApi.refreshToken).mockResolvedValue({
+      access_token: 'refreshed_token',
+      token_type: 'bearer',
+    });
     vi.mocked(authApi.authApi.getCurrentUser).mockResolvedValue(mockUser);
 
     render(
@@ -86,13 +95,11 @@ describe('AuthContext', () => {
 
     expect(screen.getByTestId('authenticated')).toHaveTextContent('yes');
     expect(screen.getByTestId('username')).toHaveTextContent('testuser');
+    expect(screen.getByTestId('hasToken')).toHaveTextContent('yes');
   });
 
-  it('should clear tokens when getCurrentUser fails', async () => {
-    localStorage.setItem('access_token', 'invalid_token');
-    localStorage.setItem('refresh_token', 'invalid_refresh');
-
-    vi.mocked(authApi.authApi.getCurrentUser).mockRejectedValue(new Error('Invalid token'));
+  it('should clear token when refresh fails', async () => {
+    vi.mocked(authApi.authApi.refreshToken).mockRejectedValue(new Error('Invalid token'));
 
     render(
       <AuthProvider>
@@ -104,15 +111,13 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('loading')).toHaveTextContent('loaded');
     });
 
-    expect(localStorage.getItem('access_token')).toBeNull();
-    expect(localStorage.getItem('refresh_token')).toBeNull();
+    expect(tokenStore.getAccessToken()).toBeNull();
     expect(screen.getByTestId('authenticated')).toHaveTextContent('no');
   });
 
   it('should login successfully', async () => {
     const mockAuthResponse = {
       access_token: 'new_access_token',
-      refresh_token: 'new_refresh_token',
       token_type: 'bearer',
     };
 
@@ -145,9 +150,10 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('yes');
     });
 
-    expect(localStorage.getItem('access_token')).toBe('new_access_token');
-    expect(localStorage.getItem('refresh_token')).toBe('new_refresh_token');
+    // Token stored in memory, not localStorage
+    expect(tokenStore.getAccessToken()).toBe('new_access_token');
     expect(screen.getByTestId('username')).toHaveTextContent('test');
+    expect(screen.getByTestId('hasToken')).toHaveTextContent('yes');
   });
 
   it('should register and auto-login', async () => {
@@ -161,7 +167,6 @@ describe('AuthContext', () => {
 
     const mockAuthResponse = {
       access_token: 'access_token',
-      refresh_token: 'refresh_token',
       token_type: 'bearer',
     };
 
@@ -192,9 +197,6 @@ describe('AuthContext', () => {
   });
 
   it('should logout and clear session', async () => {
-    localStorage.setItem('access_token', 'token');
-    localStorage.setItem('refresh_token', 'refresh');
-
     const mockUser = {
       id: 1,
       username: 'testuser',
@@ -203,6 +205,10 @@ describe('AuthContext', () => {
       updated_at: '2025-01-01T00:00:00Z',
     };
 
+    vi.mocked(authApi.authApi.refreshToken).mockResolvedValue({
+      access_token: 'token',
+      token_type: 'bearer',
+    });
     vi.mocked(authApi.authApi.getCurrentUser).mockResolvedValue(mockUser);
     vi.mocked(authApi.authApi.logout).mockResolvedValue();
 
@@ -224,11 +230,12 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('no');
     });
 
-    expect(localStorage.getItem('access_token')).toBeNull();
-    expect(localStorage.getItem('refresh_token')).toBeNull();
+    // Token cleared from memory
+    expect(tokenStore.getAccessToken()).toBeNull();
+    expect(screen.getByTestId('hasToken')).toHaveTextContent('no');
   });
 
-  it('should handle logout when refresh token is missing', async () => {
+  it('should call logout API on logout', async () => {
     const mockUser = {
       id: 1,
       username: 'testuser',
@@ -237,9 +244,12 @@ describe('AuthContext', () => {
       updated_at: '2025-01-01T00:00:00Z',
     };
 
-    localStorage.setItem('access_token', 'token');
-
+    vi.mocked(authApi.authApi.refreshToken).mockResolvedValue({
+      access_token: 'token',
+      token_type: 'bearer',
+    });
     vi.mocked(authApi.authApi.getCurrentUser).mockResolvedValue(mockUser);
+    vi.mocked(authApi.authApi.logout).mockResolvedValue();
 
     render(
       <AuthProvider>
@@ -259,7 +269,7 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('authenticated')).toHaveTextContent('no');
     });
 
-    expect(authApi.authApi.logout).not.toHaveBeenCalled();
+    expect(authApi.authApi.logout).toHaveBeenCalled();
   });
 
   it('should throw error when useAuth is used outside provider', () => {
