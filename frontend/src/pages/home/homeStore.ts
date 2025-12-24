@@ -62,6 +62,7 @@ type HomeState = {
   setAllTransactions: (updater: Transaction[] | ((prev: Transaction[]) => Transaction[])) => void;
   setCategories: (updater: Category[] | ((prev: Category[]) => Category[])) => void;
   addLocalTransaction: (transaction: Transaction) => void;
+  deleteLocalTransaction: (id: number) => void;
   reset: () => void;
 };
 
@@ -171,6 +172,11 @@ export const useHomeStore = create<HomeState>((set, get) => ({
       formLoading: false,
       formData: getBaseForm(),
     }),
+  deleteLocalTransaction: (id: number) => {
+    set((state) => ({
+      allTransactions: state.allTransactions.filter((t) => t.id !== id),
+    }));
+  },
 }));
 
 export const resetHomeStore = () => useHomeStore.getState().reset();

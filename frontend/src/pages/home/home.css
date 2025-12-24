@@ -970,3 +970,15 @@
 .dark .mobile-card-footer {
   color: var(--muted);
 }
+
+.home-trans-del-btn {
+  background: #ef4444;
+  color: white;
+  border-radius: 10px;
+  border: 1px solid #ef4444;
+  padding: 5px;
+}
+
+.home-trans-del-btn:hover {
+  cursor: pointer;
+}

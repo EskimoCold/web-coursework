@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react';
 
 import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
+import { Icon } from '../../components/Icon';
 import { useCurrency } from '../../contexts/CurrencyContext';
 
 import './home.css';
+
 import { useHomeStore } from './homeStore';
 
 interface TransactionSummary {
@@ -33,6 +35,7 @@ export function HomePage() {
     setFormData,
     resetForm,
     addLocalTransaction,
+    deleteLocalTransaction,
   } = useHomeStore();
 
   const itemsPerPage = 5;
@@ -109,7 +112,7 @@ export function HomePage() {
       }
 
       const submitData: TransactionCreate = {
-        amount: revertAmount(parseFloat(formData.amount)), // TODO
+        amount: revertAmount(parseFloat(formData.amount)),
         description: formData.description,
         transaction_type: formData.transaction_type as 'income' | 'expense',
         category_id: categoryId,
@@ -181,6 +184,19 @@ export function HomePage() {
       </div>
     );
   }
+
+  const handleDeleteTransaction = async (id: number) => {
+    try {
+      if (useBackend) {
+        await transactionsApi.deleteTransaction(id);
+        await loadData();
+      } else {
+        deleteLocalTransaction(id);
+      }
+    } catch {
+      alert('Ошибка! Не получилось удалить транзакцию');
+    }
+  };
 
   return (
     <div className="home-page">
@@ -261,6 +277,7 @@ export function HomePage() {
                 <th>Категория</th>
                 <th>Тип</th>
                 <th>Сумма</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -286,6 +303,14 @@ export function HomePage() {
                   <td className={`amount-cell ${transaction.transaction_type}`}>
                     {transaction.transaction_type === 'income' ? '+' : '-'}
                     {formatAmount(transaction.amount)} {getCurrencySymbol()}
+                  </td>
+                  <td>
+                    <button
+                      className="home-trans-del-btn"
+                      onClick={() => handleDeleteTransaction(transaction.id)}
+                    >
+                      <Icon source="icons/sidebar/trash.png" size={20} />
+                    </button>
                   </td>
                 </tr>
               ))}
