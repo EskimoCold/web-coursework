@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import * as AuthContext from '../../contexts/AuthContext';
+import { resetAuthFormStore } from '../../stores/authFormStore';
 
 import { Register } from './Register';
 
@@ -16,7 +17,6 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Fix the AuthContext mock - use the correct path and ensure useAuth is a mock function
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
@@ -26,6 +26,7 @@ describe('Register', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthFormStore();
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       register: mockRegister,
       user: null,

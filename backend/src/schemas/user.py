@@ -22,6 +22,11 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class UserPasswordUpdate(BaseModel):
+    old_password: str
+    new_password: str
+
+
 class UserResponse(UserBase):
     id: int
     is_active: bool

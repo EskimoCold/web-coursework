@@ -1,33 +1,36 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import './categories.css';
 
 import { categoriesApi } from '../../api/categories';
 import { Icon } from '../../components/Icon';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
 
+import { createCategoryFormStore } from './categoryFormStore';
+
 type Props = {
   label: string;
-  modify: boolean; // редактирование старой категории?
+  modify: boolean;
   submit: string;
   placeholder?: {
     category: Category;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setOpen: (open: boolean) => void;
   };
 };
 
 export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placeholder }: Props) => {
-  const { setCategories } = useCategories();
-  const [name, setName] = useState(placeholder ? placeholder.category.name : '');
-  const [description, setDescription] = useState(
-    placeholder ? placeholder.category.description : '',
-  );
-  // const [icon, setIcon] = useState<string>(placeholder ? placeholder.category.icon : '');
-  // const [type, setType] = useState<boolean>(placeholder ? !!placeholder.category.type : true);
-  const [icon, setIcon] = useState<string>('sample.png');
-  const isSubmittable = useMemo(() => !!name.trim().length && !!icon.length, [name, icon]);
+  const { setCategories, icons } = useCategories();
+  const formStore = useMemo(() => createCategoryFormStore(), []);
+  const name = formStore((state) => state.name);
+  const description = formStore((state) => state.description);
+  const icon = formStore((state) => state.icon);
+  const setField = formStore((state) => state.setField);
+  const reset = formStore((state) => state.reset);
+  const hydrate = formStore((state) => state.hydrate);
 
-  // здесь нужен useIcons (пока что его нет, потому что нет иконок) из контекста CategoryContext
-  const possibleIconsList = Array.from({ length: 20 }, () => 'sample.png');
+  useEffect(() => {
+    hydrate(placeholder?.category);
+  }, [hydrate, placeholder?.category]);
+  const isSubmittable = useMemo(() => !!name.trim().length && !!icon.length, [name, icon]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +41,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
 
         const category: Category = {
           id: placeholder.category.id,
+          icon: icon,
           name: name.trim(),
           description: description.trim(),
         };
@@ -49,13 +53,11 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
 
         placeholder.setOpen(false);
       } else {
-        const newCategory = await categoriesApi.addCategory(name, description);
+        const newCategory = await categoriesApi.addCategory(name, description, icon);
         setCategories((prev) => [...prev, newCategory]);
       }
 
-      setName('');
-      setDescription('');
-      setIcon('');
+      reset();
     } catch (err) {
       console.error(err);
     }
@@ -83,7 +85,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
       <input
         type="text"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => setField('name', e.target.value)}
         maxLength={15}
         required
       />
@@ -91,14 +93,14 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
       <p className="cat-title">Описание</p>
       <textarea
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={(e) => setField('description', e.target.value)}
         maxLength={200}
       />
 
       <p className="cat-title">Выберите иконку</p>
       <div className="cat-icon-grid">
-        {possibleIconsList.map((iconSrc, i) => (
-          <div key={iconSrc + i} onClick={() => setIcon(iconSrc)}>
+        {icons.map((iconSrc, i) => (
+          <div key={iconSrc + i} onClick={() => setField('icon', iconSrc)}>
             <Icon
               source={iconSrc}
               size={35}
@@ -124,7 +126,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
           {submit}
         </button>
         {modify && (
-          <button className="cat-button red" type="reset">
+          <button className="cat-button danger" type="reset">
             Удалить
           </button>
         )}

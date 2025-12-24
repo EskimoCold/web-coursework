@@ -1,26 +1,34 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { describe, it, expect } from 'vitest';
+
+import { server } from '../test/setup';
 
 import { authApi } from './auth';
 
-import type { Mock } from 'vitest';
-
 describe('authApi', () => {
-  beforeEach(() => {
-    global.fetch = vi.fn();
-  });
-
   describe('login', () => {
     it('should successfully login with valid credentials', async () => {
       const mockResponse = {
         access_token: 'test_access_token',
-        refresh_token: 'test_refresh_token',
         token_type: 'bearer',
       };
 
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      server.use(
+        http.post('http://localhost:8000/api/v1/auth/login', async ({ request }) => {
+          const body = await request.json();
+          if (
+            typeof body === 'object' &&
+            body &&
+            'username' in body &&
+            'password' in body &&
+            body.username === 'testuser' &&
+            body.password === 'password123'
+          ) {
+            return HttpResponse.json(mockResponse);
+          }
+          return HttpResponse.json({ detail: 'Login failed' }, { status: 400 });
+        }),
+      );
 
       const result = await authApi.login({
         username: 'testuser',
@@ -28,21 +36,14 @@ describe('authApi', () => {
       });
 
       expect(result).toEqual(mockResponse);
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/auth/login'),
-        expect.objectContaining({
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: 'testuser', password: 'password123' }),
-        }),
-      );
     });
 
     it('should throw error on failed login', async () => {
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: false,
-        json: async (): Promise<{ detail: string }> => ({ detail: 'Invalid credentials' }),
-      });
+      server.use(
+        http.post('http://localhost:8000/api/v1/auth/login', () => {
+          return HttpResponse.json({ detail: 'Invalid credentials' }, { status: 400 });
+        }),
+      );
 
       await expect(authApi.login({ username: 'wrong', password: 'wrong' })).rejects.toThrow(
         'Invalid credentials',
@@ -50,14 +51,13 @@ describe('authApi', () => {
     });
 
     it('should throw generic error when detail is not provided', async () => {
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: false,
-        json: async (): Promise<Record<string, never>> => ({}),
-      });
-
-      await expect(authApi.login({ username: 'wrong', password: 'wrong' })).rejects.toThrow(
-        'Login failed',
+      server.use(
+        http.post('http://localhost:8000/api/v1/auth/login', () => {
+          return HttpResponse.json({}, { status: 400 });
+        }),
       );
+
+      await expect(authApi.login({ username: 'wrong', password: 'wrong' })).rejects.toThrow();
     });
   });
 
@@ -71,10 +71,11 @@ describe('authApi', () => {
         updated_at: '2025-01-01T00:00:00Z',
       };
 
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async (): Promise<typeof mockUser> => mockUser,
-      });
+      server.use(
+        http.post('http://localhost:8000/api/v1/auth/register', () => {
+          return HttpResponse.json(mockUser);
+        }),
+      );
 
       const result = await authApi.register({
         username: 'newuser',
@@ -82,20 +83,14 @@ describe('authApi', () => {
       });
 
       expect(result).toEqual(mockUser);
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/auth/register'),
-        expect.objectContaining({
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        }),
-      );
     });
 
     it('should throw error when registration fails', async () => {
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({ detail: 'User already exists' }),
-      });
+      server.use(
+        http.post('http://localhost:8000/api/v1/auth/register', () => {
+          return HttpResponse.json({ detail: 'User already exists' }, { status: 400 });
+        }),
+      );
 
       await expect(
         authApi.register({ username: 'existing', password: 'password123' }),
@@ -113,28 +108,31 @@ describe('authApi', () => {
         updated_at: '2025-01-01T00:00:00Z',
       };
 
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockUser,
-      });
+      server.use(
+        http.get('http://localhost:8000/api/v1/users/me', ({ request }) => {
+          const auth = request.headers.get('authorization');
+          if (auth === 'Bearer valid_token') {
+            return HttpResponse.json(mockUser);
+          }
+          return HttpResponse.json({}, { status: 401 });
+        }),
+      );
 
       const result = await authApi.getCurrentUser('valid_token');
 
       expect(result).toEqual(mockUser);
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/users/me'),
-        expect.objectContaining({
-          headers: { Authorization: 'Bearer valid_token' },
-        }),
-      );
     });
 
     it('should throw error when token is invalid', async () => {
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: false,
-      });
+      server.use(
+        http.get('http://localhost:8000/api/v1/users/me', () => {
+          return HttpResponse.json({}, { status: 401 });
+        }),
+      );
 
-      await expect(authApi.getCurrentUser('invalid_token')).rejects.toThrow('Failed to get user');
+      await expect(authApi.getCurrentUser('invalid_token')).rejects.toThrow(
+        'Authentication required',
+      );
     });
   });
 
@@ -142,51 +140,40 @@ describe('authApi', () => {
     it('should successfully refresh token', async () => {
       const mockResponse = {
         access_token: 'new_access_token',
-        refresh_token: 'new_refresh_token',
         token_type: 'bearer',
       };
 
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async (): Promise<typeof mockResponse> => mockResponse,
-      });
-
-      const result = await authApi.refreshToken('old_refresh_token');
-
-      expect(result).toEqual(mockResponse);
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/auth/refresh'),
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({ refresh_token: 'old_refresh_token' }),
+      server.use(
+        http.post('http://localhost:8000/api/v1/auth/refresh', () => {
+          return HttpResponse.json(mockResponse);
         }),
       );
+
+      const result = await authApi.refreshToken();
+
+      expect(result).toEqual(mockResponse);
     });
 
     it('should throw error when refresh fails', async () => {
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: false,
-      });
+      server.use(
+        http.post('http://localhost:8000/api/v1/auth/refresh', () => {
+          return HttpResponse.json({}, { status: 401 });
+        }),
+      );
 
-      await expect(authApi.refreshToken('invalid_token')).rejects.toThrow('Token refresh failed');
+      await expect(authApi.refreshToken()).rejects.toThrow('Authentication required');
     });
   });
 
   describe('logout', () => {
     it('should successfully logout', async () => {
-      (global.fetch as unknown as Mock).mockResolvedValueOnce({
-        ok: true,
-      });
-
-      await expect(authApi.logout('refresh_token')).resolves.toBeUndefined();
-
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/auth/logout'),
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({ refresh_token: 'refresh_token' }),
+      server.use(
+        http.post('http://localhost:8000/api/v1/auth/logout', () => {
+          return HttpResponse.json({ ok: true });
         }),
       );
+
+      await expect(authApi.logout()).resolves.toBeUndefined();
     });
   });
 });

@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import * as AuthContext from '../../contexts/AuthContext';
+import { resetAuthFormStore } from '../../stores/authFormStore';
 
 import { Login } from './Login';
 
@@ -16,9 +17,8 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock the AuthContext properly
 vi.mock('../../contexts/AuthContext', () => ({
-  useAuth: vi.fn(), // This ensures useAuth is a mock function
+  useAuth: vi.fn(),
 }));
 
 describe('Login', () => {
@@ -26,7 +26,7 @@ describe('Login', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Now vi.mocked() will work correctly since useAuth is a mock function
+    resetAuthFormStore();
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       login: mockLogin,
       user: null,
