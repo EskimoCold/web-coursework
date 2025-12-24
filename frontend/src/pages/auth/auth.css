@@ -272,3 +272,53 @@
   background: #c7d2fe;
   color: #111;
 }
+
+.dark .auth-container {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+.dark .auth-card {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  color: var(--ink);
+}
+
+.dark .auth-title {
+  color: var(--ink);
+}
+
+.dark .auth-subtitle {
+  color: var(--muted);
+}
+
+.dark .auth-input {
+  background: var(--panel);
+  border: 2px solid var(--stroke);
+  color: var(--ink);
+}
+
+.dark .auth-input::placeholder {
+  color: var(--muted);
+}
+
+.dark .auth-input:-webkit-autofill,
+.dark .auth-form textarea:-webkit-autofill,
+.dark .auth-form select:-webkit-autofill {
+  -webkit-text-fill-color: var(--ink) !important;
+  box-shadow: 0 0 0 1000px var(--panel) inset;
+  border: 2px solid var(--stroke);
+}
+
+.dark .auth-error {
+  background: color-mix(in srgb, #dc2626 20%, transparent);
+  color: #fca5a5;
+  border: 1px solid #dc2626;
+}
+
+.dark .auth-link {
+  color: var(--primary);
+}
+
+.dark .auth-link:hover {
+  color: color-mix(in srgb, var(--primary) 80%, white);
+}

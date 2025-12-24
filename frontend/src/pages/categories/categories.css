@@ -30,10 +30,10 @@
   grid-template-columns: minmax(0, 1.2fr) minmax(20rem, 0.8fr);
   gap: var(--spacing-xl);
   padding: var(--spacing-lg);
-  max-width: 100%;
   color: var(--cat-dark-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   box-sizing: border-box;
+  background: none;
 }
 
 .cat-mobile-add-button {
@@ -163,9 +163,16 @@ input:focus {
   background-color: var(--cat-green);
 }
 
-.red {
-  color: var(--cat-red-text);
-  background-color: var(--cat-red);
+.cat-button.danger {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.dark .cat-button.danger {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
 }
 
 .cat-card-icon {
@@ -229,6 +236,14 @@ input:focus {
   padding: var(--base-unit);
   box-sizing: border-box;
   font-family: inherit;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background: var(--panel);
+  color: var(--ink);
+  border-color: var(--stroke);
 }
 
 .cat-form textarea:focus {
@@ -300,6 +315,12 @@ input:focus {
   color: var(--cat-dark-text);
   transform: none;
   cursor: not-allowed;
+}
+
+.dark .cat-button {
+  background: var(--panel);
+  color: var(--ink);
+  border-color: var(--stroke);
 }
 
 .cat-button:disabled:hover {
@@ -609,4 +630,62 @@ input:focus {
   .cat-mobile-add-button {
     transition: none;
   }
+}
+
+/* Темная тема для категорий */
+.dark {
+  --cat-green: #50e3c299;
+  --cat-red: #ff6b6b99;
+  --cat-dark-grey: #94a3b8;
+  --cat-light-grey: #1e293b;
+  --cat-dark-text: #f1f5f9;
+  --cat-green-text: #5ee9c2;
+  --cat-red-text: #ff6b6b;
+  --cat-grey: #334155;
+  --cat-blue: #60a5fa;
+  --stroke: #334155;
+}
+
+.dark .cat-main {
+  color: var(--cat-dark-text);
+}
+
+.dark .cat-form {
+  background: var(--panel);
+  border-color: var(--stroke);
+}
+
+.dark .cat-card {
+  background: var(--panel);
+  border-color: var(--stroke);
+}
+
+.dark .cat-list-grid::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark .cat-filters {
+  background: var(--cat-grey);
+}
+
+.dark .cat-card:hover {
+  border-color: var(--cat-dark-grey);
+  box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 30%);
+}
+
+.dark .cat-form input,
+.dark .cat-form textarea,
+.dark .cat-form select {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.dark .submit {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.dark .cat-window-bg {
+  background: #0f172a99;
 }
