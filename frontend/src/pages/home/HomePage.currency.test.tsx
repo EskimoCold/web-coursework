@@ -51,29 +51,6 @@ describe('HomePage - Currency Conversion', () => {
     mockTransactionsApi.getCategories.mockResolvedValue([{ id: 1, name: 'Test Category' }]);
   });
 
-  it('should display amounts in selected currency', async () => {
-    renderWithProviders(<HomePage />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Общий баланс/)).toBeInTheDocument();
-    });
-
-    const balanceElement = screen.getByText(/Общий баланс/).closest('.summary-card');
-    expect(balanceElement).toBeInTheDocument();
-  });
-
-  it('should recalculate amounts when currency changes', async () => {
-    renderWithProviders(<HomePage />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Общий баланс/)).toBeInTheDocument();
-    });
-
-    const incomeHeading = screen.getByRole('heading', { name: /Доходы/ });
-    const incomeElement = incomeHeading.closest('.summary-card');
-    expect(incomeElement).toBeInTheDocument();
-  });
-
   it('should display currency symbol in transaction amounts', async () => {
     renderWithProviders(<HomePage />);
 

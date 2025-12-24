@@ -10,7 +10,8 @@ interface CurrencyContextType {
   rates: CurrencyRates | null;
   loading: boolean;
   error: string | null;
-  convertAmount: (amount: number, fromCurrency?: Currency) => number;
+  convertAmount: (amount: number) => number;
+  revertAmount: (amount: number) => number;
   getCurrencySymbol: () => string;
   refreshRates: () => Promise<void>;
 }
@@ -71,17 +72,14 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
-  const convertAmount = (amount: number, fromCurrency: Currency = 'RUB'): number => {
+  const convertAmount = (amount: number): number => {
     if (!rates) return amount;
-    if (fromCurrency === currency) return amount;
-    if (fromCurrency === 'RUB') {
-      return amount * rates.rates[currency];
-    } else if (currency === 'RUB') {
-      return amount / rates.rates[fromCurrency];
-    } else {
-      const amountInRub = amount / rates.rates[fromCurrency];
-      return amountInRub * rates.rates[currency];
-    }
+    return amount * rates.rates[currency];
+  };
+
+  const revertAmount = (amount: number): number => {
+    if (!rates) return amount;
+    return amount / rates.rates[currency];
   };
 
   const getCurrencySymbol = (): string => {
@@ -97,6 +95,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         loading,
         error,
         convertAmount,
+        revertAmount,
         getCurrencySymbol,
         refreshRates,
       }}

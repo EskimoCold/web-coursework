@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export type SettingsSection = 'security' | 'data' | 'appearance';
 
@@ -54,47 +55,9 @@ const baseDeleteState: DeleteAccountState = {
   isLoading: false,
 };
 
-export const useSettingsStore = create<SettingsState>((set) => ({
-  activeSection: 'security',
-  theme: 'light',
-  currency: 'RUB',
-  isPasswordModalOpen: false,
-  isDeleteAccountModalOpen: false,
-  passwordForm: basePasswordForm,
-  deleteState: baseDeleteState,
-  setActiveSection: (section) => set({ activeSection: section }),
-  setTheme: (theme) => set({ theme }),
-  setCurrency: (currency) => set({ currency }),
-  setPasswordModalOpen: (open) => set({ isPasswordModalOpen: open }),
-  setDeleteModalOpen: (open) => set({ isDeleteAccountModalOpen: open }),
-  updatePasswordField: (field, value) =>
-    set((state) => ({
-      passwordForm: { ...state.passwordForm, [field]: value },
-    })),
-  setPasswordError: (error) =>
-    set((state) => ({
-      passwordForm: { ...state.passwordForm, error },
-    })),
-  setPasswordSuccess: (success) =>
-    set((state) => ({
-      passwordForm: { ...state.passwordForm, success },
-    })),
-  setPasswordLoading: (isLoading) =>
-    set((state) => ({
-      passwordForm: { ...state.passwordForm, isLoading },
-    })),
-  resetPasswordForm: () => set({ passwordForm: basePasswordForm }),
-  setDeleteError: (error) =>
-    set((state) => ({
-      deleteState: { ...state.deleteState, error },
-    })),
-  setDeleteLoading: (isLoading) =>
-    set((state) => ({
-      deleteState: { ...state.deleteState, isLoading },
-    })),
-  resetDeleteState: () => set({ deleteState: baseDeleteState }),
-  reset: () =>
-    set({
+export const useSettingsStore = create<SettingsState>()(
+  persist(
+    (set) => ({
       activeSection: 'security',
       theme: 'light',
       currency: 'RUB',
@@ -102,7 +65,55 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       isDeleteAccountModalOpen: false,
       passwordForm: basePasswordForm,
       deleteState: baseDeleteState,
+      setActiveSection: (section) => set({ activeSection: section }),
+      setTheme: (theme) => set({ theme }),
+      setCurrency: (currency) => set({ currency }),
+      setPasswordModalOpen: (open) => set({ isPasswordModalOpen: open }),
+      setDeleteModalOpen: (open) => set({ isDeleteAccountModalOpen: open }),
+      updatePasswordField: (field, value) =>
+        set((state) => ({
+          passwordForm: { ...state.passwordForm, [field]: value },
+        })),
+      setPasswordError: (error) =>
+        set((state) => ({
+          passwordForm: { ...state.passwordForm, error },
+        })),
+      setPasswordSuccess: (success) =>
+        set((state) => ({
+          passwordForm: { ...state.passwordForm, success },
+        })),
+      setPasswordLoading: (isLoading) =>
+        set((state) => ({
+          passwordForm: { ...state.passwordForm, isLoading },
+        })),
+      resetPasswordForm: () => set({ passwordForm: basePasswordForm }),
+      setDeleteError: (error) =>
+        set((state) => ({
+          deleteState: { ...state.deleteState, error },
+        })),
+      setDeleteLoading: (isLoading) =>
+        set((state) => ({
+          deleteState: { ...state.deleteState, isLoading },
+        })),
+      resetDeleteState: () => set({ deleteState: baseDeleteState }),
+      reset: () =>
+        set({
+          theme: 'light',
+          currency: 'RUB',
+          isPasswordModalOpen: false,
+          isDeleteAccountModalOpen: false,
+          passwordForm: basePasswordForm,
+          deleteState: baseDeleteState,
+        }),
     }),
-}));
+    {
+      name: 'settings-storage',
+      partialize: (state) => ({
+        theme: state.theme,
+        currency: state.currency,
+      }),
+    },
+  ),
+);
 
 export const resetSettingsStore = () => useSettingsStore.getState().reset();

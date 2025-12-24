@@ -14,6 +14,7 @@ import { Register } from '../pages/auth/Register';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { HomePage } from '../pages/home/HomePage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
+import { useSettingsStore } from '../pages/settings/settingsStore';
 import { useNavigationStore } from '../stores/navigationStore';
 
 function AnalyticsTracker() {
@@ -33,6 +34,18 @@ function AnalyticsTracker() {
 function MainApp() {
   const active = useNavigationStore((state) => state.activePage);
   const setActive = useNavigationStore((state) => state.setActivePage);
+
+  const { theme } = useSettingsStore();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const isDark =
+      theme === 'dark' ||
+      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    root.classList.toggle('dark', isDark);
+    root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  }, [theme]);
 
   const pages = useMemo(
     () =>
