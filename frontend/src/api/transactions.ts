@@ -46,4 +46,15 @@ export const transactionsApi = {
       headers: { Authorization: `Bearer ${token}` },
     });
   },
+  deleteTransaction: (id: number) => {
+    const token = getAuthToken();
+
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    return api.delete<Response>(`/transactions/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
 };
