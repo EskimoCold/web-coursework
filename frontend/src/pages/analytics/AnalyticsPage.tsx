@@ -18,7 +18,7 @@ import {
 import './analytics.css';
 
 import { Transaction } from '../../api/transactions';
-import { useCurrency } from '../../contexts/CurrencyContext';
+import { Currency, useCurrency } from '../../contexts/CurrencyContext';
 
 import { FilterOption, useAnalyticsStore } from './analyticsStore';
 
@@ -32,7 +32,8 @@ const FILTERS: [FilterOption, string][] = [
 ];
 
 export const AnalyticsPage: React.FC = () => {
-  const { convertAmount, getCurrencySymbol } = useCurrency();
+  const { currency, setCurrency, getCurrencySymbol, convertAmount, prefetchRatesForDates } =
+    useCurrency();
   const {
     transactions,
     categories,
@@ -99,18 +100,48 @@ export const AnalyticsPage: React.FC = () => {
     [transactions, from, to],
   );
 
+  const transactionDateKeys = useMemo(
+    () =>
+      Array.from(
+        new Set(filteredTransactions.map((t) => t.transaction_date.toISOString().split('T')[0])),
+      ),
+    [filteredTransactions],
+  );
+
+  useEffect(() => {
+    if (transactionDateKeys.length) {
+      prefetchRatesForDates(transactionDateKeys);
+    }
+  }, [prefetchRatesForDates, transactionDateKeys]);
+
   const [incomes, expenses] = useMemo(
     () => [
       filteredTransactions.reduce(
-        (acc, curVal) => acc + (curVal.transaction_type === 'income' ? curVal.amount : 0),
+        (acc, curVal) =>
+          acc +
+          (curVal.transaction_type === 'income'
+            ? convertAmount(
+                curVal.amount,
+                (curVal.currency ?? 'RUB') as Currency,
+                curVal.transaction_date,
+              )
+            : 0),
         0,
       ),
       filteredTransactions.reduce(
-        (acc, curVal) => acc + (curVal.transaction_type === 'expense' ? curVal.amount : 0),
+        (acc, curVal) =>
+          acc +
+          (curVal.transaction_type === 'expense'
+            ? convertAmount(
+                curVal.amount,
+                (curVal.currency ?? 'RUB') as Currency,
+                curVal.transaction_date,
+              )
+            : 0),
         0,
       ),
     ],
-    [filteredTransactions],
+    [filteredTransactions, convertAmount],
   );
 
   const dailyIncomeExpense = useMemo(() => {
@@ -122,10 +153,15 @@ export const AnalyticsPage: React.FC = () => {
       const key = day.getTime();
 
       const current = totals.get(key) ?? { income: 0, expense: 0 };
+      const converted = convertAmount(
+        transaction.amount,
+        (transaction.currency ?? 'RUB') as Currency,
+        transaction.transaction_date,
+      );
       if (transaction.transaction_type === 'income') {
-        current.income += transaction.amount;
+        current.income += converted;
       } else if (transaction.transaction_type === 'expense') {
-        current.expense += transaction.amount;
+        current.expense += converted;
       }
       totals.set(key, current);
     });
@@ -134,8 +170,8 @@ export const AnalyticsPage: React.FC = () => {
       .sort((a, b) => a[0] - b[0])
       .map(([timestamp, values]) => ({
         date: new Date(timestamp),
-        income: convertAmount(values.income),
-        expense: convertAmount(values.expense),
+        income: values.income,
+        expense: values.expense,
       }));
   }, [filteredTransactions, convertAmount]);
 
@@ -149,10 +185,15 @@ export const AnalyticsPage: React.FC = () => {
       .filter((t) => t.transaction_type === 'income')
       .forEach((t) => {
         const name = categoryNameById[String(t.category_id)] ?? t.category?.name ?? 'Без категории';
-        imp.set(name, (imp.get(name) || 0) + t.amount);
+        const converted = convertAmount(
+          t.amount,
+          (t.currency ?? 'RUB') as Currency,
+          t.transaction_date,
+        );
+        imp.set(name, (imp.get(name) || 0) + converted);
       });
 
-    return Array.from(imp, ([name, value]) => ({ name: name, value: convertAmount(value) }));
+    return Array.from(imp, ([name, value]) => ({ name: name, value }));
   }, [filteredTransactions, categoryNameById, convertAmount]);
 
   const expenseByCategory = useMemo(() => {
@@ -161,10 +202,15 @@ export const AnalyticsPage: React.FC = () => {
       .filter((t) => t.transaction_type === 'expense')
       .forEach((t) => {
         const name = categoryNameById[String(t.category_id)] ?? t.category?.name ?? 'Без категории';
-        imp.set(name, (imp.get(name) || 0) + t.amount);
+        const converted = convertAmount(
+          t.amount,
+          (t.currency ?? 'RUB') as Currency,
+          t.transaction_date,
+        );
+        imp.set(name, (imp.get(name) || 0) + converted);
       });
 
-    return Array.from(imp, ([name, value]) => ({ name: name, value: convertAmount(value) }));
+    return Array.from(imp, ([name, value]) => ({ name: name, value }));
   }, [filteredTransactions, categoryNameById, convertAmount]);
 
   const chartData = useMemo(() => {
@@ -228,25 +274,41 @@ export const AnalyticsPage: React.FC = () => {
             {f[1]}
           </button>
         ))}
+        <div className="anal-currency">
+          <label className="anal-currency-label" htmlFor="analytics-currency">
+            Валюта
+          </label>
+          <select
+            id="analytics-currency"
+            className="anal-currency-select"
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as Currency)}
+          >
+            <option value="RUB">RUB</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="AED">AED</option>
+          </select>
+        </div>
       </div>
 
       <div className="anal-info-grid">
         <div>
           <p className="anal-label">Общий баланс</p>
           <p className="anal-value total">
-            {convertAmount(incomes - expenses).toLocaleString('ru-RU')} {getCurrencySymbol()}
+            {(incomes - expenses).toLocaleString('ru-RU')} {getCurrencySymbol()}
           </p>
         </div>
         <div>
           <p className="anal-label">Доходы</p>
           <p className="anal-value income">
-            {convertAmount(incomes).toLocaleString('ru-RU')} {getCurrencySymbol()}
+            {incomes.toLocaleString('ru-RU')} {getCurrencySymbol()}
           </p>
         </div>
         <div>
           <p className="anal-label">Расходы</p>
           <p className="anal-value expense">
-            {convertAmount(expenses).toLocaleString('ru-RU')} {getCurrencySymbol()}
+            {expenses.toLocaleString('ru-RU')} {getCurrencySymbol()}
           </p>
         </div>
         <div>

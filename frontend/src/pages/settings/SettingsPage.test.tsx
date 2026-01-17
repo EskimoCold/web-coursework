@@ -12,7 +12,7 @@ vi.mock('../../api/currency', () => ({
     getRates: vi.fn().mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     }),
     convert: vi.fn(),
   },
@@ -26,7 +26,7 @@ describe('SettingsPage', () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     });
   });
 

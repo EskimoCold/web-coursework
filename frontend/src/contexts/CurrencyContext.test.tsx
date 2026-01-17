@@ -37,7 +37,7 @@ describe('CurrencyContext', () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     });
 
     render(
@@ -58,7 +58,7 @@ describe('CurrencyContext', () => {
     const mockRates = {
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     };
 
     mockCurrencyApi.getRates.mockResolvedValue(mockRates);
@@ -82,7 +82,7 @@ describe('CurrencyContext', () => {
     const mockRates = {
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     };
 
     mockCurrencyApi.getRates.mockResolvedValue(mockRates);
@@ -106,7 +106,7 @@ describe('CurrencyContext', () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     });
 
     render(
@@ -128,7 +128,7 @@ describe('CurrencyContext', () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     });
 
     render(

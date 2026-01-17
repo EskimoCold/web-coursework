@@ -27,7 +27,7 @@ vi.mock('../../api/currency', () => ({
     getRates: vi.fn().mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     }),
     convert: vi.fn(),
   },
@@ -297,6 +297,7 @@ const mockTransactions: Transaction[] = [
   {
     id: 1,
     amount: 1000,
+    currency: 'RUB',
     transaction_type: 'income',
     transaction_date: '2024-01-15',
     category: { id: 1, name: 'Salary', type: 1, icon: 'salary', description: 'Salary income' },
@@ -305,6 +306,7 @@ const mockTransactions: Transaction[] = [
   {
     id: 2,
     amount: 500,
+    currency: 'RUB',
     transaction_type: 'expense',
     transaction_date: '2024-01-16',
     category: { id: 2, name: 'Food', type: 0, icon: 'food', description: 'Food expenses' },
@@ -313,6 +315,7 @@ const mockTransactions: Transaction[] = [
   {
     id: 3,
     amount: 200,
+    currency: 'RUB',
     transaction_type: 'expense',
     transaction_date: '2024-01-17',
     category: {
@@ -327,6 +330,7 @@ const mockTransactions: Transaction[] = [
   {
     id: 4,
     amount: 1500,
+    currency: 'RUB',
     transaction_type: 'income',
     transaction_date: '2024-01-18',
     category: {
@@ -345,7 +349,7 @@ const renderComponent = (transactions: Transaction[] = mockTransactions) => {
   (currencyApi.getRates as vi.Mock).mockResolvedValue({
     base: 'RUB',
     date: '2024-01-01',
-    rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+    rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
   });
 
   testTransactions = transactions;
@@ -481,6 +485,7 @@ describe('AnalyticsPage', () => {
       {
         id: 1,
         amount: 1000,
+        currency: 'RUB',
         transaction_type: 'income',
         transaction_date: new Date().toISOString(),
         category: { id: 1, name: 'Salary', type: 1, icon: 'salary', description: 'Salary income' },
@@ -552,6 +557,7 @@ describe('AnalyticsPage', () => {
       {
         id: 5,
         amount: 300,
+        currency: 'RUB',
         transaction_type: 'expense',
         transaction_date: '2024-01-20',
         category: undefined,
@@ -580,6 +586,7 @@ describe('AnalyticsPage', () => {
       {
         id: 1,
         amount: 1000,
+        currency: 'RUB',
         transaction_type: 'income',
         transaction_date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
         category: { id: 1, name: 'Salary', type: 1, icon: 'salary', description: 'Salary income' },
@@ -604,6 +611,7 @@ describe('AnalyticsPage', () => {
       {
         id: 1,
         amount: 1000,
+        currency: 'RUB',
         transaction_type: 'income',
         transaction_date: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(), // 200 days ago
         category: { id: 1, name: 'Salary', type: 1, icon: 'salary', description: 'Salary income' },
@@ -641,6 +649,7 @@ describe('AnalyticsPage', () => {
       {
         id: 1,
         amount: 500,
+        currency: 'RUB',
         transaction_type: 'expense',
         transaction_date: '2024-01-20',
         category_id: 2,
@@ -705,6 +714,7 @@ describe('AnalyticsPage', () => {
       {
         id: 1,
         amount: 100,
+        currency: 'RUB',
         transaction_type: 'income',
         transaction_date: '2024-01-15',
         category: { id: 1, name: 'Salary', type: 1, icon: 'salary', description: '' },
@@ -713,6 +723,7 @@ describe('AnalyticsPage', () => {
       {
         id: 2,
         amount: 200,
+        currency: 'RUB',
         transaction_type: 'income',
         transaction_date: '2024-01-15',
         category: { id: 1, name: 'Salary', type: 1, icon: 'salary', description: '' },
@@ -739,6 +750,7 @@ describe('AnalyticsPage', () => {
       {
         id: 1,
         amount: 1000,
+        currency: 'RUB',
         transaction_type: 'income',
         transaction_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
         category: { id: 1, name: 'Salary', type: 1, icon: 'salary', description: '' },
@@ -765,6 +777,7 @@ describe('AnalyticsPage', () => {
       {
         id: 1,
         amount: 300,
+        currency: 'RUB',
         transaction_type: 'expense',
         transaction_date: '2024-01-20',
         category_id: 999, // Несуществующий ID

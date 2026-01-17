@@ -2,19 +2,22 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { transactionsApi, TransactionCreate } from '../api/transactions';
+import { Currency, useCurrency } from '../contexts/CurrencyContext';
 
 import './transaction-form.css';
 import { useTransactionFormStore } from './transactionFormStore';
 
 export function TransactionForm() {
   const navigate = useNavigate();
+  const { currency, getCurrencySymbol } = useCurrency();
   const { categories, loading, formData, loadCategories, setLoading, setFormField, reset } =
     useTransactionFormStore();
 
   useEffect(() => {
     loadCategories();
+    setFormField('currency', currency);
     return () => reset();
-  }, [loadCategories, reset]);
+  }, [loadCategories, reset, setFormField, currency]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +74,9 @@ export function TransactionForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="amount">Сумма *</label>
+            <label htmlFor="amount">
+              Сумма * ({getCurrencySymbol(formData.currency as Currency)})
+            </label>
             <input
               type="number"
               id="amount"
@@ -82,6 +87,22 @@ export function TransactionForm() {
               step="0.01"
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="currency">Валюта *</label>
+            <select
+              id="currency"
+              name="currency"
+              value={formData.currency}
+              onChange={handleChange}
+              required
+            >
+              <option value="RUB">RUB</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="AED">AED</option>
+            </select>
           </div>
 
           <div className="form-group">
