@@ -102,7 +102,9 @@
 }
 
 .anal-filters {
-  display: inline;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   background: var(--anal-grey);
   padding: 7px;
   border-radius: 15px;
@@ -125,6 +127,26 @@
   background: var(--panel);
   padding: 5px;
   border-radius: 12px;
+}
+
+.anal-currency {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+}
+
+.anal-currency-label {
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.anal-currency-select {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  padding: 4px 8px;
+  color: var(--ink);
 }
 
 /* Mobile Responsive Styles */
@@ -185,6 +207,10 @@
   .anal-filters-btn {
     font-size: 13px;
     padding: 4px 8px;
+  }
+
+  .anal-currency {
+    margin-top: 8px;
   }
 }
 

@@ -367,12 +367,12 @@ function AppearanceSection() {
           <select
             className="settings-select"
             value={currency}
-            onChange={(e) => setCurrency(e.target.value as 'RUB' | 'USD' | 'EUR' | 'CNY')}
+            onChange={(e) => setCurrency(e.target.value as 'RUB' | 'USD' | 'EUR' | 'AED')}
           >
             <option value="RUB">Рубли (RUB) ₽</option>
             <option value="USD">Доллары (USD) $</option>
             <option value="EUR">Евро (EUR) €</option>
-            <option value="CNY">Юани (CNY) ¥</option>
+            <option value="AED">Дирхам (AED) د.إ</option>
           </select>
         </div>
       </div>

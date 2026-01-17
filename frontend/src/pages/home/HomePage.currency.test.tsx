@@ -26,13 +26,14 @@ describe('HomePage - Currency Conversion', () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     });
 
     mockTransactionsApi.getTransactions.mockResolvedValue([
       {
         id: 1,
         amount: 1000,
+        currency: 'RUB',
         transaction_type: 'income',
         transaction_date: '2024-01-01T00:00:00Z',
         description: 'Test income',
@@ -41,6 +42,7 @@ describe('HomePage - Currency Conversion', () => {
       {
         id: 2,
         amount: 500,
+        currency: 'RUB',
         transaction_type: 'expense',
         transaction_date: '2024-01-02T00:00:00Z',
         description: 'Test expense',
