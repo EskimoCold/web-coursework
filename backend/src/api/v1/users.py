@@ -90,6 +90,7 @@ async def _import_transactions(
             db.add(
                 Transaction(
                     amount=float(txn_data["amount"]),
+                    currency=txn_data.get("currency", "RUB"),
                     description=txn_data.get("description"),
                     transaction_type=txn_data["transaction_type"],
                     category_id=category_id,
@@ -145,6 +146,7 @@ async def export_user_data(
             {
                 "id": txn.id,
                 "amount": txn.amount,
+                "currency": txn.currency,
                 "description": txn.description,
                 "transaction_type": txn.transaction_type,
                 "category_id": txn.category_id,

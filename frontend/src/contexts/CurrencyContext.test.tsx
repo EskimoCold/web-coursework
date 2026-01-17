@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useEffect } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { currencyApi } from '../api/currency';
@@ -26,6 +27,17 @@ const TestComponent = () => {
   );
 };
 
+const DateConversionComponent = ({ date }: { date: string }) => {
+  const { convertAmount, prefetchRatesForDates, setCurrency } = useCurrency();
+
+  useEffect(() => {
+    setCurrency('USD');
+    prefetchRatesForDates([date]);
+  }, [date, prefetchRatesForDates, setCurrency]);
+
+  return <div data-testid="converted-date">{convertAmount(100, 'AED', date).toFixed(2)}</div>;
+};
+
 describe('CurrencyContext', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,7 +49,7 @@ describe('CurrencyContext', () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     });
 
     render(
@@ -58,7 +70,7 @@ describe('CurrencyContext', () => {
     const mockRates = {
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     };
 
     mockCurrencyApi.getRates.mockResolvedValue(mockRates);
@@ -82,7 +94,7 @@ describe('CurrencyContext', () => {
     const mockRates = {
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     };
 
     mockCurrencyApi.getRates.mockResolvedValue(mockRates);
@@ -106,7 +118,7 @@ describe('CurrencyContext', () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     });
 
     render(
@@ -128,7 +140,7 @@ describe('CurrencyContext', () => {
     mockCurrencyApi.getRates.mockResolvedValue({
       base: 'RUB',
       date: '2024-01-01',
-      rates: { RUB: 1, USD: 0.011, EUR: 0.01, CNY: 0.08 },
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
     });
 
     render(
@@ -147,5 +159,83 @@ describe('CurrencyContext', () => {
     });
 
     expect(Storage.prototype.setItem).toHaveBeenCalledWith('fintrack_currency', 'USD');
+  });
+
+  it('should normalize stored currency values', async () => {
+    Storage.prototype.getItem = vi.fn(() => 'aed');
+    mockCurrencyApi.getRates.mockResolvedValue({
+      base: 'RUB',
+      date: '2024-01-01',
+      rates: { RUB: 1, USD: 0.011, EUR: 0.01, AED: 0.04 },
+    });
+
+    render(
+      <CurrencyProvider>
+        <TestComponent />
+      </CurrencyProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('currency')).toHaveTextContent('AED');
+    });
+  });
+
+  it('should use historical rates when available', async () => {
+    const latestRates = {
+      base: 'RUB',
+      date: '2000-01-02',
+      rates: { RUB: 1, USD: 0.01, EUR: 0.02, AED: 0.05 },
+    };
+    const historicalRates = {
+      base: 'RUB',
+      date: '2000-01-01',
+      rates: { RUB: 1, USD: 0.02, EUR: 0.01, AED: 0.04 },
+    };
+
+    mockCurrencyApi.getRates.mockImplementation((date?: string) => {
+      if (date) {
+        return Promise.resolve(historicalRates);
+      }
+      return Promise.resolve(latestRates);
+    });
+
+    render(
+      <CurrencyProvider>
+        <DateConversionComponent date="2000-01-01" />
+      </CurrencyProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('converted-date')).toHaveTextContent('50.00');
+    });
+  });
+
+  it('should fall back to latest rates when historical rates are unavailable', async () => {
+    const latestRates = {
+      base: 'RUB',
+      date: '2000-01-02',
+      rates: { RUB: 1, USD: 0.01, EUR: 0.02, AED: 0.05 },
+    };
+
+    mockCurrencyApi.getRates.mockImplementation((date?: string) => {
+      if (date) {
+        return Promise.reject(new Error('no rates'));
+      }
+      return Promise.resolve(latestRates);
+    });
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <CurrencyProvider>
+        <DateConversionComponent date="2000-01-01" />
+      </CurrencyProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('converted-date')).toHaveTextContent('20.00');
+    });
+
+    consoleSpy.mockRestore();
   });
 });

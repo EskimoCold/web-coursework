@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 
 import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
 import { Icon } from '../../components/Icon';
-import { useCurrency } from '../../contexts/CurrencyContext';
+import { Currency, useCurrency } from '../../contexts/CurrencyContext';
 
 import './home.css';
 
@@ -15,7 +15,7 @@ interface TransactionSummary {
 }
 
 export function HomePage() {
-  const { convertAmount, revertAmount, getCurrencySymbol } = useCurrency();
+  const { convertAmount, getCurrencySymbol, currency } = useCurrency();
   const {
     currentPage,
     filter,
@@ -52,20 +52,26 @@ export function HomePage() {
   }, [allTransactions, filter]);
 
   const summary = useMemo((): TransactionSummary => {
-    const totalIncome = allTransactions.reduce(
-      (acc, curVal) => acc + (curVal.transaction_type === 'income' ? curVal.amount : 0),
-      0,
+    const totals = allTransactions.reduce(
+      (acc, curVal) => {
+        const txCurrency = (curVal.currency ?? 'RUB') as Currency;
+        const converted = convertAmount(curVal.amount, txCurrency, curVal.transaction_date);
+        if (curVal.transaction_type === 'income') {
+          acc.totalIncome += converted;
+        } else if (curVal.transaction_type === 'expense') {
+          acc.totalExpenses += converted;
+        }
+        return acc;
+      },
+      { totalIncome: 0, totalExpenses: 0 },
     );
 
-    const totalExpenses = allTransactions.reduce(
-      (acc, curVal) => acc + (curVal.transaction_type === 'expense' ? curVal.amount : 0),
-      0,
-    );
-
-    const balance = totalIncome - totalExpenses;
-
-    return { totalIncome, totalExpenses, balance };
-  }, [allTransactions]);
+    return {
+      totalIncome: totals.totalIncome,
+      totalExpenses: totals.totalExpenses,
+      balance: totals.totalIncome - totals.totalExpenses,
+    };
+  }, [allTransactions, convertAmount]);
 
   const paginatedTransactions = useMemo(() => {
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -77,6 +83,7 @@ export function HomePage() {
   }, [filteredTransactions, currentPage, itemsPerPage]);
 
   const handleAddTransaction = () => {
+    setFormData((prev) => ({ ...prev, currency }));
     setShowAddModal(true);
   };
 
@@ -112,7 +119,8 @@ export function HomePage() {
       }
 
       const submitData: TransactionCreate = {
-        amount: revertAmount(parseFloat(formData.amount)),
+        amount: parseFloat(formData.amount),
+        currency: formData.currency as Currency,
         description: formData.description,
         transaction_type: formData.transaction_type as 'income' | 'expense',
         category_id: categoryId,
@@ -169,13 +177,11 @@ export function HomePage() {
     });
   };
 
-  const formatAmount = (amount: number) => {
-    const convertedAmount = convertAmount(amount);
-    return new Intl.NumberFormat('ru-RU', {
+  const formatAmount = (amount: number) =>
+    new Intl.NumberFormat('ru-RU', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(convertedAmount);
-  };
+    }).format(amount);
 
   if (loading) {
     return (
@@ -302,7 +308,8 @@ export function HomePage() {
                   </td>
                   <td className={`amount-cell ${transaction.transaction_type}`}>
                     {transaction.transaction_type === 'income' ? '+' : '-'}
-                    {formatAmount(transaction.amount)} {getCurrencySymbol()}
+                    {formatAmount(transaction.amount)}{' '}
+                    {getCurrencySymbol((transaction.currency ?? 'RUB') as Currency)}
                   </td>
                   <td>
                     <button
@@ -332,7 +339,8 @@ export function HomePage() {
               </div>
               <div className={`mobile-card-amount ${transaction.transaction_type}`}>
                 {transaction.transaction_type === 'income' ? '+' : '-'}
-                {formatAmount(transaction.amount)} {getCurrencySymbol()}
+                {formatAmount(transaction.amount)}{' '}
+                {getCurrencySymbol((transaction.currency ?? 'RUB') as Currency)}
               </div>
             </div>
             <div className="mobile-card-description">{transaction.description}</div>
@@ -419,7 +427,9 @@ export function HomePage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="amount">Сумма ({getCurrencySymbol()})</label>
+                <label htmlFor="amount">
+                  Сумма ({getCurrencySymbol(formData.currency as Currency)})
+                </label>
                 <input
                   type="number"
                   id="amount"
@@ -431,6 +441,22 @@ export function HomePage() {
                   placeholder="0.00"
                   required
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="currency">Валюта</label>
+                <select
+                  id="currency"
+                  name="currency"
+                  value={formData.currency}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="RUB">RUB</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="AED">AED</option>
+                </select>
               </div>
 
               <div className="form-group">
