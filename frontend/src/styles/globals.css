@@ -6,8 +6,19 @@
   --primary: #2b7cff;
   --primary-ghost: #e7f0ff;
   --stroke: #e5e7eb;
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --bottom-nav-height: 0px;
 
   color-scheme: light dark;
+}
+
+@media (width <= 768px) {
+  :root {
+    --bottom-nav-height: calc(72px + var(--safe-area-bottom));
+  }
 }
 
 .dark {
@@ -20,12 +31,18 @@
   --stroke: #334155;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
   padding: 0;
   font-family: system-ui, sans-serif;
   background: var(--bg);
   color: var(--ink);
+  min-height: 100%;
+  overscroll-behavior-y: none;
 }
 
 h1,
@@ -56,9 +73,16 @@ textarea::placeholder {
   border: none;
 }
 
+@media (width <= 768px) {
+  .app-root {
+    grid-template-columns: 1fr;
+    padding-bottom: var(--bottom-nav-height);
+  }
+}
+
 @media (width <= 480px) {
   .app-root {
-    grid-template-columns: none;
+    grid-template-columns: 1fr;
   }
 }
 
