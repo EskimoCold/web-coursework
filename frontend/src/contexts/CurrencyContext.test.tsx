@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useEffect } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { currencyApi } from '../api/currency';
@@ -35,9 +35,7 @@ const DateConversionComponent = ({ date }: { date: string }) => {
     prefetchRatesForDates([date]);
   }, [date, prefetchRatesForDates, setCurrency]);
 
-  return (
-    <div data-testid="converted-date">{convertAmount(100, 'AED', date).toFixed(2)}</div>
-  );
+  return <div data-testid="converted-date">{convertAmount(100, 'AED', date).toFixed(2)}</div>;
 };
 
 describe('CurrencyContext', () => {
