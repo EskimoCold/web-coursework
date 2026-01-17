@@ -74,7 +74,6 @@ def _build_response(data: dict) -> dict:
 
 @router.get("/rates")
 async def get_currency_rates(date: str | None = None):
-    """Получение курсов валют относительно RUB (возможна историческая дата)"""
     try:
         endpoint = _normalize_date(date)
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -117,7 +116,6 @@ async def convert_currency(
     to_currency: str,
     date: str | None = None,
 ):
-    """Конвертация суммы из одной валюты в другую (по дате, если указана)"""
     if from_currency == to_currency:
         return {"amount": amount, "from": from_currency, "to": to_currency, "converted": amount}
 
