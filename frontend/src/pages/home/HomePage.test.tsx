@@ -15,6 +15,7 @@ vi.mock('../../api/transactions', () => ({
         {
           id: 1,
           amount: 1500,
+          currency: 'RUB',
           transaction_type: 'expense',
           transaction_date: '2024-01-15T00:00:00Z',
           description: 'Продукты в супермаркете',
@@ -23,6 +24,7 @@ vi.mock('../../api/transactions', () => ({
         {
           id: 2,
           amount: 50000,
+          currency: 'RUB',
           transaction_type: 'income',
           transaction_date: '2024-01-10T00:00:00Z',
           description: 'Зарплата за январь',

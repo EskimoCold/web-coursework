@@ -1,6 +1,8 @@
 import { BASE_URL } from './client';
 import { tokenStore } from './tokenStore';
 
+import type { CurrencyCode } from './currency';
+
 const getAuthToken = (): string | null => {
   return tokenStore.getAccessToken();
 };
@@ -25,6 +27,7 @@ export interface ExportData {
   transactions: Array<{
     id: number;
     amount: number;
+    currency: CurrencyCode;
     description?: string;
     transaction_type: 'income' | 'expense';
     category_id?: number;

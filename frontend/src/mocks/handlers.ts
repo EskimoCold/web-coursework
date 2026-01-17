@@ -44,7 +44,7 @@ export const handlers = [
         RUB: 1,
         USD: 0.011,
         EUR: 0.01,
-        CNY: 0.08,
+        AED: 0.04,
       },
     });
   }),
@@ -54,6 +54,7 @@ export const handlers = [
       {
         id: 1,
         amount: 1500,
+        currency: 'RUB',
         transaction_type: 'expense',
         transaction_date: '2024-01-15T00:00:00Z',
         description: 'Продукты в супермаркете',
@@ -62,6 +63,7 @@ export const handlers = [
       {
         id: 2,
         amount: 50000,
+        currency: 'RUB',
         transaction_type: 'income',
         transaction_date: '2024-01-10T00:00:00Z',
         description: 'Зарплата за январь',
@@ -70,6 +72,7 @@ export const handlers = [
       {
         id: 3,
         amount: 800,
+        currency: 'RUB',
         transaction_type: 'expense',
         transaction_date: '2024-01-08T00:00:00Z',
         description: 'Проездной на метро',
