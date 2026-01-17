@@ -61,3 +61,7 @@ textarea::placeholder {
     grid-template-columns: none;
   }
 }
+
+.dark img {
+  filter: invert(100%);
+}
