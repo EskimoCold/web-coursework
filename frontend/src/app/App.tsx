@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { initAnalytics, trackPageview } from '../analytics/googleAnalytics';
@@ -36,16 +36,40 @@ function MainApp() {
   const setActive = useNavigationStore((state) => state.setActivePage);
 
   const { theme } = useSettingsStore();
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches,
+  );
 
   useEffect(() => {
-    const root = document.documentElement;
-    const isDark =
-      theme === 'dark' ||
-      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
+  const applyTheme = useCallback((isDark: boolean) => {
+    const root = document.documentElement;
     root.classList.toggle('dark', isDark);
     root.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  }, [theme]);
+
+    const themeColor = isDark ? '#1e293b' : '#ffffff';
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]:not([media])');
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement('meta');
+      metaThemeColor.setAttribute('name', 'theme-color');
+      document.head.appendChild(metaThemeColor);
+    }
+    metaThemeColor.setAttribute('content', themeColor);
+
+    document.querySelectorAll('meta[name="theme-color"][media]').forEach((meta) => {
+      meta.setAttribute('content', themeColor);
+    });
+  }, []);
+
+  useEffect(() => {
+    const isDark = theme === 'dark' || (theme === 'system' && systemDark);
+    applyTheme(isDark);
+  }, [theme, systemDark, applyTheme]);
 
   const pages = useMemo(
     () =>
