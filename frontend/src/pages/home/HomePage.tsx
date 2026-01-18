@@ -217,68 +217,78 @@ export function HomePage() {
     <div className="home-page">
       {backendError && <div className="backend-error">⚠️ {backendError}</div>}
 
-      {!isMobile && (<div className="summary-section">
-        <div className="summary-header">
-          <div>
-            <h1>Дашборд финансов</h1>
-            <p>Быстрый обзор ваших доходов и расходов</p>
+      {!isMobile && (
+        <div className="summary-section">
+          <div className="summary-header">
+            <div>
+              <h1>Дашборд финансов</h1>
+              <p>Быстрый обзор ваших доходов и расходов</p>
+            </div>
+            <button className="primary-button add-button" onClick={handleAddTransaction}>
+              + Добавить транзакцию
+            </button>
           </div>
-          <button className="primary-button add-button" onClick={handleAddTransaction}>
-            + Добавить транзакцию
-          </button>
-        </div>
 
-        <div className="summary-cards">
-          <div className="summary-card balance">
-            <h3>Баланс</h3>
-            <div className="amount">
-              {formatAmount(summary.balance)} {getCurrencySymbol()}
+          <div className="summary-cards">
+            <div className="summary-card balance">
+              <h3>Баланс</h3>
+              <div className="amount">
+                {formatAmount(summary.balance)} {getCurrencySymbol()}
+              </div>
             </div>
-          </div>
-          <div className="summary-card income">
-            <h3>Доходы</h3>
-            <div className="amount">
-              +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+            <div className="summary-card income">
+              <h3>Доходы</h3>
+              <div className="amount">
+                +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+              </div>
             </div>
-          </div>
-          <div className="summary-card expense">
-            <h3>Расходы</h3>
-            <div className="amount">
-              -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+            <div className="summary-card expense">
+              <h3>Расходы</h3>
+              <div className="amount">
+                -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+              </div>
             </div>
           </div>
         </div>
-      </div>)}
-      {isMobile && (<>
-      <div className="summary-header">
-          <div>
-            <h1>Дашборд финансов</h1>
-            <p>Быстрый обзор ваших доходов и расходов</p>
+      )}
+      {isMobile && (
+        <>
+          <div className="summary-header">
+            <div>
+              <h1>Дашборд финансов</h1>
+              <p>Быстрый обзор ваших доходов и расходов</p>
+            </div>
+            <button className="primary-button add-button" onClick={handleAddTransaction}>
+              + Добавить транзакцию
+            </button>
           </div>
-          <button className="primary-button add-button" onClick={handleAddTransaction}>
-            + Добавить транзакцию
-          </button>
-        </div>
 
-        {filter === 'all' && (<div className="summary-card balance">
-          <h3>Баланс</h3>
-          <div className="amount">
-            {formatAmount(summary.balance)} {getCurrencySymbol()}
-          </div>
-        </div>)}
-        {filter === 'income' && (<div className="summary-card income">
-          <h3>Доходы</h3>
-          <div className="amount">
-            +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
-          </div>
-        </div>)}
-        {filter === 'expense' && (<div className="summary-card expense">
-          <h3>Расходы</h3>
-          <div className="amount">
-            -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
-          </div>
-        </div>)}
-      </>)}
+          {filter === 'all' && (
+            <div className="summary-card balance">
+              <h3>Баланс</h3>
+              <div className="amount">
+                {formatAmount(summary.balance)} {getCurrencySymbol()}
+              </div>
+            </div>
+          )}
+          {filter === 'income' && (
+            <div className="summary-card income">
+              <h3>Доходы</h3>
+              <div className="amount">
+                +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+              </div>
+            </div>
+          )}
+          {filter === 'expense' && (
+            <div className="summary-card expense">
+              <h3>Расходы</h3>
+              <div className="amount">
+                -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       <div className="filters-section">
         <div className="filters">
@@ -301,10 +311,12 @@ export function HomePage() {
             Расходы
           </button>
         </div>
-        {!isMobile && (<div className="table-info">
-          Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length}{' '}
-          транзакций
-        </div>)}
+        {!isMobile && (
+          <div className="table-info">
+            Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length}{' '}
+            транзакций
+          </div>
+        )}
       </div>
 
       {/* Transactions Table - Desktop */}
@@ -380,14 +392,14 @@ export function HomePage() {
                 {getCurrencySymbol((transaction.currency ?? 'RUB') as Currency)}
               </div>
             </div>
-            {transaction.id === displayedInfoTransactionId && 
-            (<div className="mobile-card-category">
-              {transaction.category?.name || 'Без категории'}
-            </div>)
-            }
-            {transaction.id === displayedInfoTransactionId && 
-            (<div className="mobile-card-description">{transaction.description}</div>)
-            }
+            {transaction.id === displayedInfoTransactionId && (
+              <div className="mobile-card-category">
+                {transaction.category?.name || 'Без категории'}
+              </div>
+            )}
+            {transaction.id === displayedInfoTransactionId && (
+              <div className="mobile-card-description">{transaction.description}</div>
+            )}
             <div className="mobile-card-footer">
               <div className="mobile-card-date">{formatDate(transaction.transaction_date)}</div>
             </div>
