@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
 import { Icon } from '../../components/Icon';
@@ -39,6 +39,15 @@ export function HomePage() {
   } = useHomeStore();
 
   const itemsPerPage = 5;
+
+  const isMobile = useMemo(() => {
+    const style = window.getComputedStyle(document.body);
+    const base = Number(style.fontSize.replace('px', ''));
+    const width = Number(style.width.replace('px', ''));
+    const rem = width / base;
+    return rem <= 48;
+  }, []);
+  const [displayedInfoTransactionId, showTransactionInfoMobile] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
@@ -208,38 +217,78 @@ export function HomePage() {
     <div className="home-page">
       {backendError && <div className="backend-error">⚠️ {backendError}</div>}
 
-      <div className="summary-section">
-        <div className="summary-header">
-          <div>
-            <h1>Дашборд финансов</h1>
-            <p>Быстрый обзор ваших доходов и расходов</p>
+      {!isMobile && (
+        <div className="summary-section">
+          <div className="summary-header">
+            <div>
+              <h1>Дашборд финансов</h1>
+              <p>Быстрый обзор ваших доходов и расходов</p>
+            </div>
+            <button className="primary-button add-button" onClick={handleAddTransaction}>
+              + Добавить транзакцию
+            </button>
           </div>
-          <button className="primary-button add-button" onClick={handleAddTransaction}>
-            + Добавить транзакцию
-          </button>
-        </div>
 
-        <div className="summary-cards">
-          <div className="summary-card balance">
-            <h3>Баланс</h3>
-            <div className="amount">
-              {formatAmount(summary.balance)} {getCurrencySymbol()}
+          <div className="summary-cards">
+            <div className="summary-card balance">
+              <h3>Баланс</h3>
+              <div className="amount">
+                {formatAmount(summary.balance)} {getCurrencySymbol()}
+              </div>
             </div>
-          </div>
-          <div className="summary-card income">
-            <h3>Доходы</h3>
-            <div className="amount">
-              +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+            <div className="summary-card income">
+              <h3>Доходы</h3>
+              <div className="amount">
+                +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+              </div>
             </div>
-          </div>
-          <div className="summary-card expense">
-            <h3>Расходы</h3>
-            <div className="amount">
-              -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+            <div className="summary-card expense">
+              <h3>Расходы</h3>
+              <div className="amount">
+                -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+      {isMobile && (
+        <>
+          <div className="summary-header">
+            <div>
+              <h1>Дашборд финансов</h1>
+              <p>Быстрый обзор ваших доходов и расходов</p>
+            </div>
+            <button className="primary-button add-button" onClick={handleAddTransaction}>
+              + Добавить транзакцию
+            </button>
+          </div>
+
+          {filter === 'all' && (
+            <div className="summary-card balance">
+              <h3>Баланс</h3>
+              <div className="amount">
+                {formatAmount(summary.balance)} {getCurrencySymbol()}
+              </div>
+            </div>
+          )}
+          {filter === 'income' && (
+            <div className="summary-card income">
+              <h3>Доходы</h3>
+              <div className="amount">
+                +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+              </div>
+            </div>
+          )}
+          {filter === 'expense' && (
+            <div className="summary-card expense">
+              <h3>Расходы</h3>
+              <div className="amount">
+                -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       <div className="filters-section">
         <div className="filters">
@@ -262,10 +311,12 @@ export function HomePage() {
             Расходы
           </button>
         </div>
-        <div className="table-info">
-          Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length}{' '}
-          транзакций
-        </div>
+        {!isMobile && (
+          <div className="table-info">
+            Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length}{' '}
+            транзакций
+          </div>
+        )}
       </div>
 
       {/* Transactions Table - Desktop */}
@@ -332,23 +383,25 @@ export function HomePage() {
           <div
             key={transaction.id}
             className={`mobile-transaction-card ${transaction.transaction_type}`}
+            onClick={() => showTransactionInfoMobile(transaction.id)}
           >
             <div className="mobile-card-header">
-              <div className="mobile-card-category">
-                {transaction.category?.name || 'Без категории'}
-              </div>
               <div className={`mobile-card-amount ${transaction.transaction_type}`}>
                 {transaction.transaction_type === 'income' ? '+' : '-'}
                 {formatAmount(transaction.amount)}{' '}
                 {getCurrencySymbol((transaction.currency ?? 'RUB') as Currency)}
               </div>
             </div>
-            <div className="mobile-card-description">{transaction.description}</div>
+            {transaction.id === displayedInfoTransactionId && (
+              <div className="mobile-card-category">
+                {transaction.category?.name || 'Без категории'}
+              </div>
+            )}
+            {transaction.id === displayedInfoTransactionId && (
+              <div className="mobile-card-description">{transaction.description}</div>
+            )}
             <div className="mobile-card-footer">
               <div className="mobile-card-date">{formatDate(transaction.transaction_date)}</div>
-              <span className={`mobile-card-type ${transaction.transaction_type}`}>
-                {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
-              </span>
             </div>
           </div>
         ))}

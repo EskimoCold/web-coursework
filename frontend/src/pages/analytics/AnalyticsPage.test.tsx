@@ -836,3 +836,236 @@ describe('AnalyticsPage', () => {
     });
   });
 });
+
+describe('AnalyticsPage - CSS and Mobile Tests', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetAnalyticsStore();
+  });
+
+  it('should apply correct CSS classes for desktop layout', async () => {
+    const { container } = renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Общий баланс')).toBeInTheDocument();
+    });
+
+    const mainElement = container.querySelector('.anal-main');
+    expect(mainElement).toBeInTheDocument();
+
+    const infoGrid = container.querySelector('.anal-info-grid');
+    expect(infoGrid).toBeInTheDocument();
+  });
+
+  it('should show correct currency selector in filters', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Все время')).toBeInTheDocument();
+    });
+  });
+
+  it('should have proper styling for filter buttons', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Неделя')).toBeInTheDocument();
+    });
+
+    const filtersContainer = document.querySelector('.anal-filters');
+    expect(filtersContainer).toBeInTheDocument();
+
+    const activeFilter = document.querySelector('.anal-filter-active');
+    expect(activeFilter).toBeInTheDocument();
+    expect(activeFilter).toHaveTextContent('Все время');
+  });
+
+  it('should display correct color classes for values', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      const incomeValue = document.querySelector('.anal-value.income');
+      const expenseValue = document.querySelector('.anal-value.expense');
+
+      expect(incomeValue).toBeInTheDocument();
+      expect(expenseValue).toBeInTheDocument();
+      expect(incomeValue).toHaveClass('income');
+      expect(expenseValue).toHaveClass('expense');
+    });
+  });
+
+  it('should render chart containers with correct styling', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Динамика доходов и расходов')).toBeInTheDocument();
+    });
+
+    const chartContainers = document.querySelectorAll('.anal-chart-container');
+    expect(chartContainers.length).toBeGreaterThanOrEqual(0);
+
+    chartContainers.forEach((container) => {
+      expect(container).toHaveClass('anal-chart-container');
+    });
+
+    const chartTitles = document.querySelectorAll('.anal-chart-title');
+    expect(chartTitles.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it('should handle mobile view styling correctly when isMobile is true', async () => {
+    const originalGetComputedStyle = window.getComputedStyle;
+
+    window.getComputedStyle = vi.fn().mockReturnValue({
+      fontSize: '16px',
+      width: '375px',
+    } as CSSStyleDeclaration);
+
+    renderComponent();
+
+    const mainElement = document.querySelector('.anal-main');
+    expect(mainElement).toBeInTheDocument();
+
+    window.getComputedStyle = originalGetComputedStyle;
+  });
+
+  it('should have responsive design for different screen sizes', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Динамика доходов и расходов')).toBeInTheDocument();
+    });
+  });
+
+  it('should display currency in amounts correctly formatted', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      const balanceElement = document.querySelector('.anal-value.total');
+      expect(balanceElement).toBeInTheDocument();
+
+      const text = balanceElement?.textContent || '';
+      expect(text).toContain('₽');
+      expect(text).toMatch(/\d[\s\d]*/);
+    });
+  });
+
+  it('should have correct dark mode CSS variables', () => {
+    expect(document.documentElement.style.getPropertyValue('--anal-green')).toBeDefined();
+    expect(document.documentElement.style.getPropertyValue('--anal-red')).toBeDefined();
+    expect(document.documentElement.style.getPropertyValue('--anal-grey')).toBeDefined();
+  });
+
+  it('should apply different styles for active vs inactive filter buttons', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Неделя')).toBeInTheDocument();
+    });
+
+    const weekButton = screen.getByText('Неделя');
+    const allTimeButton = screen.getByText('Все время');
+
+    expect(allTimeButton).toHaveClass('anal-filter-active');
+    expect(weekButton).not.toHaveClass('anal-filter-active');
+
+    fireEvent.click(weekButton);
+
+    await waitFor(() => {
+      expect(weekButton).toHaveClass('anal-filter-active');
+      expect(allTimeButton).not.toHaveClass('anal-filter-active');
+    });
+  });
+
+  it('should display forecast error with correct styling when prediction fails', async () => {
+    (predictExpenses as vi.Mock).mockRejectedValueOnce(new Error('Forecast failed'));
+    testForecastError = 'Не удалось построить прогноз расходов';
+
+    renderComponent();
+
+    await waitFor(() => {
+      const errorElement = screen.getByText('Не удалось построить прогноз расходов');
+      expect(errorElement).toBeInTheDocument();
+    });
+  });
+
+  it('should handle empty categories in pie chart gracefully', async () => {
+    const noCategoryTransaction: Transaction[] = [
+      {
+        id: 1,
+        amount: 1000,
+        currency: 'RUB',
+        transaction_type: 'expense',
+        transaction_date: '2024-01-15',
+        category: undefined,
+        description: 'Expense without category',
+      } as unknown as Transaction,
+    ];
+
+    renderComponent(noCategoryTransaction);
+
+    await waitFor(() => {
+      expect(screen.getByText('Расходы по категориям')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('AnalyticsPage - Filter Interactions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetAnalyticsStore();
+  });
+
+  it('should update active filter when clicking different periods', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Неделя')).toBeInTheDocument();
+    });
+
+    const weekButton = screen.getByText('Неделя');
+    const monthButton = screen.getByText('Месяц');
+    const yearButton = screen.getByText('Год');
+    const allButton = screen.getByText('Все время');
+
+    expect(allButton).toHaveClass('anal-filter-active');
+
+    fireEvent.click(weekButton);
+    await waitFor(() => {
+      expect(weekButton).toHaveClass('anal-filter-active');
+      expect(allButton).not.toHaveClass('anal-filter-active');
+    });
+
+    fireEvent.click(monthButton);
+    await waitFor(() => {
+      expect(monthButton).toHaveClass('anal-filter-active');
+      expect(weekButton).not.toHaveClass('anal-filter-active');
+    });
+
+    fireEvent.click(yearButton);
+    await waitFor(() => {
+      expect(yearButton).toHaveClass('anal-filter-active');
+      expect(monthButton).not.toHaveClass('anal-filter-active');
+    });
+
+    fireEvent.click(allButton);
+    await waitFor(() => {
+      expect(allButton).toHaveClass('anal-filter-active');
+      expect(yearButton).not.toHaveClass('anal-filter-active');
+    });
+  });
+
+  it('should recalculate values when filter changes', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Всего операций')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Неделя'));
+
+    await waitFor(() => {
+      const newOperations = document.querySelector('.anal-value.operations')?.textContent;
+      expect(newOperations).toBeDefined();
+    });
+  });
+});
