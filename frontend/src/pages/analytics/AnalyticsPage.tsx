@@ -13,6 +13,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Line,
+  Brush,
 } from 'recharts';
 
 import './analytics.css';
@@ -21,6 +22,7 @@ import { Transaction } from '../../api/transactions';
 import { Currency, useCurrency } from '../../contexts/CurrencyContext';
 
 import { FilterOption, useAnalyticsStore } from './analyticsStore';
+import { MobileBlock } from '../../components/MobileBlock';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 type NormalizedTransaction = Omit<Transaction, 'transaction_date'> & { transaction_date: Date };
@@ -262,6 +264,14 @@ export const AnalyticsPage: React.FC = () => {
     [getCurrencySymbol],
   );
 
+  const isMobile = useMemo(() => {
+    const style = window.getComputedStyle(document.body);
+    const base = Number(style.fontSize.replace('px', ''));
+    const width = Number(style.width.replace('px', ''));
+    const rem = width / base;
+    return rem <= 48;
+  }, []);
+
   return (
     <div className="anal-main">
       <div className="anal-filters">
@@ -292,6 +302,7 @@ export const AnalyticsPage: React.FC = () => {
         </div>
       </div>
 
+      {!isMobile && (<>
       <div className="anal-info-grid">
         <div>
           <p className="anal-label">Общий баланс</p>
@@ -399,6 +410,85 @@ export const AnalyticsPage: React.FC = () => {
           </div>
         </div>
       </div>
+    </>)}
+
+    {isMobile && (<div className='anal-chart-container'>
+      <MobileBlock title='Динамика доходов и расходов' defaultOpen={true}>
+        {forecastError && <p className="anal-value expense">{forecastError}</p>}
+        <ResponsiveContainer width="100%" height={320}>
+          <AreaChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip formatter={tooltipFormatter} />
+            <Area
+              type="monotone"
+              dataKey="expense"
+              stackId="1"
+              stroke="#FF8042"
+              fill="#FF8042"
+              fillOpacity={0.3}
+            />
+            <Area
+              type="monotone"
+              dataKey="income"
+              stackId="1"
+              stroke="#00C49F"
+              fill="#00C49F"
+              fillOpacity={0.3}
+            />
+            <Line
+              type="monotone"
+              dataKey="predictedExpense"
+              stroke="#6A4BFF"
+              strokeWidth={2}
+              dot={false}
+              strokeDasharray="6 3"
+              connectNulls
+              isAnimationActive={!isForecasting}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </MobileBlock>
+
+      <MobileBlock title='Расходы по категориям'>
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={expenseByCategory}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+              label={(props: { name?: string; value?: number }) => {
+                // eslint-disable-next-line react/prop-types
+                const name = props.name || '';
+                // eslint-disable-next-line react/prop-types
+                const value = typeof props.value === 'number' ? props.value : 0;
+                return `${name}: ${value.toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
+              }}
+            >
+              {expenseByCategory.map((_, index) => (
+                <Cell key={index} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </MobileBlock>
+
+      <MobileBlock title="Доходы по категориям">
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={incomeByCategory}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Bar dataKey="value" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
+      </MobileBlock>
+    </div>)}
     </div>
   );
 };

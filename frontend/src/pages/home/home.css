@@ -114,6 +114,7 @@
   padding: 20px;
   text-align: center;
   transition: transform 0.3s ease;
+  margin-bottom: 20px;
 }
 
 .summary-card:hover {
@@ -725,6 +726,10 @@
 .description-text {
   font-weight: 500;
   color: #1f2937;
+}
+
+.dark .description-text {
+  color: var(--ink);
 }
 
 .description-notes {
