@@ -1,16 +1,25 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import './layout.css';
 
 type Props = { title: string; children: ReactNode };
 
 export function Layout({ title, children }: Props) {
+  const isMobile = useMemo(() => {
+    const style = window.getComputedStyle(document.body);
+    const base = Number(style.fontSize.replace('px', ''));
+    const width = Number(style.width.replace('px', ''));
+    const rem = width / base;
+    return rem <= 48;
+  }, []);
+
   return (
     <main className="layout" aria-label="main-layout">
-      <header className="layout-header" role="banner">
+      {!isMobile && (<><header className="layout-header" role="banner">
         <h1 className="layout-title">{title}</h1>
       </header>
       <section className="layout-content">{children}</section>
-      <footer className="layout-footer">©2025 FinTrack</footer>
+      <footer className="layout-footer">©2025 FinTrack</footer></>)}
+      {isMobile && children}
     </main>
   );
 }

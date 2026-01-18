@@ -6,6 +6,7 @@ import { Icon } from '../../components/Icon';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
 
 import { createCategoryFormStore } from './categoryFormStore';
+import { useCategoriesPageStore } from './categoriesPageStore';
 
 type Props = {
   label: string;
@@ -26,6 +27,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
   const setField = formStore((state) => state.setField);
   const reset = formStore((state) => state.reset);
   const hydrate = formStore((state) => state.hydrate);
+  const {setShowAddForm} = useCategoriesPageStore();
 
   useEffect(() => {
     hydrate(placeholder?.category);
@@ -60,6 +62,8 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
       reset();
     } catch (err) {
       console.error(err);
+    } finally {
+      setShowAddForm(false);
     }
   };
 
@@ -77,6 +81,14 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
       console.error(err);
     }
   };
+
+  const isMobile = useMemo(() => {
+    const style = window.getComputedStyle(document.body);
+    const base = Number(style.fontSize.replace('px', ''));
+    const width = Number(style.width.replace('px', ''));
+    const rem = width / base;
+    return rem <= 48;
+  }, []);
 
   return (
     <form onSubmit={handleSubmit} onReset={handleDelete} className="cat-form">
@@ -98,7 +110,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
       />
 
       <p className="cat-title">Выберите иконку</p>
-      <div className="cat-icon-grid">
+      <div className={`${isMobile ? "mobile-" : ""}cat-icon-grid`}>
         {icons.map((iconSrc, i) => (
           <div key={iconSrc + i} onClick={() => setField('icon', iconSrc)}>
             <Icon
