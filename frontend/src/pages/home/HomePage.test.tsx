@@ -241,4 +241,133 @@ describe('HomePage', () => {
 
     window.getComputedStyle = originalGetComputedStyle;
   });
+
+  test('shows mobile view summary cards', async () => {
+    const originalGetComputedStyle = window.getComputedStyle;
+    window.getComputedStyle = vi.fn().mockReturnValue({
+      fontSize: '16px',
+      width: '375px',
+    } as CSSStyleDeclaration);
+
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Дашборд финансов')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Доходы'));
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Доходы')[0]).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Расходы'));
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Расходы')[0]).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Все'));
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Баланс')[0]).toBeInTheDocument();
+    });
+
+    window.getComputedStyle = originalGetComputedStyle;
+  });
+
+  test('shows transaction details when clicking mobile card', async () => {
+    const originalGetComputedStyle = window.getComputedStyle;
+    window.getComputedStyle = vi.fn().mockReturnValue({
+      fontSize: '16px',
+      width: '375px',
+    } as CSSStyleDeclaration);
+
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
+    });
+
+    const mobileCards = document.querySelectorAll('.mobile-transaction-card');
+    expect(mobileCards.length).toBeGreaterThan(0);
+
+    fireEvent.click(mobileCards[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText('Продукты')).toBeInTheDocument();
+      expect(screen.getAllByText('Продукты в супермаркете')[0]).toBeInTheDocument();
+    });
+
+    window.getComputedStyle = originalGetComputedStyle;
+  });
+
+  test('handles multiple clicks on mobile cards', async () => {
+    const originalGetComputedStyle = window.getComputedStyle;
+    window.getComputedStyle = vi.fn().mockReturnValue({
+      fontSize: '16px',
+      width: '375px',
+    } as CSSStyleDeclaration);
+
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
+      expect(screen.getByText('Зарплата за январь')).toBeInTheDocument();
+    });
+
+    const mobileCards = document.querySelectorAll('.mobile-transaction-card');
+    expect(mobileCards.length).toBe(2);
+
+    fireEvent.click(mobileCards[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText('Продукты')).toBeInTheDocument();
+    });
+
+    fireEvent.click(mobileCards[1]);
+
+    await waitFor(() => {
+      expect(screen.getByText('Зарплата')).toBeInTheDocument();
+    });
+
+    window.getComputedStyle = originalGetComputedStyle;
+  });
+
+  test('mobile cards show correct transaction type styling', async () => {
+    const originalGetComputedStyle = window.getComputedStyle;
+    window.getComputedStyle = vi.fn().mockReturnValue({
+      fontSize: '16px',
+      width: '375px',
+    } as CSSStyleDeclaration);
+
+    render(
+      <CurrencyProvider>
+        <HomePage />
+      </CurrencyProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Продукты в супермаркете')).toBeInTheDocument();
+    });
+
+    const mobileCards = document.querySelectorAll('.mobile-transaction-card');
+
+    expect(mobileCards[0]).toHaveClass('expense');
+    expect(mobileCards[1]).toHaveClass('income');
+
+    window.getComputedStyle = originalGetComputedStyle;
+  });
 });
