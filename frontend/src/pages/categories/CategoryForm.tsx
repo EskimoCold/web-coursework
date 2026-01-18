@@ -92,7 +92,11 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
 
   return (
     <form onSubmit={handleSubmit} onReset={handleDelete} className="cat-form">
-      <h1>{label}</h1>
+      {isMobile ? (<h1 style={{
+          color: "#374151",
+          fontSize: "1.3rem",
+          fontWeight: 700,
+        }}>{label}</h1>) : <h1>{label}</h1>}
       <p className="cat-title">Название категории</p>
       <input
         type="text"

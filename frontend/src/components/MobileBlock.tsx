@@ -4,10 +4,11 @@ type Props = {
   title: string,
   children: React.ReactNode,
   defaultOpen?: boolean,
-  onChange?: (isOpen: boolean) => void;
+  onChange?: (isOpen: boolean) => void,
+  className?: string,
 }
 
-export const MobileBlock: React.FC<Props> = ({title, children, defaultOpen = false, onChange}) => {
+export const MobileBlock: React.FC<Props> = ({title, children, defaultOpen = false, onChange, className = ""}) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const toggle = () => {
@@ -17,18 +18,21 @@ export const MobileBlock: React.FC<Props> = ({title, children, defaultOpen = fal
   };
 
   return (
-    <div className="mobile-block">
+    <div className={className}>
       <div
-        className="mobile-block-header"
         onClick={toggle}
         role="button"
         tabIndex={0}
         aria-expanded={isOpen}
       >
-        <h2 className="mobile-block-title">{title}</h2>
+        <h2 style={{
+          color: "#374151",
+          fontSize: "1.3rem",
+          fontWeight: 700,
+        }}>{title}</h2>
       </div>
       
-      {isOpen && <div className="mobile-block-content">{children}</div>}
+      {isOpen && <>{children}</>}
     </div>
   );
 }
