@@ -412,8 +412,8 @@ export const AnalyticsPage: React.FC = () => {
       </div>
     </>)}
 
-    {isMobile && (<div className='anal-chart-container'>
-      <MobileBlock title='Динамика доходов и расходов' defaultOpen={true}>
+    {isMobile && (<div>
+      <MobileBlock className={'anal-chart-container'} title='Динамика доходов и расходов' defaultOpen={true}>
         {forecastError && <p className="anal-value expense">{forecastError}</p>}
         <ResponsiveContainer width="100%" height={320}>
           <AreaChart data={chartData}>
@@ -451,7 +451,7 @@ export const AnalyticsPage: React.FC = () => {
         </ResponsiveContainer>
       </MobileBlock>
 
-      <MobileBlock title='Расходы по категориям'>
+      <MobileBlock className={'anal-chart-container'} title='Расходы по категориям'>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -478,7 +478,7 @@ export const AnalyticsPage: React.FC = () => {
         </ResponsiveContainer>
       </MobileBlock>
 
-      <MobileBlock title="Доходы по категориям">
+      <MobileBlock className={'anal-chart-container'} title="Доходы по категориям">
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={incomeByCategory}>
             <CartesianGrid strokeDasharray="3 3" />
