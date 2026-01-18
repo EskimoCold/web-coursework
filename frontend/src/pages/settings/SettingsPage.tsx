@@ -436,7 +436,7 @@ export function SettingsPage() {
 
   return (
     <div className="settings-page">
-      <div className={`${isMobile ? "mobile-" : ""}settings-card`}>
+      <div className={`${isMobile ? 'mobile-' : ''}settings-card`}>
         <div className="settings-header">
           <div>
             <h1 className="settings-title">Настройки</h1>
@@ -445,7 +445,7 @@ export function SettingsPage() {
         </div>
 
         <div className="settings-content">
-          <div className={`${isMobile ? "mobile-" : ""}settings-nav`}>
+          <div className={`${isMobile ? 'mobile-' : ''}settings-nav`}>
             <button
               className={`settings-nav-button ${activeSection === 'security' ? 'active' : ''}`}
               onClick={() => setActiveSection('security')}

@@ -260,7 +260,6 @@
 }
 
 @media (width <= 480px) {
-
   .sb-item {
     padding: 8px 4px;
     min-height: 44px;

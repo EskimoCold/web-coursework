@@ -13,16 +13,15 @@ import {
   Tooltip,
   ResponsiveContainer,
   Line,
-  Brush,
 } from 'recharts';
 
 import './analytics.css';
 
 import { Transaction } from '../../api/transactions';
+import { MobileBlock } from '../../components/MobileBlock';
 import { Currency, useCurrency } from '../../contexts/CurrencyContext';
 
 import { FilterOption, useAnalyticsStore } from './analyticsStore';
-import { MobileBlock } from '../../components/MobileBlock';
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884D8'];
 type NormalizedTransaction = Omit<Transaction, 'transaction_date'> & { transaction_date: Date };
@@ -302,75 +301,163 @@ export const AnalyticsPage: React.FC = () => {
         </div>
       </div>
 
-      {!isMobile && (<>
-      <div className="anal-info-grid">
-        <div>
-          <p className="anal-label">Общий баланс</p>
-          <p className="anal-value total">
-            {(incomes - expenses).toLocaleString('ru-RU')} {getCurrencySymbol()}
-          </p>
-        </div>
-        <div>
-          <p className="anal-label">Доходы</p>
-          <p className="anal-value income">
-            {incomes.toLocaleString('ru-RU')} {getCurrencySymbol()}
-          </p>
-        </div>
-        <div>
-          <p className="anal-label">Расходы</p>
-          <p className="anal-value expense">
-            {expenses.toLocaleString('ru-RU')} {getCurrencySymbol()}
-          </p>
-        </div>
-        <div>
-          <p className="anal-label">Всего операций</p>
-          <p className="anal-value operations">{filteredTransactions.length}</p>
-        </div>
-      </div>
+      {!isMobile && (
+        <>
+          <div className="anal-info-grid">
+            <div>
+              <p className="anal-label">Общий баланс</p>
+              <p className="anal-value total">
+                {(incomes - expenses).toLocaleString('ru-RU')} {getCurrencySymbol()}
+              </p>
+            </div>
+            <div>
+              <p className="anal-label">Доходы</p>
+              <p className="anal-value income">
+                {incomes.toLocaleString('ru-RU')} {getCurrencySymbol()}
+              </p>
+            </div>
+            <div>
+              <p className="anal-label">Расходы</p>
+              <p className="anal-value expense">
+                {expenses.toLocaleString('ru-RU')} {getCurrencySymbol()}
+              </p>
+            </div>
+            <div>
+              <p className="anal-label">Всего операций</p>
+              <p className="anal-value operations">{filteredTransactions.length}</p>
+            </div>
+          </div>
 
-      <div className="anal-charts-grid">
-        <div className="anal-chart-container">
-          <h3 className="anal-chart-title">Динамика доходов и расходов</h3>
-          {forecastError && <p className="anal-value expense">{forecastError}</p>}
-          <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip formatter={tooltipFormatter} />
-              <Area
-                type="monotone"
-                dataKey="expense"
-                stackId="1"
-                stroke="#FF8042"
-                fill="#FF8042"
-                fillOpacity={0.3}
-              />
-              <Area
-                type="monotone"
-                dataKey="income"
-                stackId="1"
-                stroke="#00C49F"
-                fill="#00C49F"
-                fillOpacity={0.3}
-              />
-              <Line
-                type="monotone"
-                dataKey="predictedExpense"
-                stroke="#6A4BFF"
-                strokeWidth={2}
-                dot={false}
-                strokeDasharray="6 3"
-                connectNulls
-                isAnimationActive={!isForecasting}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+          <div className="anal-charts-grid">
+            <div className="anal-chart-container">
+              <h3 className="anal-chart-title">Динамика доходов и расходов</h3>
+              {forecastError && <p className="anal-value expense">{forecastError}</p>}
+              <ResponsiveContainer width="100%" height={320}>
+                <AreaChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip formatter={tooltipFormatter} />
+                  <Area
+                    type="monotone"
+                    dataKey="expense"
+                    stackId="1"
+                    stroke="#FF8042"
+                    fill="#FF8042"
+                    fillOpacity={0.3}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="income"
+                    stackId="1"
+                    stroke="#00C49F"
+                    fill="#00C49F"
+                    fillOpacity={0.3}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="predictedExpense"
+                    stroke="#6A4BFF"
+                    strokeWidth={2}
+                    dot={false}
+                    strokeDasharray="6 3"
+                    connectNulls
+                    isAnimationActive={!isForecasting}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
 
+            <div>
+              <div className="anal-chart-container">
+                <h3 className="anal-chart-title">Расходы по категориям</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={expenseByCategory}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={(props: { name?: string; value?: number }) => {
+                        // eslint-disable-next-line react/prop-types
+                        const name = props.name || '';
+                        // eslint-disable-next-line react/prop-types
+                        const value = typeof props.value === 'number' ? props.value : 0;
+                        return `${name}: ${value.toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
+                      }}
+                    >
+                      {expenseByCategory.map((_, index) => (
+                        <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="anal-chart-container">
+                <h3 className="anal-chart-title">Доходы по категориям</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={incomeByCategory}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Bar dataKey="value" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {isMobile && (
         <div>
-          <div className="anal-chart-container">
-            <h3 className="anal-chart-title">Расходы по категориям</h3>
+          <MobileBlock
+            className={'anal-chart-container'}
+            title="Динамика доходов и расходов"
+            defaultOpen={true}
+          >
+            {forecastError && <p className="anal-value expense">{forecastError}</p>}
+            <ResponsiveContainer width="100%" height={320}>
+              <AreaChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip formatter={tooltipFormatter} />
+                <Area
+                  type="monotone"
+                  dataKey="expense"
+                  stackId="1"
+                  stroke="#FF8042"
+                  fill="#FF8042"
+                  fillOpacity={0.3}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="income"
+                  stackId="1"
+                  stroke="#00C49F"
+                  fill="#00C49F"
+                  fillOpacity={0.3}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="predictedExpense"
+                  stroke="#6A4BFF"
+                  strokeWidth={2}
+                  dot={false}
+                  strokeDasharray="6 3"
+                  connectNulls
+                  isAnimationActive={!isForecasting}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </MobileBlock>
+
+          <MobileBlock className={'anal-chart-container'} title="Расходы по категориям">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -395,10 +482,9 @@ export const AnalyticsPage: React.FC = () => {
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          </MobileBlock>
 
-          <div className="anal-chart-container">
-            <h3 className="anal-chart-title">Доходы по категориям</h3>
+          <MobileBlock className={'anal-chart-container'} title="Доходы по категориям">
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={incomeByCategory}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -407,88 +493,9 @@ export const AnalyticsPage: React.FC = () => {
                 <Bar dataKey="value" fill="#8884d8" />
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </MobileBlock>
         </div>
-      </div>
-    </>)}
-
-    {isMobile && (<div>
-      <MobileBlock className={'anal-chart-container'} title='Динамика доходов и расходов' defaultOpen={true}>
-        {forecastError && <p className="anal-value expense">{forecastError}</p>}
-        <ResponsiveContainer width="100%" height={320}>
-          <AreaChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip formatter={tooltipFormatter} />
-            <Area
-              type="monotone"
-              dataKey="expense"
-              stackId="1"
-              stroke="#FF8042"
-              fill="#FF8042"
-              fillOpacity={0.3}
-            />
-            <Area
-              type="monotone"
-              dataKey="income"
-              stackId="1"
-              stroke="#00C49F"
-              fill="#00C49F"
-              fillOpacity={0.3}
-            />
-            <Line
-              type="monotone"
-              dataKey="predictedExpense"
-              stroke="#6A4BFF"
-              strokeWidth={2}
-              dot={false}
-              strokeDasharray="6 3"
-              connectNulls
-              isAnimationActive={!isForecasting}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </MobileBlock>
-
-      <MobileBlock className={'anal-chart-container'} title='Расходы по категориям'>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={expenseByCategory}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-              label={(props: { name?: string; value?: number }) => {
-                // eslint-disable-next-line react/prop-types
-                const name = props.name || '';
-                // eslint-disable-next-line react/prop-types
-                const value = typeof props.value === 'number' ? props.value : 0;
-                return `${name}: ${value.toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
-              }}
-            >
-              {expenseByCategory.map((_, index) => (
-                <Cell key={index} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-      </MobileBlock>
-
-      <MobileBlock className={'anal-chart-container'} title="Доходы по категориям">
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={incomeByCategory}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      </MobileBlock>
-    </div>)}
+      )}
     </div>
   );
 };
