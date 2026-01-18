@@ -855,7 +855,6 @@ describe('AnalyticsPage - CSS and Mobile Tests', () => {
 
     const infoGrid = container.querySelector('.anal-info-grid');
     expect(infoGrid).toBeInTheDocument();
-
   });
 
   it('should show correct currency selector in filters', async () => {
@@ -930,12 +929,11 @@ describe('AnalyticsPage - CSS and Mobile Tests', () => {
   });
 
   it('should have responsive design for different screen sizes', async () => {
-    const { container } = renderComponent();
+    renderComponent();
 
     await waitFor(() => {
       expect(screen.getByText('Динамика доходов и расходов')).toBeInTheDocument();
     });
-
   });
 
   it('should display currency in amounts correctly formatted', async () => {
@@ -1009,7 +1007,6 @@ describe('AnalyticsPage - CSS and Mobile Tests', () => {
       expect(screen.getByText('Расходы по категориям')).toBeInTheDocument();
     });
   });
-
 });
 
 describe('AnalyticsPage - Filter Interactions', () => {
