@@ -153,12 +153,11 @@
     width: 100%;
     min-height: auto;
     height: auto;
-    padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
-    border-right: none;
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--sb-border);
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    justify-content: space-around;
     z-index: 100;
     box-shadow:
       0 -4px 20px rgb(0 0 0 / 8%),
@@ -261,11 +260,6 @@
 }
 
 @media (width <= 480px) {
-  .sb {
-    padding: 10px 8px calc(14px + env(safe-area-inset-bottom, 0px));
-    gap: 4px;
-  }
-
   .sb-item {
     padding: 8px 4px;
     min-height: 44px;

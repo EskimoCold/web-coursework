@@ -5,6 +5,7 @@ import { categoriesApi } from '../../api/categories';
 import { Icon } from '../../components/Icon';
 import { Category, useCategories } from '../../contexts/CategoriesContext';
 
+import { useCategoriesPageStore } from './categoriesPageStore';
 import { createCategoryFormStore } from './categoryFormStore';
 
 type Props = {
@@ -26,6 +27,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
   const setField = formStore((state) => state.setField);
   const reset = formStore((state) => state.reset);
   const hydrate = formStore((state) => state.hydrate);
+  const { setShowAddForm } = useCategoriesPageStore();
 
   useEffect(() => {
     hydrate(placeholder?.category);
@@ -60,6 +62,8 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
       reset();
     } catch (err) {
       console.error(err);
+    } finally {
+      setShowAddForm(false);
     }
   };
 
@@ -78,9 +82,29 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
     }
   };
 
+  const isMobile = useMemo(() => {
+    const style = window.getComputedStyle(document.body);
+    const base = Number(style.fontSize.replace('px', ''));
+    const width = Number(style.width.replace('px', ''));
+    const rem = width / base;
+    return rem <= 48;
+  }, []);
+
   return (
     <form onSubmit={handleSubmit} onReset={handleDelete} className="cat-form">
-      <h1>{label}</h1>
+      {isMobile ? (
+        <h1
+          style={{
+            color: '#374151',
+            fontSize: '1.3rem',
+            fontWeight: 700,
+          }}
+        >
+          {label}
+        </h1>
+      ) : (
+        <h1>{label}</h1>
+      )}
       <p className="cat-title">Название категории</p>
       <input
         type="text"
@@ -98,7 +122,7 @@ export const CategoryForm: React.FC<Props> = ({ label, submit, modify, placehold
       />
 
       <p className="cat-title">Выберите иконку</p>
-      <div className="cat-icon-grid">
+      <div className={`${isMobile ? 'mobile-' : ''}cat-icon-grid`}>
         {icons.map((iconSrc, i) => (
           <div key={iconSrc + i} onClick={() => setField('icon', iconSrc)}>
             <Icon

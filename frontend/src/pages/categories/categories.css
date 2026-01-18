@@ -264,6 +264,12 @@ input:focus {
   gap: var(--spacing-lg);
 }
 
+.mobile-cat-icon-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  gap: 10px;
+}
+
 .cat-grid-icon-item {
   cursor: pointer;
   border: 1px solid var(--stroke);
