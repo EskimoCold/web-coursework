@@ -26,7 +26,6 @@ export const MobileBlock: React.FC<Props> = ({title, children, defaultOpen = fal
         aria-expanded={isOpen}
       >
         <h2 style={{
-          color: "#374151",
           fontSize: "1.3rem",
           fontWeight: 700,
         }}>{title}</h2>
