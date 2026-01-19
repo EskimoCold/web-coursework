@@ -89,3 +89,7 @@ textarea::placeholder {
 .dark img {
   filter: invert(100%);
 }
+
+.dark img {
+  filter: invert(100%);
+}
