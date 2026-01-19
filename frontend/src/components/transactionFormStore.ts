@@ -17,6 +17,7 @@ type TransactionFormState = {
 
 const getBaseForm = (): TransactionCreate => ({
   amount: 0,
+  currency: 'RUB',
   description: '',
   transaction_type: 'expense',
   category_id: null,

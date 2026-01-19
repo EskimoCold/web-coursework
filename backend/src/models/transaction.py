@@ -11,6 +11,7 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     amount = Column(Float, nullable=False)
+    currency = Column(String, nullable=False, default="RUB")
     description = Column(String, nullable=True)
     transaction_type = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)

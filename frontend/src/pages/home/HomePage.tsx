@@ -1,8 +1,8 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { transactionsApi, Transaction, TransactionCreate } from '../../api/transactions';
 import { Icon } from '../../components/Icon';
-import { useCurrency } from '../../contexts/CurrencyContext';
+import { Currency, useCurrency } from '../../contexts/CurrencyContext';
 
 import './home.css';
 
@@ -15,7 +15,7 @@ interface TransactionSummary {
 }
 
 export function HomePage() {
-  const { convertAmount, revertAmount, getCurrencySymbol } = useCurrency();
+  const { convertAmount, getCurrencySymbol, currency } = useCurrency();
   const {
     currentPage,
     filter,
@@ -40,6 +40,15 @@ export function HomePage() {
 
   const itemsPerPage = 5;
 
+  const isMobile = useMemo(() => {
+    const style = window.getComputedStyle(document.body);
+    const base = Number(style.fontSize.replace('px', ''));
+    const width = Number(style.width.replace('px', ''));
+    const rem = width / base;
+    return rem <= 48;
+  }, []);
+  const [displayedInfoTransactionId, showTransactionInfoMobile] = useState<number | null>(null);
+
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -52,20 +61,26 @@ export function HomePage() {
   }, [allTransactions, filter]);
 
   const summary = useMemo((): TransactionSummary => {
-    const totalIncome = allTransactions.reduce(
-      (acc, curVal) => acc + (curVal.transaction_type === 'income' ? curVal.amount : 0),
-      0,
+    const totals = allTransactions.reduce(
+      (acc, curVal) => {
+        const txCurrency = (curVal.currency ?? 'RUB') as Currency;
+        const converted = convertAmount(curVal.amount, txCurrency, curVal.transaction_date);
+        if (curVal.transaction_type === 'income') {
+          acc.totalIncome += converted;
+        } else if (curVal.transaction_type === 'expense') {
+          acc.totalExpenses += converted;
+        }
+        return acc;
+      },
+      { totalIncome: 0, totalExpenses: 0 },
     );
 
-    const totalExpenses = allTransactions.reduce(
-      (acc, curVal) => acc + (curVal.transaction_type === 'expense' ? curVal.amount : 0),
-      0,
-    );
-
-    const balance = totalIncome - totalExpenses;
-
-    return { totalIncome, totalExpenses, balance };
-  }, [allTransactions]);
+    return {
+      totalIncome: totals.totalIncome,
+      totalExpenses: totals.totalExpenses,
+      balance: totals.totalIncome - totals.totalExpenses,
+    };
+  }, [allTransactions, convertAmount]);
 
   const paginatedTransactions = useMemo(() => {
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -77,6 +92,7 @@ export function HomePage() {
   }, [filteredTransactions, currentPage, itemsPerPage]);
 
   const handleAddTransaction = () => {
+    setFormData((prev) => ({ ...prev, currency }));
     setShowAddModal(true);
   };
 
@@ -112,7 +128,8 @@ export function HomePage() {
       }
 
       const submitData: TransactionCreate = {
-        amount: revertAmount(parseFloat(formData.amount)),
+        amount: parseFloat(formData.amount),
+        currency: formData.currency as Currency,
         description: formData.description,
         transaction_type: formData.transaction_type as 'income' | 'expense',
         category_id: categoryId,
@@ -169,13 +186,11 @@ export function HomePage() {
     });
   };
 
-  const formatAmount = (amount: number) => {
-    const convertedAmount = convertAmount(amount);
-    return new Intl.NumberFormat('ru-RU', {
+  const formatAmount = (amount: number) =>
+    new Intl.NumberFormat('ru-RU', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(convertedAmount);
-  };
+    }).format(amount);
 
   if (loading) {
     return (
@@ -202,38 +217,78 @@ export function HomePage() {
     <div className="home-page">
       {backendError && <div className="backend-error">⚠️ {backendError}</div>}
 
-      <div className="summary-section">
-        <div className="summary-header">
-          <div>
-            <h1>Дашборд финансов</h1>
-            <p>Быстрый обзор ваших доходов и расходов</p>
+      {!isMobile && (
+        <div className="summary-section">
+          <div className="summary-header">
+            <div>
+              <h1>Дашборд финансов</h1>
+              <p>Быстрый обзор ваших доходов и расходов</p>
+            </div>
+            <button className="primary-button add-button" onClick={handleAddTransaction}>
+              + Добавить транзакцию
+            </button>
           </div>
-          <button className="primary-button add-button" onClick={handleAddTransaction}>
-            + Добавить транзакцию
-          </button>
-        </div>
 
-        <div className="summary-cards">
-          <div className="summary-card balance">
-            <h3>Баланс</h3>
-            <div className="amount">
-              {formatAmount(summary.balance)} {getCurrencySymbol()}
+          <div className="summary-cards">
+            <div className="summary-card balance">
+              <h3>Баланс</h3>
+              <div className="amount">
+                {formatAmount(summary.balance)} {getCurrencySymbol()}
+              </div>
             </div>
-          </div>
-          <div className="summary-card income">
-            <h3>Доходы</h3>
-            <div className="amount">
-              +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+            <div className="summary-card income">
+              <h3>Доходы</h3>
+              <div className="amount">
+                +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+              </div>
             </div>
-          </div>
-          <div className="summary-card expense">
-            <h3>Расходы</h3>
-            <div className="amount">
-              -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+            <div className="summary-card expense">
+              <h3>Расходы</h3>
+              <div className="amount">
+                -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+      {isMobile && (
+        <>
+          <div className="summary-header">
+            <div>
+              <h1>Дашборд финансов</h1>
+              <p>Быстрый обзор ваших доходов и расходов</p>
+            </div>
+            <button className="primary-button add-button" onClick={handleAddTransaction}>
+              + Добавить транзакцию
+            </button>
+          </div>
+
+          {filter === 'all' && (
+            <div className="summary-card balance">
+              <h3>Баланс</h3>
+              <div className="amount">
+                {formatAmount(summary.balance)} {getCurrencySymbol()}
+              </div>
+            </div>
+          )}
+          {filter === 'income' && (
+            <div className="summary-card income">
+              <h3>Доходы</h3>
+              <div className="amount">
+                +{formatAmount(summary.totalIncome)} {getCurrencySymbol()}
+              </div>
+            </div>
+          )}
+          {filter === 'expense' && (
+            <div className="summary-card expense">
+              <h3>Расходы</h3>
+              <div className="amount">
+                -{formatAmount(summary.totalExpenses)} {getCurrencySymbol()}
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       <div className="filters-section">
         <div className="filters">
@@ -256,10 +311,12 @@ export function HomePage() {
             Расходы
           </button>
         </div>
-        <div className="table-info">
-          Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length}{' '}
-          транзакций
-        </div>
+        {!isMobile && (
+          <div className="table-info">
+            Показано {paginatedTransactions.transactions.length} из {filteredTransactions.length}{' '}
+            транзакций
+          </div>
+        )}
       </div>
 
       {/* Transactions Table - Desktop */}
@@ -302,7 +359,8 @@ export function HomePage() {
                   </td>
                   <td className={`amount-cell ${transaction.transaction_type}`}>
                     {transaction.transaction_type === 'income' ? '+' : '-'}
-                    {formatAmount(transaction.amount)} {getCurrencySymbol()}
+                    {formatAmount(transaction.amount)}{' '}
+                    {getCurrencySymbol((transaction.currency ?? 'RUB') as Currency)}
                   </td>
                   <td>
                     <button
@@ -325,22 +383,25 @@ export function HomePage() {
           <div
             key={transaction.id}
             className={`mobile-transaction-card ${transaction.transaction_type}`}
+            onClick={() => showTransactionInfoMobile(transaction.id)}
           >
             <div className="mobile-card-header">
+              <div className={`mobile-card-amount ${transaction.transaction_type}`}>
+                {transaction.transaction_type === 'income' ? '+' : '-'}
+                {formatAmount(transaction.amount)}{' '}
+                {getCurrencySymbol((transaction.currency ?? 'RUB') as Currency)}
+              </div>
+            </div>
+            {transaction.id === displayedInfoTransactionId && (
               <div className="mobile-card-category">
                 {transaction.category?.name || 'Без категории'}
               </div>
-              <div className={`mobile-card-amount ${transaction.transaction_type}`}>
-                {transaction.transaction_type === 'income' ? '+' : '-'}
-                {formatAmount(transaction.amount)} {getCurrencySymbol()}
-              </div>
-            </div>
-            <div className="mobile-card-description">{transaction.description}</div>
+            )}
+            {transaction.id === displayedInfoTransactionId && (
+              <div className="mobile-card-description">{transaction.description}</div>
+            )}
             <div className="mobile-card-footer">
               <div className="mobile-card-date">{formatDate(transaction.transaction_date)}</div>
-              <span className={`mobile-card-type ${transaction.transaction_type}`}>
-                {transaction.transaction_type === 'income' ? 'Доход' : 'Расход'}
-              </span>
             </div>
           </div>
         ))}
@@ -419,7 +480,9 @@ export function HomePage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="amount">Сумма ({getCurrencySymbol()})</label>
+                <label htmlFor="amount">
+                  Сумма ({getCurrencySymbol(formData.currency as Currency)})
+                </label>
                 <input
                   type="number"
                   id="amount"
@@ -431,6 +494,22 @@ export function HomePage() {
                   placeholder="0.00"
                   required
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="currency">Валюта</label>
+                <select
+                  id="currency"
+                  name="currency"
+                  value={formData.currency}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="RUB">RUB</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="AED">AED</option>
+                </select>
               </div>
 
               <div className="form-group">

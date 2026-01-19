@@ -1,9 +1,12 @@
 import { api } from './client';
 import { tokenStore } from './tokenStore';
 
+import type { CurrencyCode } from './currency';
+
 export interface Transaction {
   id: number;
   amount: number;
+  currency?: CurrencyCode;
   transaction_type: 'income' | 'expense';
   transaction_date: string;
   description: string;
@@ -22,6 +25,7 @@ export interface Category {
 
 export interface TransactionCreate {
   amount: number;
+  currency: CurrencyCode;
   description: string;
   transaction_type: 'income' | 'expense';
   category_id?: number | null;

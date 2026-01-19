@@ -153,14 +153,17 @@
     width: 100%;
     min-height: auto;
     height: auto;
-    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-    border-right: none;
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--sb-border);
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    justify-content: space-around;
     z-index: 100;
-    box-shadow: 0 -2px 10px rgb(0 0 0 / 5%);
+    box-shadow:
+      0 -4px 20px rgb(0 0 0 / 8%),
+      0 -1px 3px rgb(0 0 0 / 4%);
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    backdrop-filter: blur(20px);
   }
 
   .sb-brand {
@@ -174,7 +177,7 @@
   .sb-list {
     display: flex;
     flex-direction: row;
-    gap: 4px;
+    gap: 6px;
     margin: 0;
     flex: 1;
     justify-content: space-around;
@@ -188,25 +191,46 @@
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
     justify-items: center;
-    padding: 8px 4px;
+    padding: 10px 6px;
+    min-height: 48px;
     gap: 4px;
     font-size: 11px;
-    border-radius: 8px;
+    border-radius: 12px;
+    transition:
+      transform 0.1s ease,
+      background 0.15s ease;
+  }
+
+  .sb-item:active {
+    transform: scale(0.95);
   }
 
   .sb-active-bar {
     display: none;
   }
 
+  .sb-item.is-active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+
   .sb-dot {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
 
   .sb-label {
     text-align: center;
     font-size: 10px;
     line-height: 1.2;
+    font-weight: 500;
   }
 
   .sb-spacer {
@@ -215,32 +239,36 @@
 
   .sb-exit {
     margin-top: 0;
-    padding: 8px;
+    padding: 10px 8px;
+    min-height: 48px;
     min-width: auto;
     flex-direction: column;
     gap: 4px;
     font-size: 10px;
     flex-shrink: 0;
+    transition: transform 0.1s ease;
+  }
+
+  .sb-exit:active {
+    transform: scale(0.95);
   }
 
   .sb-exit .sb-label {
     font-size: 10px;
+    font-weight: 500;
   }
 }
 
 @media (width <= 480px) {
-  .sb {
-    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
-  }
-
   .sb-item {
-    padding: 6px 2px;
-    gap: 2px;
+    padding: 8px 4px;
+    min-height: 44px;
+    gap: 3px;
   }
 
   .sb-dot {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
 
   .sb-label {
@@ -248,11 +276,27 @@
   }
 
   .sb-exit {
-    padding: 6px 4px;
+    padding: 8px 6px;
+    min-height: 44px;
     font-size: 9px;
   }
 
   .sb-exit .sb-label {
     font-size: 9px;
+  }
+}
+
+@media (display-mode: standalone) {
+  .sb {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (width <= 768px) {
+    .sb {
+      /* Ensure minimum safe distance from edge */
+      padding-bottom: max(16px, calc(12px + env(safe-area-inset-bottom, 0px)));
+    }
   }
 }

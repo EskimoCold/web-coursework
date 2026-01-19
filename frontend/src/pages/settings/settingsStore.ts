@@ -59,7 +59,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       activeSection: 'security',
-      theme: 'light',
+      theme: 'system',
       currency: 'RUB',
       isPasswordModalOpen: false,
       isDeleteAccountModalOpen: false,
@@ -98,7 +98,7 @@ export const useSettingsStore = create<SettingsState>()(
       resetDeleteState: () => set({ deleteState: baseDeleteState }),
       reset: () =>
         set({
-          theme: 'light',
+          theme: 'system',
           currency: 'RUB',
           isPasswordModalOpen: false,
           isDeleteAccountModalOpen: false,

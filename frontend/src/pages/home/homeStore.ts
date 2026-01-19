@@ -6,6 +6,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   {
     id: 1,
     amount: 1500,
+    currency: 'RUB',
     transaction_type: 'expense',
     transaction_date: '2024-01-15T00:00:00Z',
     description: 'Продукты в супермаркете',
@@ -14,6 +15,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   {
     id: 2,
     amount: 50000,
+    currency: 'RUB',
     transaction_type: 'income',
     transaction_date: '2024-01-10T00:00:00Z',
     description: 'Зарплата за январь',
@@ -22,6 +24,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   {
     id: 3,
     amount: 800,
+    currency: 'RUB',
     transaction_type: 'expense',
     transaction_date: '2024-01-08T00:00:00Z',
     description: 'Проездной на метро',
@@ -33,6 +36,7 @@ type HomeFilter = 'all' | 'income' | 'expense';
 
 type HomeFormState = {
   amount: string;
+  currency: 'RUB' | 'USD' | 'EUR' | 'AED';
   description: string;
   transaction_type: 'income' | 'expense';
   category_id: string;
@@ -68,6 +72,7 @@ type HomeState = {
 
 const getBaseForm = (): HomeFormState => ({
   amount: '',
+  currency: 'RUB',
   description: '',
   transaction_type: 'expense',
   category_id: '',

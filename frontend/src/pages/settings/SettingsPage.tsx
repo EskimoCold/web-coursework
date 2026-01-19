@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import './settings.css';
@@ -367,12 +367,12 @@ function AppearanceSection() {
           <select
             className="settings-select"
             value={currency}
-            onChange={(e) => setCurrency(e.target.value as 'RUB' | 'USD' | 'EUR' | 'CNY')}
+            onChange={(e) => setCurrency(e.target.value as 'RUB' | 'USD' | 'EUR' | 'AED')}
           >
             <option value="RUB">Рубли (RUB) ₽</option>
             <option value="USD">Доллары (USD) $</option>
             <option value="EUR">Евро (EUR) €</option>
-            <option value="CNY">Юани (CNY) ¥</option>
+            <option value="AED">Дирхам (AED) د.إ</option>
           </select>
         </div>
       </div>
@@ -426,9 +426,17 @@ export function SettingsPage() {
     }
   };
 
+  const isMobile = useMemo(() => {
+    const style = window.getComputedStyle(document.body);
+    const base = Number(style.fontSize.replace('px', ''));
+    const width = Number(style.width.replace('px', ''));
+    const rem = width / base;
+    return rem <= 48;
+  }, []);
+
   return (
     <div className="settings-page">
-      <div className="settings-card">
+      <div className={`${isMobile ? 'mobile-' : ''}settings-card`}>
         <div className="settings-header">
           <div>
             <h1 className="settings-title">Настройки</h1>
@@ -437,7 +445,7 @@ export function SettingsPage() {
         </div>
 
         <div className="settings-content">
-          <div className="settings-nav">
+          <div className={`${isMobile ? 'mobile-' : ''}settings-nav`}>
             <button
               className={`settings-nav-button ${activeSection === 'security' ? 'active' : ''}`}
               onClick={() => setActiveSection('security')}
