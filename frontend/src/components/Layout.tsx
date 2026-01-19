@@ -1,9 +1,9 @@
 import { ReactNode, useMemo } from 'react';
 import './layout.css';
 
-type Props = { title: string; children: ReactNode };
+type Props = { children: ReactNode };
 
-export function Layout({ title, children }: Props) {
+export function Layout({ children }: Props) {
   const isMobile = useMemo(() => {
     const style = window.getComputedStyle(document.body);
     const base = Number(style.fontSize.replace('px', ''));
