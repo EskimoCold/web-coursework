@@ -4,14 +4,13 @@ import { describe, it, expect } from 'vitest';
 import { Layout } from './Layout';
 
 describe('Layout', () => {
-  it('renders header title and basic regions', () => {
+  it('renders children and basic regions', () => {
     render(
-      <Layout title="Категории">
+      <Layout>
         <div>children</div>
       </Layout>,
     );
-    expect(screen.getByRole('banner')).toBeInTheDocument();
-    expect(screen.getByText('Категории')).toBeVisible();
+    expect(screen.getByText('children')).toBeVisible();
     expect(screen.getByLabelText('main-layout')).toBeInTheDocument();
   });
 });

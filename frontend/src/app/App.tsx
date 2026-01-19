@@ -90,7 +90,7 @@ function MainApp() {
       <CurrencyProvider>
         <div className="app-root">
           <Sidebar active={active} onSelect={setActive} />
-          <Layout title={active}>{renderContent()}</Layout>
+          <Layout>{renderContent()}</Layout>
         </div>
       </CurrencyProvider>
     </CategoryProvider>
