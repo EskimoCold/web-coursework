@@ -80,8 +80,14 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait-primary',
+        id: '/',
         start_url: '/',
+        scope: '/',
+        launch_handler: {
+          client_mode: 'focus-existing',
+        },
         icons: [
           {
             src: 'pwa-192x192.png',
