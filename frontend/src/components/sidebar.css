@@ -12,7 +12,10 @@
 
 .sb {
   width: var(--sb-w);
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
   background: var(--panel);
   border-right: 1px solid var(--stroke);
   padding: 18px 14px 16px;
@@ -21,6 +24,7 @@
   gap: 10px;
   color: var(--ink);
   z-index: 10;
+  box-sizing: border-box;
 }
 
 .sb-brand {
