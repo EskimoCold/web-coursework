@@ -1,9 +1,9 @@
 import { ReactNode, useMemo } from 'react';
 import './layout.css';
 
-type Props = { title: string; children: ReactNode };
+type Props = { children: ReactNode };
 
-export function Layout({ title, children }: Props) {
+export function Layout({ children }: Props) {
   const isMobile = useMemo(() => {
     const style = window.getComputedStyle(document.body);
     const base = Number(style.fontSize.replace('px', ''));
@@ -16,9 +16,6 @@ export function Layout({ title, children }: Props) {
     <main className="layout" aria-label="main-layout">
       {!isMobile && (
         <>
-          <header className="layout-header" role="banner">
-            <h1 className="layout-title">{title}</h1>
-          </header>
           <section className="layout-content">{children}</section>
           <footer className="layout-footer">©2025 FinTrack</footer>
         </>
