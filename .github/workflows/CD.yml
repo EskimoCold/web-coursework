@@ -25,8 +25,8 @@ jobs:
             git fetch --all --prune
             git reset --hard origin/main
 
-            docker compose pull || true
-            docker compose up -d --build
+            docker compose -f docker-compose.prod.yml pull || true
+            docker compose -f docker-compose.prod.yml up -d --build
             docker image prune -f || true
 
             echo "Deployment finished"

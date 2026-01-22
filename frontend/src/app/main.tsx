@@ -17,6 +17,14 @@ registerSW({
   },
 });
 
+const hideAppShellLoader = () => {
+  const loader = document.getElementById('app-shell-loader');
+  if (loader) {
+    loader.classList.add('hidden');
+    setTimeout(() => loader.remove(), 200);
+  }
+};
+
 const renderApp = () => {
   const rootElement = document.getElementById('root');
   if (!rootElement) return;
@@ -29,6 +37,7 @@ const renderApp = () => {
         </Sentry.ErrorBoundary>
       </React.StrictMode>,
     );
+    hideAppShellLoader();
   }
 };
 
