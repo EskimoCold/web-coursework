@@ -3,6 +3,8 @@ import { create } from 'zustand';
 import { authApi, User, LoginRequest, RegisterRequest } from '../api/auth';
 import { tokenStore } from '../api/tokenStore';
 
+const AUTH_SESSION_KEY = 'fintrack_has_session';
+
 type AuthState = {
   user: User | null;
   accessToken: string | null;
@@ -27,6 +29,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   ...baseState,
   setUser: (user) => set({ user, isAuthenticated: !!user }),
   initAuth: async () => {
+    const hasSession = localStorage.getItem(AUTH_SESSION_KEY) === 'true';
+
+    if (!hasSession) {
+      set({ ...baseState, isLoading: false });
+      return;
+    }
+
     set({ isLoading: true });
     try {
       const response = await authApi.refreshToken();
@@ -40,6 +49,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch {
       tokenStore.clearAccessToken();
+      localStorage.removeItem(AUTH_SESSION_KEY);
       set({ ...baseState, isLoading: false });
     }
   },
@@ -48,6 +58,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const response = await authApi.login(data);
     tokenStore.setAccessToken(response.access_token);
     const user = await authApi.getCurrentUser(response.access_token);
+    localStorage.setItem(AUTH_SESSION_KEY, 'true');
     set({
       user,
       accessToken: response.access_token,
@@ -67,11 +78,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.error(err);
     } finally {
       tokenStore.clearAccessToken();
+      localStorage.removeItem(AUTH_SESSION_KEY);
       set({ ...baseState, isLoading: false });
     }
   },
   reset: () => {
     tokenStore.clearAccessToken();
+    localStorage.removeItem(AUTH_SESSION_KEY);
     set({ ...baseState });
   },
 }));
